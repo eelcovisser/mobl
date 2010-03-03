@@ -28,11 +28,18 @@ strategies
     Init(t) -> Init(<rename-scope(rename-all)> t)
 
   rename :
-    Template(name, arg*, body) -> Template(name, arg2*, body2)
+    Template(name, arg*, req*, body) -> Template(name, arg2*, req*, body2)
     with rename-scope( 
            arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
            ; body2 := <rename-all> body
          )
+
+	rename :
+	  TemplateNoRequires(name, arg*, body) -> TemplateNoRequires(name, arg2*, body2)
+	  with rename-scope( 
+	         arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+	         ; body2 := <rename-all> body
+	       )
 
   rename :
     Screen(name, arg*, rt, body) -> Screen(name, arg2*, rt, body2)

@@ -1,0 +1,7 @@
+module MoBL-Completions
+
+imports MoBL-Completions.generated
+
+completions
+    completion keyword  : "screen"                                                    
+    completion template : "screen " "e" " () {\n\t  \n}\n"

@@ -4,16 +4,16 @@ strategies
 
   emit-html =
     ?code
-    ; rules ( EmittedHtml :+= code)
+    ; current-html := <EmittedHtml <+ !"">
+    ; rules ( EmittedHtml := <concat-strings> [current-html, code] )
     
   get-all-html =
-    bagof-EmittedHtml
-    ; concat-strings
+    EmittedHtml
     
   emit-js =
     ?code
-    ; rules ( EmittedJs :+= code)
+    ; current-js := <EmittedJs <+ !"">
+    ; rules ( EmittedJs := <concat-strings> [current-js, code] )
     
   get-all-js =
-    bagof-EmittedJs
-    ; concat-strings
+    EmittedJs

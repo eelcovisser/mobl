@@ -6,10 +6,21 @@ imports
   
 strategies
 
-  desugar-all = innermost(desugar)
+  desugar-all :
+    Module(qid, def*) -> Module(qid, def2*)
+    with {| ModuleName
+          : rules ( ModuleName := qid )
+          ; def2* := <innermost(desugar)> def*
+          |}
+  
+  desugar :
+    FunctionNoReturnType(name, farg*, stat*) -> Function(name, farg*, SimpleType("void"), stat*)
   
   desugar :
     ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
+  
+  desugar :
+    TemplateNoRequires(qid, farg*, elem*) -> Template(qid, farg*, [], elem*)
 
   desugar :
     TemplateCallNoArgs(name, prop*, body) -> TemplateCall(name, [], prop*, body)

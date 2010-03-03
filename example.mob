@@ -1,37 +1,29 @@
 module example
 
+import core
+
 entity Task {
   name        : String
-  description : Text
-  done        : Bool
-  tags        : Collection<Tag>
+  description : core::Text
+  done        : core::Bool
+  tags        : core::Collection<Tag>
 }
 
 entity Tag {
-  name   : String
-  tasks  : Collection<Task>
+  name   : core::String
+  tasks  : core::Collection<Task>
 }
 
-external type String { }
-external type Int { }
-external type Bool { }
-external type Text { }
-external type Uri { }
-external type Collection<T> {}
-
-template outputString(s : String) {
-  <span databind=s></span>
-}
-
-template inputCheckbox(b : Bool) {
-  <input type="checkbox" databind=b/>
+function sayHello(name : core::String) : core::String {
+  return "Hello, " + name;
 }
 
 template standardLayout() {
   "Header"
   elements()
   "Footer"
-}
+}  
+
 
 screen root() {
   standardLayout {

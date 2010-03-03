@@ -8,7 +8,7 @@ strategies
   type-of = eq-type-of
   
   eq-type-of :
-    Int(_) -> SimpleType("Int")
+    Int(_) -> SimpleType(QId("core", "Int"))
     
   eq-type-of :
-    String(_) -> SimpleType("String")
+    String(_) -> SimpleType(QId("core", "String"))

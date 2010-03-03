@@ -1,6 +1,6 @@
 module MoBL.main
 
-imports MoBL-Builders MoBL-Colorer MoBL-Folding MoBL-Outliner MoBL-References MoBL-Syntax
+imports MoBL-Builders MoBL-Colorer MoBL-Folding MoBL-Outliner MoBL-References MoBL-Syntax MoBL-Completions
 
 language General properties
                   

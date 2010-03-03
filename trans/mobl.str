@@ -12,6 +12,7 @@ imports
   generation/emit
   desugar
   lookup
+  resolve
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
   
@@ -21,13 +22,14 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (ast, path, project-path) -> (errors, warnings, notes)
     with
       // Ensure all dynamic rules are properly scoped
-      try(dr-scope-all-end);
-      dr-scope-all-start
+      try(dr-scope-all-end)
+      ; dr-scope-all-start
     with
-      analyze; 
-      errors   := <collect-all(constraint-error, conc)> ast;
-      warnings := <collect-all(constraint-warning, conc)> ast;
-      notes    := <collect-all(constraint-note, conc)> ast
+      rules ( ProjectPath := project-path )
+      ; ast2 := <analyze; store-result> ast 
+      ; errors   := <collect-all(constraint-error, conc)> ast2
+      ; warnings := <collect-all(constraint-warning, conc)> ast2
+      ; notes    := <collect-all(constraint-note, conc)> ast2
     
   // Prints the abstract syntax ATerm of a selection.
   generate-aterm:
@@ -47,7 +49,9 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
   generate-artifacts:
     (selected, position, ast, path, project-path) -> None() //(filename-html, result-html)
     with
-      !ast
+      rules ( ProjectPath := project-path )
+      ; !ast
+      ; analyze
       ; desugar-all
       ; definitions-to-html
       ; definitions-to-js

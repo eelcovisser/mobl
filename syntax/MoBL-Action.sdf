@@ -8,18 +8,19 @@ exports
   context-free syntax %% Logic
     "function" ID "(" FArg* ")" ":" Type "{" Statement* "}" -> Definition {cons("Function")}
     "function" ID "(" FArg* ")" "{" Statement* "}" -> Definition {cons("FunctionNoReturnType")}
-    "function" "(" FArg* ")" ":" Type "{" Statement* "}" -> Exp {cons("FunctionExp")}
-    "function" "(" FArg* ")" "{" Statement* "}" -> Exp {cons("FunctionNoReturnTypeExp")}
+    %%"function" "(" FArg* ")" ":" Type "{" Statement* "}" -> Exp {cons("FunctionExp")}
+    %%"function" "(" FArg* ")" "{" Statement* "}" -> Exp {cons("FunctionNoReturnTypeExp")}
   
   context-free syntax %% Statements
     "var" ID ":" Type ":=" Exp ";"              -> Statement {cons("VarDecl")}
-    %%"var" ID ":=" Exp ";"                       -> Statement {cons("VarDeclInferred")}
+    "var" ID ":=" Exp ";"                       -> Statement {cons("VarDeclInferred")}
     
     QId ":=" Exp ";"                            -> Statement {cons("Assignment")}
     Exp ";"                                     -> Statement {cons("ExpStat")}
     "{" Statement* "}"                          -> Statement {cons("Block")}
     "if" "(" Exp ")" Statement "else" Statement -> Statement {cons("If")}
     "if" "(" Exp ")" Statement                  -> Statement {cons("IfNoElse")}
+    "return" Exp ";"                            -> Statement {cons("Return")}
     
   context-free syntax %% Expressions
   
@@ -38,6 +39,7 @@ exports
     
     Exp "?" Exp ":" Exp          -> Exp {left, cons("Choice")}
     "[" {Exp ","}* "]"           -> Exp {cons("ListCons")}
+    "(" Exp ")"                  -> Exp {cons("Brackets")}
     
   context-free syntax %% Filters
     "[" Exp Filter "]"                       -> Exp {cons("SetComp")}

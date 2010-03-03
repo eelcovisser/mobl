@@ -8,6 +8,7 @@ imports
   lib/editor-common
   desugar
   generation/emit
+  generation/javascript
 
 rules
 
@@ -27,13 +28,13 @@ rules
     ; concat-strings
 
   definition-to-html :
-    Screen(name, args, rt, elem*) -> <emit-html> $[<div class="screen" id="[name]" [fargs]>[body]</div>
+    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="screen" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
     with body := <elems-to-html> elem*
        ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
 
   definition-to-html :
-    Template(name, args, elem*) -> <emit-html> $[<div class="template" id="[name]" [fargs]>[body]</div>
+    Template(qid, args, req*, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
     with fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
        ; body := <elems-to-html> elem*
@@ -46,7 +47,7 @@ rules
     ; concat-strings
     
   arg-to-html :
-    (idx, e) -> $[arg[<subti> (idx, 1)]=[<exp-to-html> e]]
+    (idx, e) -> $[arg[<subti> (idx, 1)]=[<expression-to-html> e]]
 
   elem-to-html :
     TemplateCall(name, arg*, prop*, elem*) -> $[<div class="templatecall" template="[name]" [args] [props]>[body]</div>]
@@ -64,11 +65,27 @@ rules
     with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
   
   tag-arg-to-html :
-    HtmlArg(name, e) -> $[[name]=[e2]]
-    with e2 := <exp-to-html> e
+    HtmlArg(name, s) -> $[[name]=[s]]
+
+  tag-arg-to-html :
+    HtmlDatabindArg(e) -> $[databind=[es]]
+    with es := <expression-to-html> e
     
   elem-to-html :
     ScreenString(s) -> <un-double-quote> s
     
-  exp-to-html :
-    e -> $["someexpr"]
+  expression-to-html :
+    e -> $["[<expression-to-js; html-escape> e]"]
+  
+  html-escape =
+    string-replace(|"\"", "&quot;")
+
+rules // utils
+	
+  qid-to-html :
+    s -> s
+    where is-string
+
+  qid-to-html :
+    QId(qid, x) -> $[[qids]__[x]]
+    with qids := <qid-to-html> qid	

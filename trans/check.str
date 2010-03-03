@@ -8,21 +8,52 @@ imports
   lookup
   type
   rename
+  desugar
+  mobl
+  resolve
 
 rules
 
   // Analysis: does a topdown traversal of the tree,
   // and try to apply the record-entity rule.
   analyze =
-    Fst // Ignore the other parts
-    ; topdown(try(declare))
-    ; rename-all
-    ; store-result
+    ?Module(qid, _)
+    ; {| ModuleName, Imports
+       : rules ( ModuleName := qid )
+       ; where(<debug> ["Analyzing module: ", qid])
+       ; import-all
+       ; alltd(add-tl-namespace)
+       ; topdown(try(declare))
+       ; alltd(add-namespace)
+       ; rename-all
+       ; where(<debug> "Done")
+       |}
 
   store-result =
     ?t
-    ; where( rules ( ResultingAST := t ) )
-        
+    ; rules ( ResultingAST := t )
+
+  import-all =
+    alltd(import-module); topdown(try(flatten-list))
+  
+  import-module :
+    Import(qid) -> def*
+    with def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
+       ; rules ( Imports :+= qid )
+    
+  externalize-module :
+    Module(qid, def*) -> def2*
+    with def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)>
+    
+  qid-to-path =
+    is-string
+  
+  qid-to-path :
+    QId(qid, x) -> $[[qids]/[x]]
+    with qids := <qid-to-path> qid
+    
+strategies
+  
   lookup-node :
     path -> <find-node> (path, <ResultingAST>)
     where debug(!"lookup-node: ")
@@ -49,9 +80,9 @@ rules
     where not(tag := closeTag)
     
   constraint-error :
-    TemplateCall(name, arg*, prop*, body) -> (name, $[No such template defined with these arguments])
-    where not("elements" := name; [] := arg*)
-    where not(<lookup-template> (name, <map(type-of)> arg*))
+    TemplateCall(qid, arg*, prop*, body) -> (qid, $[No such template defined with these arguments])
+    where not("elements" := qid; [] := arg*)
+    where not(<lookup-template> (qid, <map(type-of)> arg*))
   
   constraint-error = normalize; constraint-error
   
@@ -75,14 +106,6 @@ rules
 
   normalize :
     TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
-  
-  // Reports an error if an entity is defined more than once.
-  // This constraint is implemented by testing if the "bag" of
-  // all entities x is not a singleton list.
-  constraint-error:
-    Entity(x, _) -> (x, $[Duplicate entity name])
-    where
-      not(<bagof-GetEntity> x => [_])
   
   constraint-warning:
     Entity(x, _) -> (x, $[Entity names must start with a capital])

@@ -11,13 +11,13 @@ strategies
     SimpleType(qid) -> <GetEntity> qid
   
   lookup-type :
-    SimpleType(qid) -> <GetExternalType> qid
+    SimpleType(qid) -> <GetType> qid
     
   lookup-type :
-    GenericType(qid, t*) -> <GetExternalGenericType> (qid, <length> t*)
+    GenericType(qid, t*) -> <GetGenericType> (qid, <length> t*)
   
   lookup-template :
     (name, arg-type*) -> <GetTemplate> <id>
     
   get-all-types =
-    <concat> [<all-keys-GetEntity>, <all-keys-GetExternalType>, <map(Fst)> <all-keys-GetExternalGenericType>]
+    <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

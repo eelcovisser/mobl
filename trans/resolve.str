@@ -1,0 +1,56 @@
+module resolve
+
+imports
+  libstratego-lib
+  include/MoBL
+  desugar
+  lookup
+  check
+
+strategies
+
+  add-tl-namespace :
+    Screen(x, farg*, rt, elem*) -> Screen(QId(<ModuleName>, x), farg*, rt, elem*)
+    where <is-string> x
+  
+  add-tl-namespace :
+    Entity(x, prop*) -> Entity(QId(<ModuleName>, x), prop*)
+    where <is-string> x
+    
+  add-tl-namespace :
+    Function(x, farg*, rt, stat*) -> Function(QId(<ModuleName>, x), farg*, rt, stat*)
+    where <is-string> x
+  
+  add-tl-namespace :
+    ExternalGenericType(x, t*) -> ExternalGenericType(QId(<ModuleName>, x), t*)
+    where <is-string> x
+    
+  add-tl-namespace :
+    ExternalType(x) -> ExternalType(QId(<ModuleName>, x))
+    where <is-string> x
+    
+  add-tl-namespace :
+    Template(x, farg*, req*, elem*) -> Template(QId(<ModuleName>, x), farg*, req*, elem*)
+    where <is-string> x
+    
+  add-tl-namespace :
+    TemplateNoRequires(x, farg*, elem*) -> TemplateNoRequires(QId(<ModuleName>, x), farg*, elem*)
+    where <is-string> x
+    
+  add-tl-namespace :
+    Entity(x, prop*) -> Entity(QId(<ModuleName>, x), prop*)
+    where <is-string> x
+  
+  add-namespace :
+    SimpleType(qid) -> qid2
+    where not(lookup-type)
+        ; debug(!"Resolving: ")
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; <debug> ["Found: ", qid2]
+    
+  prefix-qid(|qid) :
+    qid2 -> QId(qid, qid2)
+    where is-string
+
+  prefix-qid(|qid) :
+    QId(q, x) -> QId(<prefix-qid(|qid)> q, x)

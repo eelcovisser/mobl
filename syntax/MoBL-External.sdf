@@ -1,0 +1,13 @@
+module MoBL-External
+
+imports Common
+
+exports
+
+  context-free syntax
+    "external" "type" QId "{" "}"                          -> Definition {cons("ExternalType")}
+    "external" "type" QId "<" {ID ","}* ">" "{" "}"        -> Definition {cons("ExternalGenericType")}
+    "external" "template" QId "requires" {TemplateSig ","}* "(" {FArg ","}* ")" -> Definition {cons("ExternalTemplate")}
+    "external" "screen" QId ":" Type "(" {FArg ","}* ")"   -> Definition {cons("ExternalScreen")}
+    "external" "entity" QId "{" Property* "}"              -> Definition {cons("ExternalEntity")}
+    "external" "function" QId ":" Type "(" {FArg ","}* ")" -> Definition {cons("ExternalFunction")}

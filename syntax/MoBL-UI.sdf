@@ -10,7 +10,7 @@ exports
     "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturn")}
     "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
 
-    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("TemplateNoRequires")}
     "template" QId "(" {FArg ","}* ")" "requires" {TemplateSig ","}* "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
     
     ID "(" {FArg ","}* ")" -> TemplateSig {cons("TemplateSig")}
@@ -19,7 +19,8 @@ exports
     
     "<" ID HtmlArg* ">" ScreenElem* "</" ID ">"   -> ScreenElem {cons("Html")}
     "<" ID HtmlArg* "/"">" -> ScreenElem {cons("HtmlShort")}
-    ID "=" Exp             -> HtmlArg    {cons("HtmlArg")}
+    ID "=" STRING                  -> HtmlArg    {cons("HtmlArg")}
+    "databind" "=" Exp             -> HtmlArg    {cons("HtmlDatabindArg")}
     
     TemplateDefinition                                                -> ScreenElem
     

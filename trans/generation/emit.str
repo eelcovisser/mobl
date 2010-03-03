@@ -1,0 +1,19 @@
+module generation/emit
+
+strategies
+
+  emit-html =
+    ?code
+    ; rules ( EmittedHtml :+= code)
+    
+  get-all-html =
+    bagof-EmittedHtml
+    ; concat-strings
+    
+  emit-js =
+    ?code
+    ; rules ( EmittedJs :+= code)
+    
+  get-all-js =
+    bagof-EmittedJs
+    ; concat-strings

@@ -1,0 +1,47 @@
+module MoBL-UI
+
+imports
+  Common
+
+exports
+
+  context-free syntax
+  
+    "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturn")}
+    "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
+
+    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    "template" QId "(" {FArg ","}* ")" "requires" {TemplateSig ","}* "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    
+    ID "(" {FArg ","}* ")" -> TemplateSig {cons("TemplateSig")}
+    
+    TemplateDefinition      -> Definition
+    
+    "<" ID HtmlArg* ">" ScreenElem* "</" ID ">"   -> ScreenElem {cons("Html")}
+    "<" ID HtmlArg* "/"">" -> ScreenElem {cons("HtmlShort")}
+    ID "=" Exp             -> HtmlArg    {cons("HtmlArg")}
+    
+    TemplateDefinition                                                -> ScreenElem
+    
+    "init" "{" Statement* "}"                                         -> ScreenElem {cons("Init")}
+    
+    STRING                                                            -> ScreenElem {cons("ScreenString")}
+    
+    "list" "(" ID ":" Type "in" Exp ")" "{" ScreenElem* "}"           -> ScreenElem {cons("List")}
+    "placeholder"  ID "{" ScreenElem* "}"                             -> ScreenElem {cons("PlaceHolder")}
+    "cond" "(" Exp ")" "{" ScreenElem* "}"                            -> ScreenElem {cons("ConditionalDisplay")}
+    
+    "var" ID ":" Type ":=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
+    
+    QId "(" {Exp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
+    %% Variants:
+    QId "(" {Exp ","}* ")" "[" PropertyArg* "]"                       -> ScreenElem {cons("TemplateCallNoBody")}
+    QId "(" {Exp ","}* ")" "{" ScreenElem* "}"                        -> ScreenElem {cons("TemplateCallNoProperties")}
+    QId "(" {Exp ","}* ")"                                            -> ScreenElem {cons("TemplateCallNoPropertiesNoBody")}
+    QId "[" PropertyArg* "]" "{" ScreenElem* "}"                      -> ScreenElem {cons("TemplateCallNoArgs")}
+    QId "[" PropertyArg* "]"                                          -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
+    QId "{" ScreenElem* "}"                                           -> ScreenElem {cons("TemplateCallNoArgsNoProperties")}
+    QId                                                               -> ScreenElem {cons("TemplateCallNoArgsNoPropertiesNoBody")}
+
+    ID ":=" Exp  -> PropertyArg {cons("PropertyArg")}
+  

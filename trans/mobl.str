@@ -9,6 +9,8 @@ imports
   check
   generation/html
   generation/javascript
+  generation/emit
+  desugar
   lookup
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
@@ -41,6 +43,21 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     where
       <debug(!"Resolve: ")> node; 
       target     := <lookup-type> node
+
+  generate-artifacts:
+    (selected, position, ast, path, project-path) -> None() //(filename-html, result-html)
+    with
+      !ast
+      ; desugar-all
+      ; definitions-to-html
+      ; definitions-to-js
+      ; fp2 := <fopen> (<concat-strings; guarantee-extension(|"html")> [project-path, "/", path], "w")
+      ; <fputs> (<get-all-html>, fp2)
+      ; <fclose> fp2
+      ; fp := <fopen> (<concat-strings; guarantee-extension(|"js")> [project-path, "/", path], "w")
+      ; <fputs> (<get-all-js>, fp)
+      ; <fclose> fp
+
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.

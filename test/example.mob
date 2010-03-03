@@ -4,12 +4,12 @@ entity Task {
   name        : String
   description : Text
   done        : Bool
-  tags        : Set<Tag>
+  tags        : Collection<Tag>
 }
 
 entity Tag {
   name   : String
-  tasks  : Set<Task>
+  tasks  : Collection<Task>
 }
 
 external type String { }
@@ -17,8 +17,7 @@ external type Int { }
 external type Bool { }
 external type Text { }
 external type Uri { }
-external type Set<T> {}
-external type List<T> {}
+external type Collection<T> {}
 
 template outputString(s : String) {
   <span databind=s></span>

@@ -1,0 +1,13 @@
+module MoBL-Data
+
+imports
+  Common
+
+exports
+
+  context-free syntax
+  
+    "entity" QId "{" Property* "}" -> Definition {cons("Entity")}
+    ID ":" Type                   -> Property {cons("Property")}
+  
+  

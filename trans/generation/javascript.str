@@ -7,5 +7,21 @@ imports
   include/MoBL
   lib/editor-common
   desugar
+  generation/emit
 
 strategies
+
+  definitions-to-js =
+    where(alltd(definition-to-js))
+
+  definition-to-js :
+    Entity(name, prop*) -> <emit-js> $[
+    var [name] = persistence.define('[name]', {
+      [props]
+    });
+    ]
+    with props := <map(property-to-js); separate-by(!",\n"); concat-strings> prop*
+    
+  property-to-js :
+    Property(x, t) -> $['[x]': '[sqlType]']
+    with sqlType := "TEXT"

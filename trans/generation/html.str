@@ -7,14 +7,12 @@ imports
   include/MoBL
   lib/editor-common
   desugar
+  generation/emit
 
 rules
 
-  generate-artifacts:
-    (selected, position, ast, path, project-path) -> (filename-html, result-html)
-    with
-      filename-html := <guarantee-extension(|"html")> path;
-      result-html   := <desugar-all; to-html> selected
+  definitions-to-html =
+    where(alltd(definition-to-html))
 
   props-to-html :
     [] -> ""
@@ -25,19 +23,18 @@ rules
        ; rest := <props-to-html> k 
 
   elems-to-html =
-    filter(to-html)
+    filter(elem-to-html)
     ; concat-strings
 
-  to-html:
-    Module(x, d*) -> <filter(to-html); concat-strings> d*
-  
-  to-html :
-    Screen(name, args, rt, elem*) -> $[<div class="screen" id="[name]" [fargs]>[body]</div>]
+  definition-to-html :
+    Screen(name, args, rt, elem*) -> <emit-html> $[<div class="screen" id="[name]" [fargs]>[body]</div>
+]
     with body := <elems-to-html> elem*
        ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
 
-  to-html :
-    Template(name, args, elem*) -> $[<div class="template" id="[name]" [fargs]>[body]</div>]
+  definition-to-html :
+    Template(name, args, elem*) -> <emit-html> $[<div class="template" id="[name]" [fargs]>[body]</div>
+]
     with fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
        ; body := <elems-to-html> elem*
 
@@ -51,18 +48,18 @@ rules
   arg-to-html :
     (idx, e) -> $[arg[<subti> (idx, 1)]=[<exp-to-html> e]]
 
-  to-html :
+  elem-to-html :
     TemplateCall(name, arg*, prop*, elem*) -> $[<div class="templatecall" template="[name]" [args] [props]>[body]</div>]
     with props := <props-to-html> prop*
        ; body  := <elems-to-html> elem*
        ; args  := <args-to-html> arg*
   
-  to-html :
+  elem-to-html :
     Html(tag, arg*, elem*, _) -> $[<[tag] [args]>[body]</[tag]>]
     with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
        ; body := <elems-to-html> elem*
 
-  to-html :
+  elem-to-html :
     HtmlShort(tag, arg*) -> $[<[tag] [args]/>]
     with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
   
@@ -70,7 +67,7 @@ rules
     HtmlArg(name, e) -> $[[name]=[e2]]
     with e2 := <exp-to-html> e
     
-  to-html :
+  elem-to-html :
     ScreenString(s) -> <un-double-quote> s
     
   exp-to-html :

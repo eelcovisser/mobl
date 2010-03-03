@@ -1,0 +1,127 @@
+module example
+
+entity Task {
+  name        : String
+  description : Text
+  done        : Bool
+  tags        : Set<Tag>
+}
+
+entity Tag {
+  name   : String
+  tasks  : Set<Task>
+}
+
+external type String { }
+external type Int { }
+external type Bool { }
+external type Text { }
+external type Uri { }
+external type Set<T> {}
+external type List<T> {}
+
+template outputString(s : String) {
+  <span databind=s></span>
+}
+
+template inputCheckbox(b : Bool) {
+  <input type="checkbox" databind=b/>
+}
+
+template standardLayout() {
+  "Header"
+  elements()
+  "Footer"
+}
+
+screen root() {
+  standardLayout {
+   outputString("Hello there!")
+  }
+}
+
+/*
+template main() requires body() {
+  "Header"
+  body()
+  "Footer"
+}
+
+screen root() {
+  tabs {
+    tab("All", uri("img/ok.png")) { 
+      list(t : Task in Task.all()) {
+        listitem { output(t.name) }
+      }
+    }
+    tab("Done", uri("img/ok.png")) { 
+      list(t : Task in Task.all()) {
+        listitem { output(t.name) }
+      }
+    }
+    tab("Not done", uri("img/ok.png")) { 
+      list(t : Task in Task.all()) {
+        listitem { output(t.name) }
+      }
+    }
+  }
+}
+
+template main requires body() {
+  "Header"
+  body()
+  "Footer"
+}
+
+screen whatever() {
+  main {
+    template body() {
+    
+    }
+  }
+}
+
+screen addTask : Task {
+  output[id:="ZEF"](8)
+}
+
+template listitem {
+  <li>elements()</li>
+}
+
+template tabs {
+  var currentTab : String := ""
+  var tabNames : List<String> := []
+  var tabImages : List<Uri> := []
+  
+  <div id="scrollwrapper">
+    <div id="content">
+      elements()
+    </div>
+  </div>
+  <div id="tabbar">
+    list(i : Int in range(tabNames.length)) {
+      <div onclick=function() { currentTab := name; } class=currentTab == name ? "selected" : "">
+        <img src=tabImages[i]/>
+        <br/>
+        output(tabNames[i])
+      </div>
+    }
+  </div>
+    
+  template tab(name : String, image : Uri) {
+    init {
+      var n : String := "";
+      tabNames.append(n);
+      tabImages.append(image);
+      if(tabNames.length == 1) {
+        currentTab := name;
+      }
+    }
+    <div id="tab-" + name class=name == currentTab ? "invisible" : "">
+      elements()
+    </div>
+  }
+}
+
+*/

@@ -1,0 +1,33 @@
+module desugar
+
+imports
+  include/MoBL
+  libstratego-lib
+  
+strategies
+
+  desugar-all = innermost(desugar)
+  
+  desugar :
+    ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
+
+  desugar :
+    TemplateCallNoArgs(name, prop*, body) -> TemplateCall(name, [], prop*, body)
+    
+  desugar :
+    TemplateCallNoArgsNoBody(name, prop*) -> TemplateCall(name, [], prop*, [])
+    
+  desugar :
+    TemplateCallNoArgsNoProperties(name, body) -> TemplateCall(name, [], [], body)
+    
+  desugar :
+    TemplateCallNoArgsNoPropertiesNoBody(name) -> TemplateCall(name, [], [], [])
+    
+  desugar :
+    TemplateCallNoBody(name, arg*, prop*) -> TemplateCall(name, arg*, prop*, [])
+  
+  desugar :
+    TemplateCallNoProperties(name, arg*, body) -> TemplateCall(name, arg*, [], body)
+  
+  desugar :
+    TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])

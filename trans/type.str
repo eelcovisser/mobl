@@ -1,0 +1,14 @@
+module type
+
+imports
+  include/MoBL
+  
+strategies
+
+  type-of = eq-type-of
+  
+  eq-type-of :
+    Int(_) -> SimpleType("Int")
+    
+  eq-type-of :
+    String(_) -> SimpleType("String")

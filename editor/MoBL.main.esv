@@ -1,0 +1,16 @@
+module MoBL.main
+
+imports MoBL-Builders MoBL-Colorer MoBL-Folding MoBL-Outliner MoBL-References MoBL-Syntax
+
+language General properties
+                  
+  name          : MoBL
+  id            : mobl
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the MoBL language"
+  url           : http://strategoxt.org
+                  
+  extensions    : mob
+  table         : include/MoBL.tbl
+  start symbols : Start

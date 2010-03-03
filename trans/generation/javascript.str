@@ -1,0 +1,11 @@
+module generation/javascript
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/MoBL
+  lib/editor-common
+  desugar
+
+strategies

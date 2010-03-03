@@ -1,0 +1,77 @@
+module generation/html
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/MoBL
+  lib/editor-common
+  desugar
+
+rules
+
+  generate-artifacts:
+    (selected, position, ast, path, project-path) -> (filename-html, result-html)
+    with
+      filename-html := <guarantee-extension(|"html")> path;
+      result-html   := <desugar-all; to-html> selected
+
+  props-to-html :
+    [] -> ""
+  
+  props-to-html :
+    [PropertyArg(x, e)|k] -> $[ [x]="[expr]"[rest]]
+    with expr := "Bla"
+       ; rest := <props-to-html> k 
+
+  elems-to-html =
+    filter(to-html)
+    ; concat-strings
+
+  to-html:
+    Module(x, d*) -> <filter(to-html); concat-strings> d*
+  
+  to-html :
+    Screen(name, args, rt, elem*) -> $[<div class="screen" id="[name]" [fargs]>[body]</div>]
+    with body := <elems-to-html> elem*
+       ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
+
+  to-html :
+    Template(name, args, elem*) -> $[<div class="template" id="[name]" [fargs]>[body]</div>]
+    with fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
+       ; body := <elems-to-html> elem*
+
+  farg-to-html :
+    (idx, FArg(x, t)) -> $[farg[<subti> (idx, 1)]="[x]"]
+
+  args-to-html =
+    map-with-index(arg-to-html)
+    ; concat-strings
+    
+  arg-to-html :
+    (idx, e) -> $[arg[<subti> (idx, 1)]=[<exp-to-html> e]]
+
+  to-html :
+    TemplateCall(name, arg*, prop*, elem*) -> $[<div class="templatecall" template="[name]" [args] [props]>[body]</div>]
+    with props := <props-to-html> prop*
+       ; body  := <elems-to-html> elem*
+       ; args  := <args-to-html> arg*
+  
+  to-html :
+    Html(tag, arg*, elem*, _) -> $[<[tag] [args]>[body]</[tag]>]
+    with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
+       ; body := <elems-to-html> elem*
+
+  to-html :
+    HtmlShort(tag, arg*) -> $[<[tag] [args]/>]
+    with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
+  
+  tag-arg-to-html :
+    HtmlArg(name, e) -> $[[name]=[e2]]
+    with e2 := <exp-to-html> e
+    
+  to-html :
+    ScreenString(s) -> <un-double-quote> s
+    
+  exp-to-html :
+    e -> $["someexpr"]

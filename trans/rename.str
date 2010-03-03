@@ -1,0 +1,63 @@
+module rename
+
+imports
+  include/MoBL
+
+strategies
+  
+  rename-all = alltd(rename)
+  
+  rename-var : 
+   (x, t) -> y
+   with y := x{<newname> x};
+        rules(
+           RenameId : x -> y
+           TypeOf   : y -> t 
+        )
+  
+  rename :
+    Var(x) -> Var(y)
+    where y := <RenameId> x
+
+  rename-scope(s) =
+    {| RenameId
+     : s
+     |}
+
+  rename :
+    Init(t) -> Init(<rename-scope(rename-all)> t)
+
+  rename :
+    Template(name, arg*, body) -> Template(name, arg2*, body2)
+    with rename-scope( 
+           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    Screen(name, arg*, rt, body) -> Screen(name, arg2*, rt, body2)
+    with rename-scope( 
+           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    ScreenNoReturn(name, arg*, body) -> ScreenNoReturn(name, arg2*, body2)
+    with rename-scope( 
+           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    VarDecl(name, t, e) -> VarDecl(<rename-var> (name, t), t, <rename-all> e)
+  
+  rename :
+    ScreenVarDecl(name, t, e) -> ScreenVarDecl(<rename-var> (name, t), t, <rename-all> e)
+    
+  rename :
+    List(x, t, e, body) -> List(x2, t, e2, body2)
+    with rename-scope(
+           x2 := <rename-var> (x, t)
+           ; e2 := <rename-all> e
+           ; body2 := <rename-all> body
+         )

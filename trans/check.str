@@ -1,0 +1,96 @@
+module check
+
+imports
+  libstratego-lib
+  include/MoBL
+  lib/editor-common
+  declare
+  lookup
+  type
+  rename
+
+rules
+
+  // Analysis: does a topdown traversal of the tree,
+  // and try to apply the record-entity rule.
+  analyze =
+    Fst // Ignore the other parts
+    ; topdown(try(declare))
+    ; rename-all
+    ; store-result
+
+  store-result =
+    ?t
+    ; where( rules ( ResultingAST := t ) )
+        
+  lookup-node :
+    path -> <find-node> (path, <ResultingAST>)
+    where debug(!"lookup-node: ")
+                
+  find-node :
+    ([], t) -> t
+  
+  find-node :
+    ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts)) 
+    //where debug
+
+rules
+    
+  constraint-error :
+    t@SimpleType(_) -> (t, $[Type is not defined])
+    where not(<lookup-type> t) // no entity for this type
+
+  constraint-error :
+    t@GenericType(_, _) -> (t, $[Type is not defined])
+    where not(<lookup-type> t) // no entity for this type
+    
+  constraint-error :
+    Html(tag, _, _, closeTag) -> (closeTag, $[Wrong closing tag])
+    where not(tag := closeTag)
+    
+  constraint-error :
+    TemplateCall(name, arg*, prop*, body) -> (name, $[No such template defined with these arguments])
+    where not("elements" := name; [] := arg*)
+    where not(<lookup-template> (name, <map(type-of)> arg*))
+  
+  constraint-error = normalize; constraint-error
+  
+  normalize :
+    TemplateCallNoArgs(name, prop*, body) -> TemplateCall(name, [], prop*, body)
+
+  normalize :
+    TemplateCallNoArgsNoBody(name, prop*) -> TemplateCall(name, [], prop*, [])
+
+  normalize :
+    TemplateCallNoArgsNoProperties(name, body) -> TemplateCall(name, [], [], body)
+
+  normalize :
+    TemplateCallNoArgsNoPropertiesNoBody(name) -> TemplateCall(name, [], [], [])
+
+  normalize :
+    TemplateCallNoBody(name, arg*, prop*) -> TemplateCall(name, arg*, prop*, [])
+
+  normalize :
+    TemplateCallNoProperties(name, arg*, body) -> TemplateCall(name, arg*, [], body)
+
+  normalize :
+    TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
+  
+  // Reports an error if an entity is defined more than once.
+  // This constraint is implemented by testing if the "bag" of
+  // all entities x is not a singleton list.
+  constraint-error:
+    Entity(x, _) -> (x, $[Duplicate entity name])
+    where
+      not(<bagof-GetEntity> x => [_])
+  
+  constraint-warning:
+    Entity(x, _) -> (x, $[Entity names must start with a capital])
+    where
+      not(<explode-string; Hd; is-upper> x)
+  
+/*  constraint-note:
+    Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
+                                      (this note is defined in trans/check.str) ])
+*/
+  constraint-note = fail

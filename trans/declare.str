@@ -1,0 +1,38 @@
+module declare
+
+imports
+  include/MoBL
+
+strategies
+
+  // Records the definition of an entity in a dynamic rule GetEntity.
+  declare:
+    Entity(x, body) -> <fail>
+    with
+      rules(
+        GetEntity :+ x -> x
+      )
+
+  declare:
+    ExternalType(qid) -> <fail>
+    with
+      rules (
+        GetExternalType : qid -> None()
+      )
+
+  declare:
+    ExternalGenericType(qid, arg*) -> <fail>
+    with
+      arity := <length> arg*
+      ; rules (
+          GetExternalGenericType : (qid, arity) -> None()
+        )
+        
+  declare:
+    Template(name, arg*, body) -> <fail>
+    with
+      arg-types := <map(?FArg(_, <id>))> arg*
+      ; rules (
+          GetTemplate : (name, arg-types) -> body 
+        )
+  

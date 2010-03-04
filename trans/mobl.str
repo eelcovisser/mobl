@@ -25,7 +25,8 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       try(dr-scope-all-end)
       ; dr-scope-all-start
     with
-      rules ( ProjectPath := project-path )
+      rules ( ProjectPath := project-path
+              IsImported: path )
       ; ast2 := <analyze; store-result> ast 
       ; errors   := <collect-all(constraint-error, conc)> ast2
       ; warnings := <collect-all(constraint-warning, conc)> ast2

@@ -43,10 +43,8 @@ strategies
   
   add-namespace :
     SimpleType(qid) -> qid2
-    where not(lookup-type)
-        ; debug(!"Resolving: ")
-        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
-        ; <debug> ["Found: ", qid2]
+    where not(lookup-type-aux)
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
     
   prefix-qid(|qid) :
     qid2 -> QId(qid, qid2)

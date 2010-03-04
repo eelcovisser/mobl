@@ -36,10 +36,14 @@ rules
   import-all =
     alltd(import-module); topdown(try(flatten-list))
   
-  import-module :
+  import-module =
+    ?Import(qid)
+    ; lookup-import-module
+    ; rules ( Imports :+= qid )
+
+  lookup-import-module :
     Import(qid) -> def*
-    with def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
-       ; rules ( Imports :+= qid )
+    where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
     
   externalize-module :
     Module(qid, def*) -> def2*

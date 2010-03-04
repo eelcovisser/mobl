@@ -4,8 +4,8 @@ import core
 
 entity Task {
   name        : String
-  description : core::Text
-  done        : core::Bool
+  description : Text
+  done        : Bool
   tags        : core::Collection<Tag>
 }
 

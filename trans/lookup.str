@@ -7,17 +7,25 @@ imports
 
 strategies
 
-  lookup-type :
+  lookup-type =
+       lookup-type-aux
+    <+ 
+      ?SimpleType(QId(qid, _))
+      ; debug(!"Looking up this qid thingie: ")
+      ; where(<lookup-import-module; alltd(declare)> Import(qid))
+      ; lookup-type-aux
+    
+  lookup-type-aux :
     SimpleType(qid) -> <GetEntity> qid
   
-  lookup-type :
+  lookup-type-aux :
     SimpleType(qid) -> <GetType> qid
     
-  lookup-type :
+  lookup-type-aux :
     GenericType(qid, t*) -> <GetGenericType> (qid, <length> t*)
   
   lookup-template :
-    (name, arg-type*) -> <GetTemplate> <id>
+    (name, arg-type*) -> <GetTemplate>
     
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

@@ -1,0 +1,228 @@
+body {
+    background-color: #ddd;
+    color: #222;
+    font-family: Helvetica;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -webkit-text-size-adjust: none;
+    background: rgb(197, 204, 211) url(img/stripes.png);
+    /*height: 500px;*/
+}
+
+div.screen {
+    margin: 0 auto;
+    position: absolute;
+    padding-bottom: 6px;
+    width: 100%;
+    height: 100%
+}
+
+div#scrollwrapper {
+    position: relative; /* needed */
+    z-index: 1; /* needed and important */
+    width: 100%;
+    height: 250px; /* needed */
+    overflow: hidden; /* suggested */
+}
+
+div#scroller {
+    float: left;
+    width: 100%;
+    padding: 10px;
+}
+
+#header h1 {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
+    line-height: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+    text-overflow: ellipsis;
+    color: #FFFFFF;
+    background: url(img/iPhoneToolbar.png) #6d84a2 repeat-x;
+    border-bottom: 1px solid #2d3642;
+}
+
+.topRightButton {
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    -webkit-border-image: url(img/iPhoneButton.png) 0 5 0 5;
+    -webkit-border-radius: 0;
+    border-width: 0 5px 0 5px;
+    padding: 0;
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+    text-decoration: none;
+    background: none;
+}
+
+.backButton {
+    position: absolute;
+    top: 8px;
+    left: 6px;
+    -webkit-border-image: url(img/iPhoneBackButton.png) 0 8 0 14;
+    border-width: 0 8px 0 14px;
+    line-height: 28px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+    text-decoration: none;
+    background: none;
+}
+
+a.whiteButton {
+    display: block;
+    margin: 10px;
+    /*width: 250px; /* if no width was set, the button would
+     expand to the width of its parent */
+    text-align: center;
+    line-height: 46px;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 20px;
+    text-decoration: none;
+    color: #000;
+    text-shadow: #fff 0px 1px 1px;
+    border-width: 0 14px;
+    -webkit-border-image: url(img/whiteButton.png) 0 14 0 14;
+}
+
+a.redButton {
+    display: block;
+    margin: 10px;
+    /*width: 250px; /* if no width was set, the button would
+     expand to the width of its parent */
+    text-align: center;
+    line-height: 46px;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 20px;
+    text-decoration: none;
+    color: #fff;
+    text-shadow: #000 0 1px 0;
+    border-width: 0 14px;
+    -webkit-border-image: url(img/redButton.png) 0 14 0 14;
+}
+
+ul {
+    list-style: none;
+    margin: 10px;
+    padding: 0;
+}
+
+ul li {
+    background-color: #FFFFFF;
+    border: 1px solid #999999;
+    color: #222222;
+    display: block;
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: -1px;
+    padding: 12px 10px;
+    text-decoration: none;
+}
+
+ul li:first-child {
+    -webkit-border-top-left-radius: 8px;
+    -webkit-border-top-right-radius: 8px;
+}
+
+ul li:last-child {
+    -webkit-border-bottom-left-radius: 8px;
+    -webkit-border-bottom-right-radius: 8px;
+}
+
+input[type = text] {
+    -webkit-text-size-adjust: 140%;
+    color: #777;
+    background: #fff url(../.png);
+    border: 0;
+    font: normal 17px Helvetica;
+    padding: 0;
+    display: inline-block;
+    margin-left: 0px;
+    width: 100%;
+    -webkit-appearance: textarea;
+}
+
+div#optionpanel {
+    display: none;
+    background: url(img/blackbg.png) top left repeat-x;
+    text-align: center;
+    padding: 20px 10px 15px 10px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+div#tabbar {
+    background: url(img/tabbg.png) top left repeat-x;
+    text-align: center;
+    position: absolute;
+    height: 48px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+	z-index: 3;
+}
+
+div#tabbar div div {
+    float: left;
+    margin-right: 5px;
+    margin-left: 5px;
+	
+    font-size: 10px;
+    color: #c0c0c0;
+    -webkit-border-image: url(img/empty.png) 0 5 0 5;
+	width: 70px;
+}
+
+div#tabbar div.selected {
+    -webkit-border-image: url(img/selectedtabbg.png) 0 5 0 5;
+}
+
+div#optionpanel h2 {
+    font-size: 17px;
+    color: #fff;
+    text-shadow: #000 0 1px 0;
+}
+
+.view {
+    display: none;
+}
+
+li a.button {
+    position: absolute;
+    right: 25px;
+    margin-top: -3px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    /*z-index: 3;*/
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    -webkit-border-image: url(img/redButton.png) 0 12 0 12;
+    color: #fff;
+    text-shadow: #7a0001 0 -1px 0;
+}
+
+li.arrow {
+    background-image: url(img/chevron.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+}

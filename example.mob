@@ -19,7 +19,7 @@ function sayHello(name : core::String) : core::String {
 }
 
 template standardLayout() {
-  "Header bla"
+  "Header"
   elements()
   "Footer"
 }

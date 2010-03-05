@@ -82,6 +82,11 @@ strategies
       <gt> (<file-exists; modification-time> file1, <file-exists; modification-time> file2) 
 
 strategies
+    
+  refresh-workspace-file:
+    f -> <prim("SSL_EXT_refreshresource", f)>
+
+strategies
 
   desugar-position(desugar|ast):
     position -> position'

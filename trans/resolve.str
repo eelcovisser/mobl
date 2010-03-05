@@ -6,6 +6,7 @@ imports
   desugar
   lookup
   check
+  type
 
 strategies
 
@@ -42,10 +43,58 @@ strategies
     where <is-string> x
   
   add-namespace :
-    SimpleType(qid) -> qid2
+    SimpleType(qid) -> SimpleType(qid2)
     where not(lookup-type-aux)
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
     
+  add-namespace :
+    TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg*, prop*, elem2*)
+    where arg-types := <map(type-of)> arg*
+        ; not(<lookup-template-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; elem2* := <alltd(add-namespace)> elem*
+
+  add-namespace :
+    TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCallNoPropertiesNoBody(qid2, arg*)
+    where arg-types := <map(type-of)> arg*
+        ; not(<lookup-template-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+
+  add-namespace :
+    TemplateCallNoArgsNoProperties(qid, elem*) -> TemplateCallNoArgsNoProperties(qid2, elem2*)
+    where not(<lookup-template-aux> (qid, []))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; elem2* := <alltd(add-namespace)> elem*
+
+  add-namespace :
+    TemplateCallNoArgs(qid, prop*, elem*) -> TemplateCallNoArgs(qid2, prop*, elem2*)
+    where not(<lookup-template-aux> (qid, []))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; elem2* := <alltd(add-namespace)> elem*
+
+  add-namespace :
+    TemplateCallNoArgsNoBody(qid, prop*) -> TemplateCallNoArgsNoBody(qid2, prop*)
+    where not(<lookup-template-aux> (qid, []))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
+
+  add-namespace :
+    TemplateCallNoArgsNoPropertiesNoBody(qid) -> TemplateCallNoArgsNoPropertiesNoBody(qid2)
+    where not(<lookup-template-aux> (qid, []))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
+
+  add-namespace :
+    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCallNoBody(qid2, arg*, prop*)
+    where arg-types := <map(type-of)> arg*
+        ; not(<lookup-template-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+
+  add-namespace :
+    TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg*, elem2*)
+    where arg-types := <map(type-of)> arg*
+        ; not(<lookup-template-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; elem2* := <alltd(add-namespace)> elem*
+
   prefix-qid(|qid) :
     qid2 -> QId(qid, qid2)
     where is-string

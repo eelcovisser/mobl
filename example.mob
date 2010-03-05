@@ -7,7 +7,7 @@ entity Task {
   description : Text
   done        : Bool
   tags        : core::Collection<Tag>
-}
+}  
 
 entity Tag {
   name   : core::String
@@ -19,11 +19,10 @@ function sayHello(name : core::String) : core::String {
 }
 
 template standardLayout() {
-  "Header"
+  "Header bla"
   elements()
   "Footer"
-}  
-
+}
 
 screen root() {
   standardLayout {

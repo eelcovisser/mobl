@@ -32,19 +32,19 @@ strategies
         )
         
   declare:
-    TemplateNoRequires(qid, arg*, body) -> <fail>
+    TemplateNoRequires(qid, farg*, body) -> <fail>
     with
       extern := <definition-to-external>
-      ; arg-types := <map(?FArg(_, <id>))> arg*
+      ; arg-types := <map(?FArg(_, <id>))> farg*
       ; rules (
           GetTemplate : (qid, arg-types) -> extern 
         )
 
 	declare:
-	  Template(qid, arg*, req*, body) -> <fail>
+	  Template(qid, farg*, req*, body) -> <fail>
 	  with
       extern := <definition-to-external>
-      ; arg-types := <map(?FArg(_, <id>))> arg*
+      ; arg-types := <map(?FArg(_, <id>))> farg*
 	    ; rules (
 	        GetTemplate : (qid, arg-types) -> extern 
 	      )

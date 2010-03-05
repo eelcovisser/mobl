@@ -11,6 +11,7 @@ imports
   desugar
   mobl
   resolve
+  generation/compile
 
 rules
 
@@ -20,13 +21,13 @@ rules
     ?Module(qid, _)
     ; {| ModuleName, Imports
        : rules ( ModuleName := qid )
-       ; where(<debug> ["Analyzing module: ", qid])
        ; import-all
        ; alltd(add-tl-namespace)
        ; topdown(try(declare))
        ; alltd(add-namespace)
+       ; debug(!"After add-namespace: ")
+       ; topdown(try(declare))
        ; rename-all
-       ; where(<debug> "Done")
        |}
 
   store-result =
@@ -34,7 +35,8 @@ rules
     ; rules ( ResultingAST := t )
 
   import-all =
-    alltd(import-module); topdown(try(flatten-list))
+    alltd(import-module)
+    ; topdown(try(flatten-list))
   
   import-module =
     ?Import(qid)
@@ -43,11 +45,12 @@ rules
 
   lookup-import-module :
     Import(qid) -> def*
-    where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
+    where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
     
-  externalize-module :
-    Module(qid, def*) -> def2*
-    with def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)>
+  compile-and-externalize-module :
+    mod@Module(qid, def*) -> def2*
+    with compile(|<ProjectPath>)
+       ; def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
     
   qid-to-path =
     is-string
@@ -60,7 +63,6 @@ strategies
   
   lookup-node :
     path -> <find-node> (path, <ResultingAST>)
-    where debug(!"lookup-node: ")
                 
   find-node :
     ([], t) -> t
@@ -112,9 +114,14 @@ rules
     TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
   
   constraint-warning:
-    Entity(x, _) -> (x, $[Entity names must start with a capital])
+    Entity(qid, _) -> (x, $[Entity names must start with a capital])
     where
-      not(<explode-string; Hd; is-upper> x)
+      if <is-string> qid then
+        x := qid
+      else
+        QId(_, x) := qid
+      end
+      ; not(<explode-string; Hd; is-upper> x)
   
 /*  constraint-note:
     Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language

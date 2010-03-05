@@ -10,6 +10,7 @@ strategies
     Module(qid, def*) -> Module(qid, def2*)
     with {| ModuleName
           : rules ( ModuleName := qid )
+          ; debug
           ; def2* := <innermost(desugar)> def*
           |}
   
@@ -23,22 +24,22 @@ strategies
     TemplateNoRequires(qid, farg*, elem*) -> Template(qid, farg*, [], elem*)
 
   desugar :
-    TemplateCallNoArgs(name, prop*, body) -> TemplateCall(name, [], prop*, body)
+    TemplateCallNoArgs(qid, prop*, body) -> TemplateCall(qid, [], prop*, body)
     
   desugar :
-    TemplateCallNoArgsNoBody(name, prop*) -> TemplateCall(name, [], prop*, [])
+    TemplateCallNoArgsNoBody(qid, prop*) -> TemplateCall(qid, [], prop*, [])
     
   desugar :
-    TemplateCallNoArgsNoProperties(name, body) -> TemplateCall(name, [], [], body)
+    TemplateCallNoArgsNoProperties(qid, body) -> TemplateCall(qid, [], [], body)
     
   desugar :
-    TemplateCallNoArgsNoPropertiesNoBody(name) -> TemplateCall(name, [], [], [])
+    TemplateCallNoArgsNoPropertiesNoBody(qid) -> TemplateCall(qid, [], [], [])
     
   desugar :
-    TemplateCallNoBody(name, arg*, prop*) -> TemplateCall(name, arg*, prop*, [])
+    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCall(qid, arg*, prop*, [])
   
   desugar :
-    TemplateCallNoProperties(name, arg*, body) -> TemplateCall(name, arg*, [], body)
+    TemplateCallNoProperties(qid, arg*, body) -> TemplateCall(qid, arg*, [], body)
   
   desugar :
-    TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
+    TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCall(qid, arg*, [], [])

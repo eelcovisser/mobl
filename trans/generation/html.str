@@ -36,7 +36,7 @@ rules
   definition-to-html :
     Template(qid, args, req*, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
-    with fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
+    with fargs := <map-with-index(farg-to-html <+ debug(!"FAIL: "); fail); separate-by(!" "); concat-strings> args
        ; body := <elems-to-html> elem*
 
   farg-to-html :
@@ -50,7 +50,7 @@ rules
     (idx, e) -> $[arg[<subti> (idx, 1)]=[<expression-to-html> e]]
 
   elem-to-html :
-    TemplateCall(name, arg*, prop*, elem*) -> $[<div class="templatecall" template="[name]" [args] [props]>[body]</div>]
+    TemplateCall(qid, arg*, prop*, elem*) -> $[<div class="templatecall" template="[<qid-to-html> qid]" [args] [props]>[body]</div>]
     with props := <props-to-html> prop*
        ; body  := <elems-to-html> elem*
        ; args  := <args-to-html> arg*

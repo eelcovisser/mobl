@@ -1,0 +1,34 @@
+module generation/compile
+
+imports
+  libstratego-lib
+  check
+  declare
+  rename
+  desugar
+  mobl
+  generation/emit
+  generation/html
+  generation/javascript
+  include/MoBL
+  lib/editor-common
+
+strategies
+  
+  compile(|output-path) =
+      ?Module(qid, _)
+      ; analyze
+      ; desugar-all
+      ; definitions-to-html
+      ; definitions-to-js
+      ; where(path := <qid-to-path> qid
+              ; html-filename := <concat-strings; guarantee-extension(|"html")> [output-path, "/", path]
+              ; js-filename   := <concat-strings; guarantee-extension(|"js")> [output-path, "/", path])
+      ; fp2 := <fopen> (html-filename, "w")
+      ; <fputs> (<get-all-html>, fp2)
+      ; <fclose> fp2
+      ; <refresh-workspace-file> html-filename
+      ; fp := <fopen> (js-filename, "w")
+      ; <fputs> (<get-all-js>, fp)
+      ; <fclose> fp
+      ; <refresh-workspace-file> js-filename

@@ -10,6 +10,7 @@ imports
   generation/html
   generation/javascript
   generation/emit
+  generation/compile
   desugar
   lookup
   resolve
@@ -26,7 +27,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; dr-scope-all-start
     with
       rules ( ProjectPath := project-path
-              IsImported: path )
+              IsImported  : path )
       ; ast2 := <analyze; store-result> ast 
       ; errors   := <collect-all(constraint-error, conc)> ast2
       ; warnings := <collect-all(constraint-warning, conc)> ast2
@@ -50,19 +51,13 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
   generate-artifacts:
     (selected, position, ast, path, project-path) -> None() //(filename-html, result-html)
     with
-      rules ( ProjectPath := project-path )
-      ; !ast
-      ; analyze
-      ; desugar-all
-      ; definitions-to-html
-      ; definitions-to-js
-      ; fp2 := <fopen> (<concat-strings; guarantee-extension(|"html")> [project-path, "/", path], "w")
-      ; <fputs> (<get-all-html>, fp2)
-      ; <fclose> fp2
-      ; fp := <fopen> (<concat-strings; guarantee-extension(|"js")> [project-path, "/", path], "w")
-      ; <fputs> (<get-all-js>, fp)
-      ; <fclose> fp
-
+      // Ensure all dynamic rules are properly scoped
+      try(dr-scope-all-end)
+      ; dr-scope-all-start
+    with
+      rules ( ProjectPath := project-path 
+              IsImported  : path )
+      ; <compile(|<ProjectPath>)> ast
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.

@@ -28,16 +28,16 @@ strategies
     Init(t) -> Init(<rename-scope(rename-all)> t)
 
   rename :
-    Template(name, arg*, req*, body) -> Template(name, arg2*, req*, body2)
+    Template(name, farg*, req*, body) -> Template(name, farg2*, req*, body2)
     with rename-scope( 
-           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )
 
 	rename :
 	  TemplateNoRequires(name, arg*, body) -> TemplateNoRequires(name, arg2*, body2)
 	  with rename-scope( 
-	         arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+	         arg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> arg*
 	         ; body2 := <rename-all> body
 	       )
 

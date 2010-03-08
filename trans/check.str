@@ -89,6 +89,10 @@ rules
     TemplateCall(qid, arg*, prop*, body) -> (qid, $[No such template defined with these arguments])
     where not("elements" := qid; [] := arg*)
     where not(<lookup-template> (qid, <map(type-of)> arg*))
+    
+  constraint-error :
+    t@Var(qid) -> (t, $[Variable not defined])
+    where not(type-of)
   
   constraint-error = normalize; constraint-error
   

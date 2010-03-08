@@ -32,5 +32,7 @@ strategies
       ; <fputs> ($[mobiworks.provides("[<qid-to-js> qid]");
 ], fp)
       ; <fputs> (<get-all-js>, fp)
+      ; <fputs> ($[persistence.schemaSync();
+], fp)
       ; <fclose> fp
       ; <refresh-workspace-file> js-filename

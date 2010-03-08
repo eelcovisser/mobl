@@ -68,6 +68,10 @@ rules // Statements
     Return(e) -> $[return [es];
 ]
     with es := <expression-to-js> e
+  
+  stat-to-js :
+    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];
+]
     
 rules // Expressions
   expression-to-js =
@@ -88,7 +92,7 @@ rules // Expressions
        ; args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
 
   exp-to-js :
-    MethodCall(e, x, e*) -> $[[es].[x]([args])]
+    MethodCall(e, x, e*) -> $[ref([es].[x]([args]))]
     with es := <expression-to-js> e
        ; args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
   
@@ -96,6 +100,21 @@ rules // Expressions
     Indexer(e, idxe) -> ${{es}[{idxes}]}
     with es := <expression-to-js> e
        ; idxes := <expression-to-js> idxe
+         
+  exp-to-js :
+    CollectionCons(t, e*) -> $[new persistence.LocalQueryCollection([args])]
+    with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
+  
+  exp-to-js :
+    EntityCons(SimpleType(qid), propval*) -> $[new [<qid-to-js> qid]({[propvals]})]
+    with propvals := <map(\ PropVal(x, e) -> $['[x]': [<expression-to-js> e]] \); separate-by(!", "); concat-strings> propval*
+      
+  exp-to-js :
+    FieldAccess(Var(qid), x) -> $[ref(fromScope(this, '[<qid-to-js> qid]'), [x])]
+
+  exp-to-js :
+    FieldAccess(e, x) -> $[[es].[x]]
+    with es := <expression-to-js> e
 
   exp-to-js :
     Brackets(e) -> $[([es])]

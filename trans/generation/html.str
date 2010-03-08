@@ -19,32 +19,36 @@ rules
     [] -> ""
   
   props-to-html :
-    [PropertyArg(x, e)|k] -> $[ [x]="[expr]"[rest]]
-    with expr := "Bla"
-       ; rest := <props-to-html> k 
+    [PropertyArg(x, s)|k] -> $[ [x]=[s][rest]]
+    with rest := <props-to-html> k 
 
   elems-to-html =
     filter(elem-to-html)
     ; concat-strings
 
-  wrap-span(|original-elem*) =
-    id/*
-    try(
-      where(<gt> (<length> original-elem*, 1))
-      ; !$[<span>[<id>]</span>]
-    )*/
-
   definition-to-html :
-    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
+    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs][init]>[body]</div>
 ]
-    with body := <elems-to-html; wrap-span(|elem*)> elem*
+    with body := <elems-to-html> elem*
        ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
+       ; init-stat* := <filter(?Init(<id>)); concat> elem*
+       ; if not([] := init-stat*) then
+           init-fn-name := <newname> "init"
+           ; init := $[ oninit="[init-fn-name]]
+           ; <emit-js> $[
+               function [init-fn-name](scope) {
+                  [<statements-to-js> init-stat*]
+               }
+             ]
+         else
+           init := ""
+         end
 
   definition-to-html :
     Template(qid, args, req*, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
     with fargs := <map-with-index(farg-to-html <+ debug(!"FAIL: "); fail); separate-by(!" "); concat-strings> args
-       ; body := <elems-to-html; wrap-span(|elem*)> elem*
+       ; body := <elems-to-html> elem*
 
   farg-to-html :
     (idx, FArg(x, t)) -> $[farg[<subti> (idx, 1)]="[x]"]
@@ -59,7 +63,7 @@ rules
   elem-to-html :
     TemplateCall(qid, arg*, prop*, elem*) -> $[<div class="templatecall" template="[<qid-to-html> qid]" [args] [props]>[body]</div>]
     with props := <props-to-html> prop*
-       ; body  := <elems-to-html; wrap-span(|elem*)> elem*
+       ; body  := <elems-to-html> elem*
        ; args  := <args-to-html> arg*
   
   elem-to-html :
@@ -77,6 +81,11 @@ rules
   tag-arg-to-html :
     HtmlDatabindArg(e) -> $[databind=[es]]
     with es := <refwrap-expression-to-html> e
+    
+  elem-to-html :
+    List(x, t, e, elem*) -> $[<ul databind=[es] item="[x]">[body]</ul>]
+    with es := <refwrap-expression-to-html> e
+       ; body := <elems-to-html> elem*
     
   elem-to-html :
     ScreenString(s) -> <un-double-quote> s

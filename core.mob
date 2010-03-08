@@ -17,6 +17,16 @@ template inputCheckbox(b : Bool) {
 
 template header(title : String) {
   <div id="header">
-    <h1 databind=s></h1>
+    <h1 databind=title></h1>
   </div>
+}
+
+template ul() {
+  <ul>
+    elements()
+  </ul>
+}
+
+template listitem() {
+  <li>elements()</li>
 }

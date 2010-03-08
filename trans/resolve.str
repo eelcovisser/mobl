@@ -50,6 +50,12 @@ strategies
     SimpleType(qid) -> SimpleType(qid2)
     where not(lookup-type-aux)
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
+
+  add-namespace :
+    GenericType(qid, t*) -> GenericType(qid2, t2*)
+    where not(lookup-type-aux)
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> GenericType(<id>, t*); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; t2* := <alltd(add-namespace)> t*
     
   add-namespace :
     TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg*, prop*, elem2*)
@@ -94,7 +100,7 @@ strategies
 
   add-namespace :
     TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg*, elem2*)
-    where debug; arg-types := <map(type-of)> arg*; debug(!"Arg types: ")
+    where arg-types := <map(type-of)> arg*
         ; not(<lookup-template-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*

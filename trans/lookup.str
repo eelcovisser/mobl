@@ -32,11 +32,11 @@ strategies
 
   lookup-template-aux :
     (qid, arg-type*) -> ExternalTemplate(qid, farg2*, req*)
-    where debug; <GetTemplate> qid
+    where <GetTemplate> qid
         ; ?ExternalTemplate(_, farg*, req*)
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace); debug(!"Arg types 1: ")> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>)); debug(!"Arg types 2: ")> farg2*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
 
     

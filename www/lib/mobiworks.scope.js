@@ -57,7 +57,6 @@ jQuery.fn.initScope = function () {
                     if (node.attr("oninit")) {
                         eval(node.attr("oninit"))(scope, newNode); // for now
                     }
-                    console.log("Going to scope: " + name);
                     var wrapper = $("<span>");
                     wrapper.append(newNode);
                     newNode.scope(scope);

@@ -24,8 +24,8 @@ strategies
      : s
      |}
 
-  rename :
-    Init(t) -> Init(<rename-scope(rename-all)> t)
+  /*rename :
+    Init(t) -> Init(<rename-scope(rename-all)> t)*/
 
   rename :
     Template(name, farg*, req*, body) -> Template(name, farg2*, req*, body2)
@@ -49,9 +49,23 @@ strategies
          )
 
   rename :
-    ScreenNoReturn(name, arg*, body) -> ScreenNoReturn(name, arg2*, body2)
+    ScreenNoReturn(name, farg*, body) -> ScreenNoReturn(name, farg2*, body2)
     with rename-scope( 
-           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    Function(qid, farg*, rt, body) -> Function(qid, farg2*, rt, body2)
+    with rename-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    FunctionNoReturnType(qid, farg*, body) -> FunctionNoReturnType(qid, farg2*, body2)
+    with rename-scope( 
+           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )
 

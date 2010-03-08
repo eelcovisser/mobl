@@ -6,7 +6,7 @@ entity Task {
   name        : String
   description : Text
   done        : Bool
-  tags        : core::Collection<Tag>
+  tags        : Collection<Tag>
 }  
 
 entity Tag {
@@ -18,16 +18,24 @@ function sayHello(name : String) : String {
   return "Hello, " + name;
 }
 
-template standardLayout(s : String) {
-  header(s)
+template standardLayout(header : String) {
+  header(header)
   elements()
   <hr/>
   "(C) Zef Hemel, 2010"
 }
 
 screen root() {
+  init {
+    var l : Collection<Task> := Collection<Task>();
+    l.add(Task { name := "Task 1" });
+    l.add(Task { name := "Task 2" });
+    l.add(Task { name := "Task 3" });
+  }
   standardLayout("My header") {
-    outputString("Hello there!")
+    list(t : Task in l) {
+      listitem { outputString(t.name) }
+    }
   }
 }
 

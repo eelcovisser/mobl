@@ -29,6 +29,7 @@ exports
     QId                           -> Exp {cons("Var")}
     QId "(" {Exp ","}* ")"        -> Exp {cons("Call")}
     Exp "." ID "(" {Exp ","}* ")" -> Exp {cons("MethodCall")}
+    Exp "." ID                    -> Exp {cons("FieldAccess")}
     "uri" "(" Exp ")"             -> Exp {cons("Uri")}
     Exp "[" Exp "]"               -> Exp {left, cons("Indexer")}
     
@@ -38,8 +39,11 @@ exports
     Exp OperatorMethodId Exp     -> Exp {cons("BinMethodCall"), left}
     
     Exp "?" Exp ":" Exp          -> Exp {left, cons("Choice")}
-    "[" {Exp ","}* "]"           -> Exp {cons("ListCons")}
+    Type "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
+    Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
     "(" Exp ")"                  -> Exp {cons("Brackets")}
+    
+    ID ":=" Exp                  -> PropVal {cons("PropVal")}
     
   context-free syntax %% Filters
     "[" Exp Filter "]"                       -> Exp {cons("SetComp")}

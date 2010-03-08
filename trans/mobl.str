@@ -27,7 +27,8 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; dr-scope-all-start
     with
       rules ( ProjectPath := project-path
-              IsImported  : path )
+              IsImported  : path
+              OutputPath  := <concat-strings> [project-path, "/www"] )
       ; ast2 := <analyze; store-result> ast 
       ; errors   := <collect-all(constraint-error, conc)> ast2
       ; warnings := <collect-all(constraint-warning, conc)> ast2
@@ -56,8 +57,9 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; dr-scope-all-start
     with
       rules ( ProjectPath := project-path 
-              IsImported  : path )
-      ; <compile(|<ProjectPath>)> ast
+              IsImported  : path
+              OutputPath  := <concat-strings> [project-path, "/www"])
+      ; <compile> ast
 
   // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.

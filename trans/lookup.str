@@ -4,6 +4,7 @@ imports
   include/MoBL
   check
   declare
+  resolve
 
 strategies
 
@@ -24,14 +25,20 @@ strategies
     GenericType(qid, t*) -> <GetGenericType> (qid, <length> t*)
   
   lookup-template =
-       lookup-template-aux
-    <+ 
-      ?(QId(qid, _), arg-type*)
+      lookup-template-aux
+   <+ ?(QId(qid, _), _)
       ; where(<lookup-import-module; alltd(declare)> Import(qid))
       ; lookup-template-aux
 
   lookup-template-aux :
-    (qid, arg-type*) -> <GetTemplate>
+    (qid, arg-type*) -> ExternalTemplate(qid, farg2*, req*)
+    where debug; <GetTemplate> qid
+        ; ?ExternalTemplate(_, farg*, req*)
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace); debug(!"Arg types 1: ")> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>)); debug(!"Arg types 2: ")> farg2*
+        ; arg-types1* := arg-types2*
+
     
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

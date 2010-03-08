@@ -14,19 +14,20 @@ entity Tag {
   tasks  : core::Collection<Task>
 }
 
-function sayHello(name : core::String) : core::String {
+function sayHello(name : String) : String {
   return "Hello, " + name;
 }
 
-template standardLayout() {
-  "Header"
+template standardLayout(s : String) {
+  header(s)
   elements()
-  "Footer"
+  <hr/>
+  "(C) Zef Hemel, 2010"
 }
 
 screen root() {
-  standardLayout {
-   outputString("Hello there!")
+  standardLayout("My header") {
+    outputString("Hello there!")
   }
 }
 

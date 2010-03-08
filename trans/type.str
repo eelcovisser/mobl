@@ -2,10 +2,11 @@ module type
 
 imports
   include/MoBL
+  rename
   
 strategies
 
-  type-of = eq-type-of
+  type-of = eq-type-of <+ ?Var(<id>); TypeOf
   
   eq-type-of :
     Int(_) -> SimpleType(QId("core", "Int"))

@@ -57,8 +57,11 @@ jQuery.fn.initScope = function () {
                     if (node.attr("oninit")) {
                         eval(node.attr("oninit"))(scope, newNode); // for now
                     }
+                    console.log("Going to scope: " + name);
+                    var wrapper = $("<span>");
+                    wrapper.append(newNode);
                     newNode.scope(scope);
-                    return newNode;
+                    return wrapper;
                 });
                 node.remove();
                 traverseChildren = false;
@@ -116,8 +119,10 @@ jQuery.fn.initScope = function () {
                     } else {
                         subScope.setLocal('elements', function (scope) {
                             var newNode = code.clone(true);
+                            var wrapper = $("<span>");
+                            wrapper.append(newNode);
                             newNode.scope(scope);
-                            return newNode;
+                            return wrapper;
                         });
                     }
                     args.push(subScope);
@@ -128,7 +133,7 @@ jQuery.fn.initScope = function () {
                     }).apply(node);
 
                     // make the call
-                    var result = templateFn.apply(null, args);
+                    var result = templateFn.apply(null, args).contents();
 
                     var attributes = node[0].attributes;
                     for ( var j = 0; j < attributes.length; j++) {

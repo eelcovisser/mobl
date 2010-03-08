@@ -15,20 +15,22 @@ imports
 
 strategies
   
-  compile(|output-path) =
+  compile =
       ?Module(qid, _)
       ; analyze
       ; desugar-all
       ; definitions-to-html
       ; definitions-to-js
       ; where(path := <qid-to-path> qid
-              ; html-filename := <concat-strings; guarantee-extension(|"html")> [output-path, "/", path]
-              ; js-filename   := <concat-strings; guarantee-extension(|"js")> [output-path, "/", path])
+              ; html-filename := <concat-strings; guarantee-extension(|"html")> [<OutputPath>, "/", path]
+              ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path])
       ; fp2 := <fopen> (html-filename, "w")
       ; <fputs> (<get-all-html>, fp2)
       ; <fclose> fp2
       ; <refresh-workspace-file> html-filename
       ; fp := <fopen> (js-filename, "w")
+      ; <fputs> ($[mobiworks.provides("[<qid-to-js> qid]");
+], fp)
       ; <fputs> (<get-all-js>, fp)
       ; <fclose> fp
       ; <refresh-workspace-file> js-filename

@@ -14,3 +14,9 @@ template outputString(s : String) {
 template inputCheckbox(b : Bool) {
   <input type="checkbox" databind=b/>
 }
+
+template header(title : String) {
+  <div id="header">
+    <h1 databind=s></h1>
+  </div>
+}

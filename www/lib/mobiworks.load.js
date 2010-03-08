@@ -1,6 +1,6 @@
 var mobiworks = window.mobiworks || {};
 mobiworks.screenStack = [];
-mobiworks.screenCache = {};
+mobiworks.rootScope = new mobiworks.LinkedMap();
 
 function updateScrollers () {
     var scrollwrappers = $("#scrollwrapper:visible");
@@ -8,16 +8,63 @@ function updateScrollers () {
         var height = window.innerHeight;
         height -= $("#header:visible").height();
         height -= $("#tabbar:visible").height();
-        scrollwrappers.height(height+5);
+        scrollwrappers.height(height + 5);
     }
     var scrollers = $("#scrollwrapper div#content:visible");
-    for(var i = 0; i < scrollers.length; i++) {
+    for ( var i = 0; i < scrollers.length; i++) {
         scrollers.eq(i).data("scroller").refresh();
     }
 }
 
-$(window).resize(updateScrollers);
+mobiworks.provides = function (moduleName) {
+    var parts = moduleName.split('.');
+    var current = window;
+    for ( var i = 0; i < parts.length; i++) {
+        if (!current[parts[i]]) {
+            current[parts[i]] = {};
+        }
+        current = current[parts[i]];
+    }
+}
 
+mobiworks.modulesToBeLoaded = 0;
+mobiworks.onModulesLoaded = null;
+
+mobiworks.requires = function(moduleName, callback) {
+    mobiworks.modulesToBeLoaded++;
+    if(callback) {
+        mobiworks.onModulesLoaded = callback;
+    }
+    if (!mobiworks.isLoaded(moduleName)) {
+        $.getScript(moduleName + ".js", function () {
+            $.get(moduleName + ".html", function (data) {
+                var htmlDom = $(data);
+                htmlDom.scope(mobiworks.rootScope);
+                mobiworks.modulesToBeLoaded--;
+                if(mobiworks.modulesToBeLoaded === 0 && mobiworks.onModulesLoaded) {
+                    mobiworks.onModulesLoaded();
+                }
+                if(mobiworks.modulesToBeLoaded === 0 && callback) {
+                    callback();
+                }
+            });
+        });
+    }
+};
+
+mobiworks.isLoaded = function (moduleName) {
+    var parts = moduleName.split('.');
+    var current = window;
+    for ( var i = 0; i < parts.length; i++) {
+        if (!current[parts[i]]) {
+            return false;
+        }
+        current = current[parts[i]];
+    }
+    return true;
+}
+
+$(window).resize(updateScrollers);
 
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
 // false);
@@ -27,7 +74,7 @@ mobiworks.call = function (screenName, args, callback) {
         "name": screenName,
         "args": args,
         "callback": callback,
-        "div": screenName.replace('.', '_')
+        "div": screenName.replace('.', '__')
     };
     mobiworks.screenStack.push(screenFrame);
     var callbackFn = function () {
@@ -50,57 +97,42 @@ mobiworks.call = function (screenName, args, callback) {
             callback.apply(null, arguments);
         }
     };
-    if (!mobiworks.screenCache[screenName]) {
-        var screenPath = screenName.replace('.', '/');
-        $.getScript(screenPath + ".js", function () {
-            mobiworks.screenCache[screenName] = eval(screenName);
-            obj = mobiworks.screenCache[screenName]; // window[window.applicationNamespace].screen[screenName];
-                $.get(screenPath + ".html", function (data) {
-                    var newScreenCode = $("<div id=\"" + screenFrame.div
-                            + "\" class=\"screen\" style=\"position: absolute; left: 0; top: 0; width: 100%;\">" + data
-                            + "</div>");
-                    obj.show = function () {
-                        var code = newScreenCode.clone();
-                        var body = $("body");
-                        if (mobiworks.screenStack.length > 1) {
-                            var previousScreen = mobiworks.screenStack[mobiworks.screenStack.length - 2];
-                            $("body > #" + previousScreen.div).hide('slide', {
-                                direction: "left"
-                            }, 150);
-                        }
-                        if (mobiworks.screenStack.length > 1) {
-                            code.hide().prependTo(body).show('slide', {
-                                direction: "right"
-                            }, 150);
-                        } else {
-                            code.prependTo(body);
-                        }
-                        // setTimeout(scrollTo, 0, 0, 1);
-                    };
-                    obj.show();
-                    $(function () {
-                        var scope = obj.init(args, callbackFn);
-                        var div = $("div#" + screenFrame.div);
-                        div.scope(scope);
-                        div.databind();
-                        var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
-                        if (scrollers.length > 0) {
-                            for (i = 0; i < scrollers.length; i++) {
-                                scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
-                            }
-                            updateScrollers();
-                        }
-                    });
-                });
-            });
-    } else {
-        obj = mobiworks.screenCache[screenName];
-        obj.show();
-        $(function () {
-            var scope = obj.init(args, callbackFn);
-            var div = $("div#" + screenFrame.div);
-            div.scope(scope);
+    var parts = screenName.split('.');
+    var moduleName = parts.slice(0, parts.length - 1).join('.');
+    var screenTemplate = parts[parts.length - 1];
+    if (!mobiworks.isLoaded(moduleName)) {
+        mobiworks.requires(moduleName, function () {
+            var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
+            var screenTemplate = subScope.get(screenFrame.div);
+            var node = screenTemplate.apply(null, [subScope].concat(args)).contents();
+            var div = $("<div id='" + screenFrame.div + "'></div>");
+            div.append(node);
+            $("body").append(div);                
             div.databind();
+            $(function () {
+                var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
+                if (scrollers.length > 0) {
+                    for (i = 0; i < scrollers.length; i++) {
+                        scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
+                    }
+                    updateScrollers();
+                }
+            });
+        });
+    } else {
+        var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
+        var screenTemplate = subScope.get(screenFrame.div);
+        var node = screenTemplate.apply(null, [subScope].concat(args));
+        $("body").append(node);
+        
+        $(function () {
+            var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
+            if (scrollers.length > 0) {
+                for (i = 0; i < scrollers.length; i++) {
+                    scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
+                }
+                updateScrollers();
+            }
         });
     }
 }

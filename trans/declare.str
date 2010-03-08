@@ -35,18 +35,16 @@ strategies
     TemplateNoRequires(qid, farg*, body) -> <fail>
     with
       extern := <definition-to-external>
-      ; arg-types := <map(?FArg(_, <id>))> farg*
       ; rules (
-          GetTemplate : (qid, arg-types) -> extern 
+          GetTemplate : qid -> extern 
         )
 
 	declare:
 	  Template(qid, farg*, req*, body) -> <fail>
 	  with
       extern := <definition-to-external>
-      ; arg-types := <map(?FArg(_, <id>))> farg*
 	    ; rules (
-	        GetTemplate : (qid, arg-types) -> extern 
+	        GetTemplate : qid -> extern 
 	      )
 
 strategies // convert to externals

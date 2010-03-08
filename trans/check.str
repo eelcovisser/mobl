@@ -24,8 +24,8 @@ rules
        ; import-all
        ; alltd(add-tl-namespace)
        ; topdown(try(declare))
+       ; rename-all
        ; alltd(add-namespace)
-       ; debug(!"After add-namespace: ")
        ; topdown(try(declare))
        ; rename-all
        |}
@@ -44,12 +44,12 @@ rules
     ; rules ( Imports :+= qid )
 
   lookup-import-module :
-    Import(qid) -> def*
+    Import(qid) -> [<id>|def*] // preserve import itself
     where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
     
   compile-and-externalize-module :
     mod@Module(qid, def*) -> def2*
-    with compile(|<ProjectPath>)
+    with compile
        ; def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
     
   qid-to-path =

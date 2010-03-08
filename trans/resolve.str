@@ -15,6 +15,10 @@ strategies
     where <is-string> x
   
   add-tl-namespace :
+    ScreenNoReturn(x, farg*, elem*) -> ScreenNoReturn(QId(<ModuleName>, x), farg*, elem*)
+    where <is-string> x
+
+  add-tl-namespace :
     Entity(x, prop*) -> Entity(QId(<ModuleName>, x), prop*)
     where <is-string> x
     
@@ -90,7 +94,7 @@ strategies
 
   add-namespace :
     TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg*, elem2*)
-    where arg-types := <map(type-of)> arg*
+    where debug; arg-types := <map(type-of)> arg*; debug(!"Arg types: ")
         ; not(<lookup-template-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*

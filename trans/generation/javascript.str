@@ -14,6 +14,10 @@ strategies
 
   definitions-to-js =
     where(alltd(definition-to-js))
+    
+  definition-to-js :
+    Import(qid) -> <emit-js> $[mobiworks.requires('[<qid-to-js> qid]');
+]
 
   definition-to-js :
     Entity(qid, prop*) -> <emit-js> $[
@@ -76,7 +80,7 @@ rules // Expressions
     Int(n) -> n
   
   exp-to-js :
-    Var(qid) -> <qid-to-js> qid
+    Var(qid) -> $[fromScope(this, '[<qid-to-js> qid]')]
   
   exp-to-js :
     Call(qid, e*) -> $[[qids]([args])]
@@ -102,7 +106,13 @@ rules // Expressions
     with e1s := <expression-to-js> e1
        ; e2s := <expression-to-js> e2
                 
-
+rules // By-ref expressions
+  
+  refwrap-expression-to-js =
+       (?Int(s) <+ ?String(s))
+	     ; !$[ref([s])]
+    <+ expression-to-js
+  
 rules // util
   qid-to-js :
     s -> s

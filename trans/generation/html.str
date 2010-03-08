@@ -27,17 +27,24 @@ rules
     filter(elem-to-html)
     ; concat-strings
 
+  wrap-span(|original-elem*) =
+    id/*
+    try(
+      where(<gt> (<length> original-elem*, 1))
+      ; !$[<span>[<id>]</span>]
+    )*/
+
   definition-to-html :
-    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="screen" id="[<qid-to-html> qid]" [fargs]>[body]</div>
+    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
-    with body := <elems-to-html> elem*
+    with body := <elems-to-html; wrap-span(|elem*)> elem*
        ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
 
   definition-to-html :
     Template(qid, args, req*, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
 ]
     with fargs := <map-with-index(farg-to-html <+ debug(!"FAIL: "); fail); separate-by(!" "); concat-strings> args
-       ; body := <elems-to-html> elem*
+       ; body := <elems-to-html; wrap-span(|elem*)> elem*
 
   farg-to-html :
     (idx, FArg(x, t)) -> $[farg[<subti> (idx, 1)]="[x]"]
@@ -47,12 +54,12 @@ rules
     ; concat-strings
     
   arg-to-html :
-    (idx, e) -> $[arg[<subti> (idx, 1)]=[<expression-to-html> e]]
+    (idx, e) -> $[arg[<subti> (idx, 1)]=[<refwrap-expression-to-html> e]]
 
   elem-to-html :
     TemplateCall(qid, arg*, prop*, elem*) -> $[<div class="templatecall" template="[<qid-to-html> qid]" [args] [props]>[body]</div>]
     with props := <props-to-html> prop*
-       ; body  := <elems-to-html> elem*
+       ; body  := <elems-to-html; wrap-span(|elem*)> elem*
        ; args  := <args-to-html> arg*
   
   elem-to-html :
@@ -69,13 +76,13 @@ rules
 
   tag-arg-to-html :
     HtmlDatabindArg(e) -> $[databind=[es]]
-    with es := <expression-to-html> e
+    with es := <refwrap-expression-to-html> e
     
   elem-to-html :
     ScreenString(s) -> <un-double-quote> s
     
-  expression-to-html :
-    e -> $["[<expression-to-js; html-escape> e]"]
+  refwrap-expression-to-html :
+    e -> $["[<refwrap-expression-to-js; html-escape> e]"]
   
   html-escape =
     string-replace(|"\"", "&quot;")

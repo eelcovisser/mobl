@@ -16,6 +16,9 @@ strategies
   
   desugar :
     FunctionNoReturnType(name, farg*, stat*) -> Function(name, farg*, SimpleType("void"), stat*)
+
+  desugar :
+    SyncFunctionNoReturnType(name, farg*, stat*) -> SyncFunction(name, farg*, SimpleType("void"), stat*)
   
   desugar :
     ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)

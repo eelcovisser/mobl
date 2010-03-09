@@ -2,7 +2,7 @@ module lookup
 
 imports
   include/MoBL
-  check
+  analyze
   declare
   resolve
 
@@ -24,6 +24,11 @@ strategies
   lookup-type-aux :
     GenericType(qid, t*) -> <GetGenericType> (qid, <length> t*)
   
+  lookup-property :
+    (entityType, prop) -> t
+    where ExternalEntity(_, prop*) := <lookup-type> entityType
+          ; <filter(?Property(prop, t))> prop*
+  
   lookup-template =
       lookup-template-aux
    <+ ?(QId(qid, _), _)
@@ -39,6 +44,21 @@ strategies
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
 
+  lookup-function =
+      lookup-function-aux
+   <+ ?(QId(qid, _), _)
+      ; where(<lookup-import-module; alltd(declare)> Import(qid))
+      ; lookup-function-aux
+
+  lookup-function-aux :
+    (qid, arg-type*) -> ExternalFunction(qid, farg2*, rt2)
+    where <GetFunction> qid
+        ; (?ExternalFunction(_, farg*, rt) <+ ?ExternalSyncFunction(_, farg*, rt))
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; arg-types1* := arg-types2*
     
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

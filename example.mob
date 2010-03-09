@@ -10,12 +10,23 @@ entity Task {
 }  
 
 entity Tag {
-  name   : core::String
-  tasks  : core::Collection<Task>
+  name   : String
+  tasks  : Collection<Task>
 }
 
-function sayHello(name : String) : String {
-  return "Hello, " + name;
+function bla() : Int {
+/*  var n : Int := 7; 
+  n := doSomethingInteresting(8);
+  return f(2, 3 * n, 4 - 4);
+  */
+  var n : Int := 7 * 7;
+  return 8 * n + 1;
+}
+
+sync function doSomethingInteresting(i : Int) : Int {
+  var n : Int := i;
+  n := n + 1;
+  return n;
 }
 
 template standardLayout(header : String) {
@@ -26,16 +37,20 @@ template standardLayout(header : String) {
 }
 
 screen root() {
-  init {
+/*  init {
+    console::log(doSomethingInteresting(8));
     var l : Collection<Task> := Collection<Task>();
     l.add(Task { name := "Task 1" });
     l.add(Task { name := "Task 2" });
-    l.add(Task { name := "Task 3" });
-  }
+  }*/
   standardLayout("My header") {
-    list(t : Task in l) {
-      listitem { outputString(t.name) }
+    ul {
+      listitem { "Item 1" }
+      listitem { "Item 2" }
     }
+    /*list(t : Task in l) {
+      listitem { outputString(t.name) }
+    }*/
   }
 }
 

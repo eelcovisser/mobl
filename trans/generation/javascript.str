@@ -9,6 +9,9 @@ imports
   desugar
   generation/emit
   generation/html
+  generation/cps-javascript
+  rename
+  declare
 
 strategies
 
@@ -37,19 +40,37 @@ strategies
     with sqlType := "TEXT"
 
   definition-to-js :
-    Function(qid, farg*, rt, stat*) -> <emit-js> $[
+    SyncFunction(qid, farg*, rt, stat*) -> <emit-js> $[
     [varname] = function([args]) {
       [stats]
     };
     ]
     with qids := <qid-to-js> qid
        ; args := <map(?FArg(<id>, _)); separate-by(!", "); concat-strings> farg*
-       ; stats := <statements-to-js> stat*
+       ; {| InSyncFunction
+          : rules ( InSyncFunction := 1 )
+          ; stats := <statements-to-js> stat*
+         |}
        ; if <is-string> qid then
 			     varname := $[var [qid]]
 			   else
 			     varname := <qid-to-js> qid
 			   end
+
+  definition-to-js :
+    Function(qid, farg*, rt, stat*) -> <emit-js> $[
+    [varname] = function([args]) {
+      [stats]
+    };
+    ]
+    with qids := <qid-to-js> qid
+       ; args := <map(?FArg(<id>, _)); <concat> [<id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
+       ; stats := <cps-statements> stat*
+       ; if <is-string> qid then
+           varname := $[var [qid]]
+         else
+           varname := <qid-to-js> qid
+         end
 			  
 rules // Statements
 
@@ -67,16 +88,48 @@ rules // Statements
   stat-to-js :
     Return(e) -> $[return [es];
 ]
+    where InSyncFunction
+    with es := <expression-to-js> e
+
+  stat-to-js :
+    Return(e) -> $[callback([es]);
+]
+    where not(InSyncFunction)
     with es := <expression-to-js> e
   
   stat-to-js :
     VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];
 ]
+    where not(InTemplate)
+
+  stat-to-js :
+    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];
+]
+
+
+  stat-to-js :
+    Assignment(qid, e) -> $[[<qid-to-js> qid].set([<expression-to-js> e]);
+]
+    where <is-ref> qid
+
+  stat-to-js :
+    Assignment(qid, e) -> $[[<qid-to-js> qid] = [<expression-to-js> e];
+]
+    where not(<is-ref> qid)
     
 rules // Expressions
   expression-to-js =
     exp-to-js <+ debug(!"Could not translate: "); fail
+    
+  ref-expression-to-js =
+    ref-exp-to-js <+ !$[ref([<expression-to-js>])]
   
+  ref-exp-to-js :
+    String(s) -> $[ref([s])]
+
+  ref-exp-to-js :
+    Int(n) -> $[ref([n])]
+
   exp-to-js :
     String(s) -> s
 
@@ -85,36 +138,80 @@ rules // Expressions
   
   exp-to-js :
     Var(qid) -> $[fromScope(this, '[<qid-to-js> qid]')]
-  
-  exp-to-js :
-    Call(qid, e*) -> $[[qids]([args])]
-    with qids := <qid-to-js> qid
-       ; args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
+    where <InTemplate> qid
+        ; <is-string> qid
+        ; not(<is-ref> qid)
 
   exp-to-js :
-    MethodCall(e, x, e*) -> $[ref([es].[x]([args]))]
-    with es := <expression-to-js> e
-       ; args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
+    Var(qid) -> <qid-to-js> qid
+    where not(<InTemplate> qid; <is-string> qid)
+        ; not(<is-ref> qid)
+
+  exp-to-js :
+    Var(qid) -> $[fromScope(this, '[qid]').get()]
+    where <InTemplate> qid
+        ; <is-string> qid
+        ; <is-ref> qid
+          
+  exp-to-js :
+    Var(qid) -> $[[<qid-to-js> qid].get()]
+    where not(<InTemplate> qid; <is-string> qid)
+        ; <is-ref> qid
+
+  ref-exp-to-js :
+    Var(qid) -> $[ref(fromScope(this), '[qid]')]
+    where <InTemplate> qid
+        ; <is-string> qid
+        ; not(<is-ref> qid)
+
+  ref-exp-to-js :
+    Var(qid) -> $[fromScope(this, '[qid]')]
+    where <InTemplate> qid
+        ; <is-string> qid
+        ; <is-ref> qid
   
+  exp-to-js :
+    Call(qid, e*) -> $[[<qid-to-js> qid]([args])]
+    with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
+
+  /*exp-to-js :
+    Call(qid, e*) -> $[[qids]([args], function(result) {
+      [reststats]
+    })]
+    where not(<IsSyncFunction> qid)
+    with qids := <qid-to-js> qid
+       ; args := <map(expression-to-js); separate-by(!", "); concat-strings> e**/
+         
+
+  ref-exp-to-js :
+    Indexer(e, idxe) -> $[ref([es], [idxes])]
+    with es := <expression-to-js> e
+       ; idxes := <expression-to-js> idxe
+
   exp-to-js :
     Indexer(e, idxe) -> ${{es}[{idxes}]}
     with es := <expression-to-js> e
        ; idxes := <expression-to-js> idxe
          
   exp-to-js :
-    CollectionCons(t, e*) -> $[new persistence.LocalQueryCollection([args])]
+    CollectionCons(_, _, e*) -> $[new persistence.LocalQueryCollection([args])]
     with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
   
   exp-to-js :
     EntityCons(SimpleType(qid), propval*) -> $[new [<qid-to-js> qid]({[propvals]})]
     with propvals := <map(\ PropVal(x, e) -> $['[x]': [<expression-to-js> e]] \); separate-by(!", "); concat-strings> propval*
       
-  exp-to-js :
-    FieldAccess(Var(qid), x) -> $[ref(fromScope(this, '[<qid-to-js> qid]'), [x])]
+  ref-exp-to-js :
+    FieldAccess(e, x) -> $[ref([es], '[x]')]
+    with es := <expression-to-js> e
 
   exp-to-js :
     FieldAccess(e, x) -> $[[es].[x]]
     with es := <expression-to-js> e
+
+  ref-exp-to-js :
+    Brackets(e) -> $[([es])]
+    with es := <ref-expression-to-js> e
 
   exp-to-js :
     Brackets(e) -> $[([es])]
@@ -124,13 +221,6 @@ rules // Expressions
     BinMethodCall(e1, op, e2) -> $[[e1s] [op] [e2s]]
     with e1s := <expression-to-js> e1
        ; e2s := <expression-to-js> e2
-                
-rules // By-ref expressions
-  
-  refwrap-expression-to-js =
-       (?Int(s) <+ ?String(s))
-	     ; !$[ref([s])]
-    <+ expression-to-js
   
 rules // util
   qid-to-js :

@@ -1,76 +1,10 @@
 module check
 
 imports
-  libstratego-lib
   include/MoBL
-  lib/editor-common
-  declare
   lookup
   type
-  rename
-  desugar
-  mobl
-  resolve
-  generation/compile
-
-rules
-
-  // Analysis: does a topdown traversal of the tree,
-  // and try to apply the record-entity rule.
-  analyze =
-    ?Module(qid, _)
-    ; {| ModuleName, Imports
-       : rules ( ModuleName := qid )
-       ; import-all
-       ; alltd(add-tl-namespace)
-       ; topdown(try(declare))
-       ; rename-all
-       ; alltd(add-namespace)
-       ; topdown(try(declare))
-       ; rename-all
-       |}
-
-  store-result =
-    ?t
-    ; rules ( ResultingAST := t )
-
-  import-all =
-    alltd(import-module)
-    ; topdown(try(flatten-list))
   
-  import-module =
-    ?Import(qid)
-    ; lookup-import-module
-    ; rules ( Imports :+= qid )
-
-  lookup-import-module :
-    Import(qid) -> [<id>|def*] // preserve import itself
-    where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
-    
-  compile-and-externalize-module :
-    mod@Module(qid, def*) -> def2*
-    with compile
-       ; def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
-    
-  qid-to-path =
-    is-string
-  
-  qid-to-path :
-    QId(qid, x) -> $[[qids]/[x]]
-    with qids := <qid-to-path> qid
-    
-strategies
-  
-  lookup-node :
-    path -> <find-node> (path, <ResultingAST>)
-                
-  find-node :
-    ([], t) -> t
-  
-  find-node :
-    ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts)) 
-    //where debug
-
 rules
     
   constraint-error :

@@ -1,11 +1,13 @@
 module core
 
+external type void {}
 external type String { }
 external type Int { }
 external type Bool { }
 external type Text { }
 external type Uri { }
 external type Collection<T> {}
+external function console::log(s : String) : void
 
 template outputString(s : String) {
   <span databind=s></span>

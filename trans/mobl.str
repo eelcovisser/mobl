@@ -1,5 +1,10 @@
 module mobl
 
+/**
+ * This module mostly imports all other modules and deals with the IDE
+ * side of things
+ */
+
 imports
   libstratego-lib
   libstratego-gpp
@@ -14,6 +19,7 @@ imports
   desugar
   lookup
   resolve
+  analyze
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
   
@@ -78,3 +84,21 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   type-name-to-proposal:
     x -> ([x], "")
+
+strategies
+
+  store-result =
+    ?t
+    ; rules ( ResultingAST := t )
+
+  
+  lookup-node :
+    path -> <find-node> (path, <ResultingAST>)
+                
+  find-node :
+    ([], t) -> t
+  
+  find-node :
+    ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts)) 
+    //where debug
+

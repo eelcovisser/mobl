@@ -8,8 +8,10 @@ exports
   context-free syntax %% Logic
     "function" ID "(" FArg* ")" ":" Type "{" Statement* "}" -> Definition {cons("Function")}
     "function" ID "(" FArg* ")" "{" Statement* "}" -> Definition {cons("FunctionNoReturnType")}
-    %%"function" "(" FArg* ")" ":" Type "{" Statement* "}" -> Exp {cons("FunctionExp")}
-    %%"function" "(" FArg* ")" "{" Statement* "}" -> Exp {cons("FunctionNoReturnTypeExp")}
+    "sync" "function" ID "(" FArg* ")" ":" Type "{" Statement* "}" -> Definition {cons("SyncFunction")}
+    "sync" "function" ID "(" FArg* ")" "{" Statement* "}" -> Definition {cons("SyncFunctionNoReturnType")}
+
+    "function" "(" FArg* ")" ":" Type "{" Statement* "}" -> Exp {cons("FunctionExp")}
   
   context-free syntax %% Statements
     "var" ID ":" Type ":=" Exp ";"              -> Statement {cons("VarDecl")}
@@ -39,7 +41,7 @@ exports
     Exp OperatorMethodId Exp     -> Exp {cons("BinMethodCall"), left}
     
     Exp "?" Exp ":" Exp          -> Exp {left, cons("Choice")}
-    Type "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
+    ID "<" Type ">" "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
     Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
     "(" Exp ")"                  -> Exp {cons("Brackets")}
     

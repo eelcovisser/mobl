@@ -3,6 +3,7 @@ module type
 imports
   include/MoBL
   rename
+  lookup
   
 strategies
 
@@ -13,3 +14,10 @@ strategies
     
   eq-type-of :
     String(_) -> SimpleType(QId("core", "String"))
+  
+  eq-type-of :
+    Call(qid, e*) -> rt
+    where ExternalFunction(_, _, rt) := <lookup-function> (qid, <map(type-of)> e*)
+  
+  eq-type-of :
+    FieldAccess(e, x) -> <lookup-property> (<type-of> e, x)

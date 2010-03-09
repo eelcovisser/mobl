@@ -10,4 +10,5 @@ exports
     "external" "template" QId "requires" {TemplateSig ","}* "(" {FArg ","}* ")" -> Definition {cons("ExternalTemplate")}
     "external" "screen" QId ":" Type "(" {FArg ","}* ")"   -> Definition {cons("ExternalScreen")}
     "external" "entity" QId "{" Property* "}"              -> Definition {cons("ExternalEntity")}
-    "external" "function" QId ":" Type "(" {FArg ","}* ")" -> Definition {cons("ExternalFunction")}
+    "external" "function" QId "(" {FArg ","}* ")" ":" Type  -> Definition {cons("ExternalFunction")}
+    "external" "sync" "function" QId "(" {FArg ","}* ")" ":" Type  -> Definition {cons("ExternalSyncFunction")}

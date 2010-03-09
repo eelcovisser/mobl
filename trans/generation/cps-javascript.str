@@ -1,0 +1,69 @@
+module generation/cps-javascript
+
+imports
+  include/MoBL
+  generation/javascript
+  declare
+
+strategies
+  
+  cps-statements = debug(!"statements: "); fail
+
+  cps-statements :
+    [Return(e)|stat*] -> <cps-expression(|[$[callback(result);]|stat*])> e
+
+  cps-statements :
+    [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[var [x] = result;]|stat*])> e
+
+  cps-statements :
+    [Assignment(qid, e)|stat*] -> <cps-expression(|[$[[<qid-to-js> qid] = result;]|stat*])> e
+  
+  cps-statements :
+    [s|stat*] -> <concat-strings> [s, <cps-statements> stat*]
+    where <is-string> s
+  
+  cps-statements :
+    [] -> ""
+    
+  cps-expression(|stat*) =
+    ?e
+    ; if is-sync then
+        !$[(function(result) { [<cps-statements> stat*] }([<expression-to-js> e]));]
+      else
+        cps-exp(|stat*)
+      end
+  
+  cps-exp(|stat*) :
+    BinMethodCall(e1, op, e2) -> 
+      <cps-expression(|[$[var [result] = result;], <cps-expression(|[$[op('[op]', [result], result, function(result) { [<cps-statements> stat*] });]])> e2])> e1
+    with result := <newname> "result"
+
+  cps-expressions(|values, stat*) :
+    [e|e*] -> <cps-expression(|[$[[values].push(result); ], <cps-expressions(|values, stat*)> e*])> e
+  
+  cps-expressions(|values, stat*) :
+    [] -> <cps-statements> stat*
+    
+  cps-exp(|stat*) :
+    Call(qid, e*) -> <concat-strings> [
+      ${var {args} = [];},
+      <cps-expressions(|args, [$[[args].push(function(result) { [<cps-statements> stat*] }); [<qid-to-js> qid].apply(null, [args]); ]])> e*]
+    where not(<IsSyncFunction> qid)
+    with args := <newname> "args"
+
+  cps-exp(|stat*) :
+    Call(qid, e*) -> <concat-strings> [${var {args} = [];},
+                        <cps-expressions(|args, [$[(function(result) { [<cps-statements> stat*] }([<qid-to-js> qid].apply(null, [args]))); ]])> e*]
+    where <IsSyncFunction> qid
+    with args := <newname> "args"
+
+  cps-exp(|stat*) :
+    Int(n) -> $[(function(result) { [<cps-statements> stat*] }([n]));]
+
+  cps-exp(|stat*) :
+    Var(qid) -> $[(function(result) { [<cps-statements> stat*] }([<qid-to-js> qid]));]
+  
+strategies
+  
+  is-sync = ?Int(_)
+  is-sync = ?Var(_)

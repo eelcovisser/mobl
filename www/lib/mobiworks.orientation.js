@@ -1,5 +1,5 @@
 var mobiworks = window.mobiworks || {};
-
+/*
 mobiworks.orientation = observable.Observable();
 
 window.onresize = function () {
@@ -17,3 +17,4 @@ window.onresize = function () {
     }
     //setTimeout(scrollTo, 0, 0, 1);
 }
+*/

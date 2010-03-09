@@ -12,6 +12,10 @@ function fromScope(that, prop) {
     }
 }
 
+function log(s) {
+    console.log(s);
+}
+
 (function () {
     function LinkedMap (parent, values) {
         this.values = values || {};

@@ -30,6 +30,40 @@ strategies
       ; rules (
           GetGenericType : (qid, arity) -> extern
         )
+
+  declare:
+    Function(qid, farg*, rt, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules (
+          GetFunction : qid -> extern 
+        )
+
+  declare:
+    FunctionNoReturnType(qid, farg*, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules (
+          GetFunction : qid -> extern 
+        )
+
+  declare:
+    SyncFunction(qid, farg*, rt, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules (
+          GetFunction : qid -> extern
+          IsSyncFunction : qid
+        )
+
+  declare:
+    SyncFunctionNoReturnType(qid, farg*, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules (
+          GetFunction : qid -> extern 
+          IsSyncFunction : qid
+        )
         
   declare:
     TemplateNoRequires(qid, farg*, body) -> <fail>
@@ -57,6 +91,12 @@ strategies // convert to externals
   
   definition-to-external :
     FunctionNoReturnType(qid, farg*, stat*) -> ExternalFunction(qid, farg*, SimpleType("void"))
+
+  definition-to-external :
+    SyncFunction(qid, farg*, rt, stat*) -> ExternalSyncFunction(qid, farg*, rt)
+  
+  definition-to-external :
+    SyncFunctionNoReturnType(qid, farg*, stat*) -> ExternalSyncFunction(qid, farg*, SimpleType("void"))
   
   definition-to-external :
     Template(qid, farg*, req*, elem*) -> ExternalTemplate(qid, farg*, req*)

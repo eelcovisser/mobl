@@ -5,7 +5,7 @@ imports
   include/MoBL
   desugar
   lookup
-  check
+  analyze
   type
 
 strategies
@@ -24,6 +24,18 @@ strategies
     
   add-tl-namespace :
     Function(x, farg*, rt, stat*) -> Function(QId(<ModuleName>, x), farg*, rt, stat*)
+    where <is-string> x
+
+  add-tl-namespace :
+    FunctionNoReturnType(x, farg*, stat*) -> FunctionNoReturnType(QId(<ModuleName>, x), farg*, stat*)
+    where <is-string> x
+
+  add-tl-namespace :
+    SyncFunction(x, farg*, rt, stat*) -> SyncFunction(QId(<ModuleName>, x), farg*, rt, stat*)
+    where <is-string> x
+
+  add-tl-namespace :
+    SyncFunctionNoReturnType(x, farg*, stat*) -> SyncFunctionNoReturnType(QId(<ModuleName>, x), farg*, stat*)
     where <is-string> x
   
   add-tl-namespace :
@@ -104,6 +116,13 @@ strategies
         ; not(<lookup-template-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*
+
+  add-namespace :
+    Call(qid, e*) -> Call(qid2, e2*)
+    where arg-types := <map(type-of)> e*
+        ; not(<lookup-function-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-function-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; e2* := <alltd(add-namespace)> e*
 
   prefix-qid(|qid) :
     qid2 -> QId(qid, qid2)

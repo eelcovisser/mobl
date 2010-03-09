@@ -9,62 +9,97 @@ strategies
   
   rename-var : 
    (x, t) -> y
-   with y := x{<newname> x};
-        rules(
+   with y := x{<newname> x}
+      ; rules(
            RenameId : x -> y
-           TypeOf   : y -> t 
+           TypeOf   : y -> t
         )
   
+  rename-ref-var :
+   (x, t) -> y
+   with y := <rename-var>
+      ; rules(
+           IsRefVar : y
+        )
+  
+  is-ref :
+    y -> <IsRefVar> y
+  
+  is-ref :
+    Var(y) -> <IsRefVar> y
+  
   rename :
-    Var(x) -> Var(y)
-    where y := <RenameId> x
+    Var(x) -> Var(<RenameId> x)
 
   rename-scope(s) =
     {| RenameId
      : s
      |}
 
-  /*rename :
-    Init(t) -> Init(<rename-scope(rename-all)> t)*/
+  template-scope(s) =
+    {| RenameScope
+     : rules ( RenameScope := "template" )
+     ; rename-scope(s)
+     |}
+
+  action-scope(s) =
+    {| RenameScope
+     : rules ( RenameScope := "action" )
+     ; rename-scope(s)
+     |}
 
   rename :
     Template(name, farg*, req*, body) -> Template(name, farg2*, req*, body2)
-    with rename-scope( 
-           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+    with template-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-ref-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )
 
 	rename :
 	  TemplateNoRequires(name, arg*, body) -> TemplateNoRequires(name, arg2*, body2)
-	  with rename-scope( 
-	         arg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> arg*
+	  with template-scope( 
+	         arg2* := <map(\ FArg(x, t) -> FArg(<rename-ref-var> (x, t), t) \)> arg*
 	         ; body2 := <rename-all> body
 	       )
 
   rename :
     Screen(name, arg*, rt, body) -> Screen(name, arg2*, rt, body2)
-    with rename-scope( 
-           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-var)> arg*
+    with template-scope( 
+           arg2* := <map(\ FArg(x, t) -> (x, t) \; rename-ref-var)> arg*
            ; body2 := <rename-all> body
          )
 
   rename :
     ScreenNoReturn(name, farg*, body) -> ScreenNoReturn(name, farg2*, body2)
-    with rename-scope( 
-           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+    with template-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-ref-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )
 
   rename :
     Function(qid, farg*, rt, body) -> Function(qid, farg2*, rt, body2)
-    with rename-scope( 
+    with action-scope( 
            farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )
 
   rename :
     FunctionNoReturnType(qid, farg*, body) -> FunctionNoReturnType(qid, farg2*, body2)
-    with rename-scope( 
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    SyncFunction(qid, farg*, rt, body) -> SyncFunction(qid, farg2*, rt, body2)
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    SyncFunctionNoReturnType(qid, farg*, body) -> SyncFunctionNoReturnType(qid, farg2*, body2)
+    with action-scope( 
            farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
            ; body2 := <rename-all> body
          )

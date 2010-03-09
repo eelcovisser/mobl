@@ -6,13 +6,11 @@ imports
 exports
 
   context-free syntax %% Logic
-    "function" ID "(" FArg* ")" ":" Type "{" Statement* "}" -> Definition {cons("Function")}
-    "function" ID "(" FArg* ")" "{" Statement* "}" -> Definition {cons("FunctionNoReturnType")}
-    "sync" "function" ID "(" FArg* ")" ":" Type "{" Statement* "}" -> Definition {cons("SyncFunction")}
-    "sync" "function" ID "(" FArg* ")" "{" Statement* "}" -> Definition {cons("SyncFunctionNoReturnType")}
+    "function" ID "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> Definition {cons("Function")}
+    "function" ID "(" {FArg ","}* ")" "{" Statement* "}" -> Definition {cons("FunctionNoReturnType")}
+    "sync" "function" ID "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> Definition {cons("SyncFunction")}
+    "sync" "function" ID "(" {FArg ","}* ")" "{" Statement* "}" -> Definition {cons("SyncFunctionNoReturnType")}
 
-    "function" "(" FArg* ")" ":" Type "{" Statement* "}" -> Exp {cons("FunctionExp")}
-  
   context-free syntax %% Statements
     "var" ID ":" Type ":=" Exp ";"              -> Statement {cons("VarDecl")}
     "var" ID ":=" Exp ";"                       -> Statement {cons("VarDeclInferred")}
@@ -20,8 +18,8 @@ exports
     QId ":=" Exp ";"                            -> Statement {cons("Assignment")}
     Exp ";"                                     -> Statement {cons("ExpStat")}
     "{" Statement* "}"                          -> Statement {cons("Block")}
-    "if" "(" Exp ")" Statement "else" Statement -> Statement {cons("If")}
-    "if" "(" Exp ")" Statement                  -> Statement {cons("IfNoElse")}
+    "if" "(" Exp ")" "{" Statement* "}" "else" "{" Statement* "}" -> Statement {cons("If")}
+    "if" "(" Exp ")" "{" Statement* "}"                  -> Statement {cons("IfNoElse")}
     "return" Exp ";"                            -> Statement {cons("Return")}
     
   context-free syntax %% Expressions

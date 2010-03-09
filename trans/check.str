@@ -27,6 +27,10 @@ rules
   constraint-error :
     t@Var(qid) -> (t, $[Variable not defined])
     where not(type-of)
+
+  constraint-error :
+    t@Call(_, _) -> (t, $[Function not defined])
+    where not(type-of)
   
   constraint-error = normalize; constraint-error
   

@@ -21,6 +21,9 @@ strategies
     SyncFunctionNoReturnType(name, farg*, stat*) -> SyncFunction(name, farg*, SimpleType("void"), stat*)
   
   desugar :
+    IfNoElse(e, stat*) -> If(e, stat*, [])
+  
+  desugar :
     ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
   
   desugar :

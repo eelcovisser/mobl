@@ -14,13 +14,16 @@ entity Tag {
   tasks  : Collection<Task>
 }
 
+sync function f(n1 : Int, n2 : Int, n3 : Int) : Int {
+  return n1 * n2 * n3;
+}
+
 function bla() : Int {
-/*  var n : Int := 7; 
-  n := doSomethingInteresting(8);
+  var n : Int := 7;
+  if(n == 7) {
+    n := doSomethingInteresting(8);
+  }
   return f(2, 3 * n, 4 - 4);
-  */
-  var n : Int := 7 * 7;
-  return 8 * n + 1;
 }
 
 sync function doSomethingInteresting(i : Int) : Int {

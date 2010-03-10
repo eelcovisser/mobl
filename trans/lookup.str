@@ -26,7 +26,7 @@ strategies
   
   lookup-property :
     (entityType, prop) -> t
-    where ExternalEntity(_, prop*) := <lookup-type> entityType
+    where ExternalEntity(_, super, prop*) := <lookup-type> entityType
           ; <filter(?Property(prop, t, _))> prop*
   
   lookup-template =
@@ -59,10 +59,36 @@ strategies
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
+
+  lookup-method :
+    (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
+    where ExternalType(_, super, method*) := <GetType> t
+        ; <filter(?ExternalMethod(x, farg*, rt))> method*
+        ; if not(!farg*); not(super := t) then // could not find a method
+            <lookup-method> (super, x, arg-type*)
+          end
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; arg-types1* := arg-types2*
+
+  lookup-statc-method :
+    (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
+    where ExternalType(_, super, method*) := <GetType> t
+        ; <filter(?ExternalStaticMethod(x, farg*, rt))> method*
+        ; if not(!farg*); not(super := t) then // could not find a method
+            <lookup-method> (super, x, arg-type*)
+          end
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; arg-types1* := arg-types2*
   
   is-entity-type =
     lookup-type
-    ; ?ExternalEntity(_, _)
+    ; ?ExternalEntity(_, _, _)
 
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

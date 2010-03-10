@@ -19,7 +19,11 @@ strategies
     where <is-string> x
 
   add-tl-namespace :
-    Entity(x, prop*) -> Entity(QId(<ModuleName>, x), prop*)
+    Entity(x, super, prop*) -> Entity(QId(<ModuleName>, x), super, prop*)
+    where <is-string> x
+
+  add-tl-namespace :
+    EntityNoSuper(x, prop*) -> EntityNoSuper(QId(<ModuleName>, x), prop*)
     where <is-string> x
     
   add-tl-namespace :
@@ -47,11 +51,15 @@ strategies
     where <is-string> x
   
   add-tl-namespace :
-    ExternalGenericType(x, t*) -> ExternalGenericType(QId(<ModuleName>, x), t*)
+    ExternalGenericType(x, t*, method*) -> ExternalGenericType(QId(<ModuleName>, x), t*, method*)
     where <is-string> x
     
   add-tl-namespace :
-    ExternalType(x) -> ExternalType(QId(<ModuleName>, x))
+    ExternalType(x, super, method*) -> ExternalType(QId(<ModuleName>, x), super, method*)
+    where <is-string> x
+
+  add-tl-namespace :
+    ExternalTypeNoSuper(x, method*) -> ExternalTypeNoSuper(QId(<ModuleName>, x), method*)
     where <is-string> x
     
   add-tl-namespace :
@@ -61,11 +69,9 @@ strategies
   add-tl-namespace :
     TemplateNoRequires(x, farg*, elem*) -> TemplateNoRequires(QId(<ModuleName>, x), farg*, elem*)
     where <is-string> x
-    
-  add-tl-namespace :
-    Entity(x, prop*) -> Entity(QId(<ModuleName>, x), prop*)
-    where <is-string> x
-  
+
+rules
+   
   add-namespace :
     SimpleType(qid) -> SimpleType(qid2)
     where not(lookup-type-aux)
@@ -131,7 +137,7 @@ strategies
 
   add-namespace :
     Call(qid, e*) -> Call(qid2, e2*)
-    where debug(!"Add namespace: "); arg-types := <map(type-of)> e*
+    where arg-types := <map(type-of)> e*
         ; not(<lookup-function-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-function-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; e2* := <alltd(add-namespace)> e*

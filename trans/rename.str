@@ -47,6 +47,15 @@ strategies
      : rules ( RenameScope := "action" )
      ; rename-scope(s)
      |}
+  
+  rename :
+    ExternalGenericType(qid, x*, method*) -> ExternalGenericType(qid, x*, method2*)
+    with {| RenameType
+          : <map(\ x -> x where rules ( RenameType : SimpleType(x) -> SimpleType(x){"TemplateType"} ) \)> x*
+          ; method2* := <rename-all> method*
+          |}
+
+  rename = RenameType
 
   rename :
     Template(name, farg*, req*, body) -> Template(name, farg2*, req*, body2)

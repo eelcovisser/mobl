@@ -6,7 +6,21 @@ external type Int { }
 external type Bool { }
 external type Text { }
 external type Uri { }
-external type Collection<T> {}
+
+external type Array<T> { }
+external type Object { }
+
+external type Collection<T> {
+  function get() : Array<T>
+  function filter(property : String, op : String, value : Object) : Collection<T>
+  function order(property : String, ascending : Bool) : Collection<T>
+  function limit(n : String) : Collection<T>
+  function offset(n : String) : Collection<T>
+}
+
+external type Entity<T> {
+  static function all() : Collection<T>
+}
 
 external function log(s : String) : void
 external function alert(s : String) : void

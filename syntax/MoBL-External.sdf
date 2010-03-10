@@ -5,10 +5,15 @@ imports Common
 exports
 
   context-free syntax
-    "external" "type" QId "{" "}"                          -> Definition {cons("ExternalType")}
-    "external" "type" QId "<" {ID ","}* ">" "{" "}"        -> Definition {cons("ExternalGenericType")}
+    "external" "type" QId "{" ExternalMethodDecl* "}"                          -> Definition {cons("ExternalTypeNoSuper")}
+    "external" "type" QId ":" Type "{" ExternalMethodDecl* "}"                          -> Definition {cons("ExternalType")}
+    "external" "type" QId "<" {ID ","}* ">" "{" ExternalMethodDecl* "}"        -> Definition {cons("ExternalGenericType")}
+    
+    "static" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMethodDecl {cons("ExternalStaticMethod")}
+    "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMethodDecl {cons("ExternalMethod")}
+    
     "external" "template" QId "requires" {TemplateSig ","}* "(" {FArg ","}* ")" -> Definition {cons("ExternalTemplate")}
-    "external" "screen" QId ":" Type "(" {FArg ","}* ")"   -> Definition {cons("ExternalScreen")}
-    "external" "entity" QId "{" Property* "}"              -> Definition {cons("ExternalEntity")}
-    "external" "function" QId "(" {FArg ","}* ")" ":" Type  -> Definition {cons("ExternalFunction")}
-    "external" "sync" "function" QId "(" {FArg ","}* ")" ":" Type  -> Definition {cons("ExternalSyncFunction")}
+    "external" "screen" QId ":" Type "(" {FArg ","}* ")"                        -> Definition {cons("ExternalScreen")}
+    "external" "entity" QId ":" Type "{" Property* "}"                          -> Definition {cons("ExternalEntity")}
+    "external" "function" QId "(" {FArg ","}* ")" ":" Type                      -> Definition {cons("ExternalFunction")}
+    "external" "sync" "function" QId "(" {FArg ","}* ")" ":" Type               -> Definition {cons("ExternalSyncFunction")}

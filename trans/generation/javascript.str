@@ -20,12 +20,12 @@ strategies
   module-to-js =
   	?Module(_, def*)
     ; imports := <filter(?Import(_))> def*
-    ; entities := <filter(?Entity(_, _))> def*
-    ; rest := <filter(not(?Entity(_, _) <+ ?Import(_)))> def*
+    ; entities := <filter(?Entity(_, _, _))> def*
+    ; rest := <filter(not(?Entity(_, _, _) <+ ?Import(_)))> def*
     ; <map(import-to-js)> imports
     ; <entities-to-js> entities
     ; <filter(definition-to-js)> rest
-    
+
   import-to-js :
     Import(qid) -> <emit-js> $[mobiworks.requires('[<qid-to-js> qid]');
 ]
@@ -33,13 +33,13 @@ strategies
   entities-to-js =
   	{| OneToMany
   	 : map(entity-to-js)
-  	 ; <map(one-to-many-to-js)> <bagof-OneToMany; debug>
+  	 ; <map(one-to-many-to-js)> <bagof-OneToMany>
   	 ; <emit-js> $[persistence.schemaSync();
 ]
   	 |}
   	 
   entity-to-js :
-    Entity(qid, prop*) -> <emit-js> $[
+    Entity(qid, super, prop*) -> <emit-js> $[
     [varname] = persistence.define('[<qid-to-html> qid]', {
       [props]
     });

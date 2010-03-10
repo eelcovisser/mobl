@@ -1,5 +1,5 @@
 module example
-
+ 
 import mobl
 
 entity Task {
@@ -26,6 +26,7 @@ function bla() : Int {
 function doSomethingInteresting(i : Int) : Int {
   var n : Int := i;
   n := n + 1;
+  doSomethingInteresting(2);
   log("Bla"); 
   return n;
 }

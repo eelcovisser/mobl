@@ -32,7 +32,7 @@ rules
        ; alltd(add-namespace)
        //; topdown(try(declare))
        //; rename-all
-         ; debug
+         //; debug
        |}
 
   import-all =

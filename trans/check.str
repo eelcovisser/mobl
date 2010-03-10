@@ -10,6 +10,7 @@ rules
   constraint-error :
     t@SimpleType(_) -> (t, $[Type is not defined])
     where not(<lookup-type> t) // no entity for this type
+        ; not(_{"TemplateType"} := t)
 
   constraint-error :
     t@GenericType(_, _) -> (t, $[Type is not defined])
@@ -54,9 +55,12 @@ rules
 
   normalize :
     TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
+
+  normalize :
+    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
   
   constraint-warning:
-    Entity(qid, _) -> (x, $[Entity names must start with a capital])
+    Entity(qid, _, _) -> (x, $[Entity names must start with a capital])
     where
       if <is-string> qid then
         x := qid

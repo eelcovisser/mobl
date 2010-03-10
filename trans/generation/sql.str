@@ -1,0 +1,21 @@
+module sql
+
+imports
+  include/MoBL
+  
+strategies
+  
+  sql-type :
+    SimpleType(QId("mobl", "String")) -> "TEXT"
+
+  sql-type :
+    SimpleType(QId("mobl", "Text")) -> "TEXT"
+
+  sql-type :
+    SimpleType(QId("mobl", "Uri")) -> "VARCHAR(255)"
+
+  sql-type :
+    SimpleType(QId("mobl", "Int")) -> "INT"
+
+  sql-type :
+    SimpleType(QId("mobl", "Bool")) -> "BOOL"

@@ -10,7 +10,6 @@ strategies
     Module(qid, def*) -> Module(qid, def2*)
     with {| ModuleName
           : rules ( ModuleName := qid )
-          ; debug
           ; def2* := <innermost(desugar)> def*
           |}
   
@@ -22,6 +21,12 @@ strategies
   
   desugar :
     IfNoElse(e, stat*) -> If(e, stat*, [])
+  
+  desugar :
+    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+
+  desugar :
+    ExternalTypeNoSuper(qid, method*) -> ExternalType(qid, SimpleType(QId("mobl", "Object")), method*)
     
   desugar :
     PropertyNoAnnos(x, t) -> Property(x, t, [])

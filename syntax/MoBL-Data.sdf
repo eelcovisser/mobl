@@ -7,7 +7,8 @@ exports
 
   context-free syntax
   
-    "entity" QId "{" Property* "}"  -> Definition {cons("Entity")}
+    "entity" QId ":" Type "{" Property* "}"  -> Definition {cons("Entity")}
+    "entity" QId "{" Property* "}"  -> Definition {cons("EntityNoSuper")}
     ID ":" Type "(" {Anno ","}* ")" -> Property {cons("Property")}
     ID ":" Type                     -> Property {cons("PropertyNoAnnos")}
     ID                              -> Anno {cons("SimpleAnno")}

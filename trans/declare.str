@@ -8,7 +8,7 @@ strategies
 
   // Records the definition of an entity in a dynamic rule GetEntity.
   declare:
-    Entity(x, body) -> <fail>
+    Entity(x, super, body) -> <fail>
     with
       extern := <definition-to-external>
       ; rules(
@@ -16,13 +16,28 @@ strategies
         )
 
   declare:
-    extern@ExternalType(qid) -> <fail>
+    EntityNoSuper(x, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules(
+          GetEntity : x -> extern
+        )
+
+  declare:
+    extern@ExternalType(qid, super, method*) -> <fail>
     with rules (
            GetType : qid -> extern
          )
 
   declare:
-    extern@ExternalGenericType(qid, arg*) -> <fail>
+    ExternalTypeNoSuper(qid, method*) -> <fail>
+    with extern := <desugar> 
+       ; rules (
+           GetType : qid -> extern
+         )
+
+  declare:
+    extern@ExternalGenericType(qid, arg*, method*) -> <fail>
     with arity := <length> arg*
          ; rules (
              GetGenericType : (qid, arity) -> extern
@@ -50,7 +65,7 @@ strategies
       ; rules (
           GetFunction : qid -> extern 
         )
-
+ 
   declare:
     FunctionNoReturnType(qid, farg*, body) -> <fail>
     with
@@ -96,7 +111,10 @@ strategies
 strategies // convert to externals
   
   definition-to-external :
-    Entity(qid, prop*) -> ExternalEntity(qid, <alltd(desugar)> prop*)
+    Entity(qid, super, prop*) -> ExternalEntity(qid, super, <alltd(desugar)> prop*)
+
+  definition-to-external :
+    EntityNoSuper(qid, prop*) -> ExternalEntity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), <alltd(desugar)> prop*)
   
   definition-to-external :
     Function(qid, farg*, rt, stat*) -> ExternalFunction(qid, farg*, rt)
@@ -122,3 +140,4 @@ strategies // convert to externals
   definition-to-external =
     ?c#(_)
     ; where(<string-starts-with(|"External")> c)
+    ; try(desugar)

@@ -4,17 +4,123 @@ imports
   include/MoBL
   generation/javascript
   declare
+  type
 
+strategies // expression lifting
+  
+  //cps-lift-expressions = debug(!"lift: "); fail
+
+  cps-lift-expressions :
+    [Return(e)|stats] -> [Return(e)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-expressions :
+    [Return(e)|stats] -> <concat> [stats2, [Return(e2)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-expressions :
+    [VarDecl(x, t, e)|stats] ->[VarDecl(x, t, e)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-expressions :
+    [VarDecl(x, t, e)|stats] -> <concat> [stats2, [VarDecl(x, t, e2)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-expressions :
+    [Assignment(qid, e)|stats] -> [Assignment(qid, e)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-expressions :
+    [Assignment(qid, e)|stats] -> <concat> [stats2, [Assignment(qid, e2)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-expressions :
+    [ExpStat(e)|stats] -> [ExpStat(e)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-expressions :
+    [ExpStat(e)|stats] -> <concat> [stats2, <cps-lift-expressions> stats]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-expressions :
+    [If(e, true-stat*, false-stat*)|stats] ->[If(e, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-expressions :
+    [If(e, true-stat*, false-stat*)|stats] -> 
+    <concat> [stats2, [If(e2, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-expressions :
+    [] -> []
+
+  cps-lift-expression :
+    e@Var(_) -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
+    e@Int(_) -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
+    e@String(_) -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
+    e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
+    with v := <newname> "tmp"
+       ; rules ( Exp :+= Var(v) )
+       ; {| Exp
+          : stats := <map(cps-lift-expression); concat> e*
+          ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
+          |}
+
+  cps-lift-expression :
+    BinMethodCall(e1, op, e2) -> <concat> [stats1, stats2, [VarDeclInferred(v, BinMethodCall(e3, op, e4))]]
+    with v := <newname> "tmp"
+       ; rules ( Exp :+= Var(v) )
+       ; {| Exp
+          : stats1 := <cps-lift-expression> e1
+          ; e3 := <Exp>
+         |}
+       ; {| Exp
+          : stats2 := <cps-lift-expression> e2
+          ; e4 := <Exp>
+         |}
+  
+  //cps-statements = debug(!"statements: "); fail
 strategies
   
-  cps-statements = debug(!"statements: "); fail
-
   cps-statements :
     [Return(e)|stat*] -> <cps-expression(|[$[callback(result);
 ]|stat*])> e
 
   cps-statements :
     [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[var [x] = result;
+]|stat*])> e
+
+  cps-statements :
+    [VarDeclInferred(x, e)|stat*] -> <cps-expression(|[$[var [x] = result;
 ]|stat*])> e
 
   cps-statements :
@@ -35,7 +141,7 @@ strategies
   cps-statements :
     [If(e, true-stat*, false-stat*)|stat*] -> 
       <cps-expression(|[
-        $[if(value) {
+        $[if(result) {
             [<cps-statements> [true-stat*, stat*]]
           } else {
             [<cps-statements> [false-stat*, stat*]]
@@ -52,10 +158,8 @@ strategies
   cps-expression(|stat*) =
     ?e
     ; if is-sync then
-        !$[(function(result) {
-             [<cps-statements> stat*]
-           }([<expression-to-js> e]));
-]
+        !$[var result = [<expression-to-js> e];
+           [<cps-statements> stat*]]
       else
         cps-exp(|stat*)
       end
@@ -69,36 +173,20 @@ strategies
           });
 ]])> e2])> e1
     with result := <newname> "result"
-
-  cps-expressions(|values, stat*) :
-    [e|e*] -> <cps-expression(|[$[[values].push(result);
-], <cps-expressions(|values, stat*)> e*])> e
-  
-  cps-expressions(|values, stat*) :
-    [] -> <cps-statements> stat*
     
   cps-exp(|stat*) :
-    Call(qid, e*) -> <concat-strings> [
-      ${var {args} = [];},
-      <cps-expressions(|args, [$[
-        [args].push(function(result) {
-          [<cps-statements> stat*]
-        });
-        [<qid-to-js> qid].apply(null, [args]);
-        ]])> e*]
+    Call(qid, e*) -> $[[<qid-to-js> qid]([args]);
+]
     where not(<IsSyncFunction> qid)
-    with args := <newname> "args"
+    with args := <map(expression-to-js); <concat> [<id>, [
+      $[function(result) {
+          [<cps-statements> stat*]
+        }]]]; separate-by(!", "); concat-strings> e*
 
   cps-exp(|stat*) :
-    Call(qid, e*) -> <concat-strings> [${var {args} = [];
-},
-                        <cps-expressions(|args, [
-                          $[(function(result) {
-                              [<cps-statements> stat*]
-                            }([<qid-to-js> qid].apply(null, [args])));
-]])> e*]
+    e@Call(qid, e*) -> $[var result = [<expression-to-js> e];
+                         [<cps-statements> stat*]]
     where <IsSyncFunction> qid
-    with args := <newname> "args"
   
 strategies
   

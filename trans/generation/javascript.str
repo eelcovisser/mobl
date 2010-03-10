@@ -49,7 +49,7 @@ strategies
        ; args := <map(?FArg(<id>, _)); separate-by(!", "); concat-strings> farg*
        ; {| InSyncFunction
           : rules ( InSyncFunction := 1 )
-          ; stats := <statements-to-js> stat*
+          ; stats := </*cps-lift-expressions; debug; */statements-to-js> stat*
          |}
        ; if <is-string> qid then
 			     varname := $[var [qid]]
@@ -65,7 +65,8 @@ strategies
     ]
     with qids := <qid-to-js> qid
        ; args := <map(?FArg(<id>, _)); <concat> [<id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
-       ; stats := <cps-statements> stat*
+       ; stats := <cps-lift-expressions; debug; cps-statements> stat*
+       //; <debug> <cps-lift-expressions> stat*
        ; if <is-string> qid then
            varname := $[var [qid]]
          else
@@ -75,46 +76,45 @@ strategies
 rules // Statements
 
   statements-to-js =
-    map(statement-to-js)
+    map(statement-to-js); separate-by(!"\n"); concat-strings
   
   statement-to-js =
     stat-to-js <+ debug(!"Could not translate statement: "); fail
   
   stat-to-js :
-    ExpStat(e) -> $[[es];
-]
+    ExpStat(e) -> $[[es];]
     with es := <expression-to-js> e
 
   stat-to-js :
-    Return(e) -> $[return [es];
-]
+    Return(e) -> $[return [es];]
     where InSyncFunction
     with es := <expression-to-js> e
 
   stat-to-js :
-    Return(e) -> $[callback([es]);
-]
-    where not(InSyncFunction)
-    with es := <expression-to-js> e
-  
-  stat-to-js :
-    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];
-]
+    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];]
     where not(InTemplate)
 
   stat-to-js :
-    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];
-]
-
+    VarDeclInferred(x, e) -> $[var [x] = [<expression-to-js> e];]
+    where not(InTemplate)
 
   stat-to-js :
-    Assignment(qid, e) -> $[[<qid-to-js> qid].set([<expression-to-js> e]);
-]
+    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];]
+
+  stat-to-js :
+    If(e, true-stat*, false-stat*) -> 
+      $[if([<expression-to-js> e]) {
+          [<statements-to-js> true-stat*]
+        } else {
+          [<statements-to-js> false-stat*]
+        }]
+
+  stat-to-js :
+    Assignment(qid, e) -> $[[<qid-to-js> qid].set([<expression-to-js> e]);]
     where <is-ref> qid
 
   stat-to-js :
-    Assignment(qid, e) -> $[[<qid-to-js> qid] = [<expression-to-js> e];
-]
+    Assignment(qid, e) -> $[[<qid-to-js> qid] = [<expression-to-js> e];]
     where not(<is-ref> qid)
     
 rules // Expressions

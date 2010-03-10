@@ -27,7 +27,7 @@ strategies
   lookup-property :
     (entityType, prop) -> t
     where ExternalEntity(_, prop*) := <lookup-type> entityType
-          ; <filter(?Property(prop, t))> prop*
+          ; <filter(?Property(prop, t, _))> prop*
   
   lookup-template =
       lookup-template-aux
@@ -59,6 +59,10 @@ strategies
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
-    
+  
+  is-entity-type =
+    lookup-type
+    ; ?ExternalEntity(_, _)
+
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]

@@ -1,5 +1,19 @@
 var mobiworks = window.mobiworks || {};
 
+//var core = window.core || {};
+
+//core.alert = alert;
+
+if(!window.mobl) {
+    var mobl = {};
+}
+mobl.alert = function(s) {
+    alert(s);
+};
+mobl.log = function(s) {
+    console.log(s);
+};
+
 function ref(e, property) {
     return new mobiworks.Reference(e, property);
 }

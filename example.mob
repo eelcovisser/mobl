@@ -1,17 +1,17 @@
 module example
 
-import core
+import mobl
 
 entity Task {
   name        : String
   description : Text
   done        : Bool
-  tags        : Collection<Tag>
+  tags        : Collection<Tag> (inverse:tasks)
 }  
-
+ 
 entity Tag {
   name   : String
-  tasks  : Collection<Task>
+  tasks  : Collection<Task> (inverse:tags)
 }
 
 function f(n1 : Int, n2 : Int, n3 : Int) : Int {
@@ -23,10 +23,10 @@ function bla() : Int {
   return f(doSomethingInteresting(2), 2 * doSomethingInteresting(1), 3) + 1;
 }
 
-
-sync function doSomethingInteresting(i : Int) : Int {
+function doSomethingInteresting(i : Int) : Int {
   var n : Int := i;
   n := n + 1;
+  log("Bla"); 
   return n;
 }
 
@@ -38,17 +38,18 @@ template standardLayout(header : String) {
 }
 
 screen root() {
-/*  init {
+  /*init {
     console::log(doSomethingInteresting(8));
     var l : Collection<Task> := Collection<Task>();
     l.add(Task { name := "Task 1" });
     l.add(Task { name := "Task 2" });
-  }*/
+  } */
   standardLayout("My header") {
     ul {
       listitem { "Item 1" }
       listitem { "Item 2" }
     }
+    button("Click me")[onclick:=doSomethingInteresting(8)] 
     /*list(t : Task in l) {
       listitem { outputString(t.name) }
     }*/

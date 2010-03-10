@@ -22,6 +22,9 @@ strategies
   
   desugar :
     IfNoElse(e, stat*) -> If(e, stat*, [])
+    
+  desugar :
+    PropertyNoAnnos(x, t) -> Property(x, t, [])
   
   desugar :
     ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)

@@ -23,6 +23,14 @@ strategies
     where <is-string> x
     
   add-tl-namespace :
+    ExternalFunction(x, farg*, rt) -> ExternalFunction(QId(<ModuleName>, x), farg*, rt)
+    where <is-string> x
+
+  add-tl-namespace :
+    ExternalSyncFunction(x, farg*, rt) -> ExternalSyncFunction(QId(<ModuleName>, x), farg*, rt)
+    where <is-string> x
+
+  add-tl-namespace :
     Function(x, farg*, rt, stat*) -> Function(QId(<ModuleName>, x), farg*, rt, stat*)
     where <is-string> x
 
@@ -70,11 +78,12 @@ strategies
         ; t2* := <alltd(add-namespace)> t*
     
   add-namespace :
-    TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg*, prop*, elem2*)
+    TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg*, prop2*, elem2*)
     where arg-types := <map(type-of)> arg*
         ; not(<lookup-template-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*
+        ; prop2* := <alltd(add-namespace)> prop*
 
   add-namespace :
     TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCallNoPropertiesNoBody(qid2, arg*)
@@ -89,15 +98,17 @@ strategies
         ; elem2* := <alltd(add-namespace)> elem*
 
   add-namespace :
-    TemplateCallNoArgs(qid, prop*, elem*) -> TemplateCallNoArgs(qid2, prop*, elem2*)
+    TemplateCallNoArgs(qid, prop*, elem*) -> TemplateCallNoArgs(qid2, prop2*, elem2*)
     where not(<lookup-template-aux> (qid, []))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*
+        ; prop2* := <alltd(add-namespace)> prop*
 
   add-namespace :
-    TemplateCallNoArgsNoBody(qid, prop*) -> TemplateCallNoArgsNoBody(qid2, prop*)
+    TemplateCallNoArgsNoBody(qid, prop*) -> TemplateCallNoArgsNoBody(qid2, prop2*)
     where not(<lookup-template-aux> (qid, []))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; prop2* := <alltd(add-namespace)> prop*
 
   add-namespace :
     TemplateCallNoArgsNoPropertiesNoBody(qid) -> TemplateCallNoArgsNoPropertiesNoBody(qid2)
@@ -105,10 +116,11 @@ strategies
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
 
   add-namespace :
-    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCallNoBody(qid2, arg*, prop*)
+    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCallNoBody(qid2, arg*, prop2*)
     where arg-types := <map(type-of)> arg*
         ; not(<lookup-template-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; prop2* := <alltd(add-namespace)> prop*
 
   add-namespace :
     TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg*, elem2*)
@@ -119,7 +131,7 @@ strategies
 
   add-namespace :
     Call(qid, e*) -> Call(qid2, e2*)
-    where arg-types := <map(type-of)> e*
+    where debug(!"Add namespace: "); arg-types := <map(type-of)> e*
         ; not(<lookup-function-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-function-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; e2* := <alltd(add-namespace)> e*

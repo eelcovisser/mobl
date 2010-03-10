@@ -10,14 +10,14 @@ strategies
   type-of = eq-type-of <+ ?Var(<id>); TypeOf
   
   eq-type-of :
-    Int(_) -> SimpleType(QId("core", "Int"))
+    Int(_) -> SimpleType(QId("mobl", "Int"))
     
   eq-type-of :
-    String(_) -> SimpleType(QId("core", "String"))
+    String(_) -> SimpleType(QId("mobl", "String"))
   
   eq-type-of :
     Call(qid, e*) -> rt
-    where ExternalFunction(_, _, rt) := <lookup-function> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+    where ExternalFunction(_, _, rt) := <debug; lookup-function> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
   
   eq-type-of :
     FieldAccess(e, x) -> <lookup-property> (<type-of> e, x)

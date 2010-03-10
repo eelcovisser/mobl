@@ -2,6 +2,7 @@ module declare
 
 imports
   include/MoBL
+  desugar
 
 strategies
 
@@ -15,21 +16,32 @@ strategies
         )
 
   declare:
-    ExternalType(qid) -> <fail>
-    with
-      extern := <definition-to-external>
-      ; rules (
-          GetType : qid -> extern
-        )
+    extern@ExternalType(qid) -> <fail>
+    with rules (
+           GetType : qid -> extern
+         )
 
   declare:
-    ExternalGenericType(qid, arg*) -> <fail>
+    extern@ExternalGenericType(qid, arg*) -> <fail>
+    with arity := <length> arg*
+         ; rules (
+             GetGenericType : (qid, arity) -> extern
+           )
+
+
+  declare:
+    extern@ExternalFunction(qid, farg*, rt) -> <fail>
+    with rules (
+           GetFunction : qid -> extern 
+         )
+
+  declare:
+    extern@ExternalSyncFunction(qid, farg*, rt) -> <fail>
     with
-      extern := <definition-to-external>
-      ; arity := <length> arg*
-      ; rules (
-          GetGenericType : (qid, arity) -> extern
-        )
+      rules (
+        GetFunction : qid -> extern
+        IsSyncFunction : qid
+      )
 
   declare:
     Function(qid, farg*, rt, body) -> <fail>
@@ -84,7 +96,7 @@ strategies
 strategies // convert to externals
   
   definition-to-external :
-    Entity(qid, body) -> ExternalEntity(qid, body)
+    Entity(qid, prop*) -> ExternalEntity(qid, <alltd(desugar)> prop*)
   
   definition-to-external :
     Function(qid, farg*, rt, stat*) -> ExternalFunction(qid, farg*, rt)
@@ -103,6 +115,9 @@ strategies // convert to externals
 
   definition-to-external :
     TemplateNoRequires(qid, farg*, elem*) -> ExternalTemplate(qid, farg*, [])
+
+  definition-to-external :
+    Import(s) -> Import(s)
 
   definition-to-external =
     ?c#(_)

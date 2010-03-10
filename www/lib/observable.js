@@ -1,5 +1,6 @@
 var observable = {};
 
+
 (function () {
     function Observable () {
         this.subscribers = {};

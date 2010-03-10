@@ -25,6 +25,7 @@ mobiworks.provides = function (moduleName) {
         }
         current = current[parts[i]];
     }
+    current.isLoaded = true;
 }
 
 mobiworks.modulesToBeLoaded = 0;
@@ -61,7 +62,7 @@ mobiworks.isLoaded = function (moduleName) {
         }
         current = current[parts[i]];
     }
-    return true;
+    return current.isLoaded;
 }
 
 $(window).resize(updateScrollers);

@@ -19,7 +19,12 @@ rules
     [] -> ""
   
   props-to-html :
-    [PropertyArg(x, s)|k] -> $[ [x]=[s][rest]]
+    [PropertyArg(x, String(s))|k] -> $[ [x]=[s][rest]]
+    with rest := <props-to-html> k 
+
+  props-to-html :
+    [PropertyArg(x, e)|k] -> $[ [x]=[<expression-to-html> e][rest]]
+    where not(String(_) := e)
     with rest := <props-to-html> k 
 
   elems-to-html =
@@ -98,6 +103,9 @@ rules
     
   ref-expression-to-html :
     e -> $["[<ref-expression-to-js; html-escape> e]"]
+
+  expression-to-html :
+    e -> $["[<expression-to-js; html-escape> e]"]
   
   html-escape =
     string-replace(|"\"", "&quot;")

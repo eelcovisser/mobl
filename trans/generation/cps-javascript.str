@@ -112,7 +112,7 @@ strategies // expression lifting
 strategies
   
   cps-statements :
-    [Return(e)|stat*] -> <cps-expression(|[$[callback(result);
+    [Return(e)|stat*] -> <cps-expression(|[$[if(callback) callback(result);
 ]|stat*])> e
 
   cps-statements :

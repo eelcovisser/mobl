@@ -2,7 +2,7 @@ module generation/compile
 
 imports
   libstratego-lib
-  check
+  analyze
   declare
   rename
   desugar
@@ -20,7 +20,7 @@ strategies
       ; analyze
       ; desugar-all
       ; definitions-to-html
-      ; definitions-to-js
+      ; module-to-js
       ; where(path := <qid-to-path> qid
               ; html-filename := <concat-strings; guarantee-extension(|"html")> [<OutputPath>, "/", path]
               ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path])
@@ -32,7 +32,5 @@ strategies
       ; <fputs> ($[mobiworks.provides("[<qid-to-js> qid]");
 ], fp)
       ; <fputs> (<get-all-js>, fp)
-      ; <fputs> ($[persistence.schemaSync();
-], fp)
       ; <fclose> fp
       ; <refresh-workspace-file> js-filename

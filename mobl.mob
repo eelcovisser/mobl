@@ -1,4 +1,4 @@
-module core
+module mobl
 
 external type void {}
 external type String { }
@@ -7,7 +7,11 @@ external type Bool { }
 external type Text { }
 external type Uri { }
 external type Collection<T> {}
-external function console::log(s : String) : void
+
+external function log(s : String) : void
+external function alert(s : String) : void
+
+external function flush() : void
 
 template outputString(s : String) {
   <span databind=s></span>
@@ -31,4 +35,8 @@ template ul() {
 
 template listitem() {
   <li>elements()</li>
+}
+
+template button(text : String) {
+  <button databind=text></button>
 }

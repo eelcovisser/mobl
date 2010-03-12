@@ -12,8 +12,7 @@ imports
   include/MoBL
   lib/editor-common
   check
-  generation/html
-  generation/javascript
+  generation/compile
   generation/emit
   generation/compile
   desugar

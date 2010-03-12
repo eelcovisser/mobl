@@ -8,8 +8,9 @@ imports
   desugar
   mobl
   generation/emit
-  generation/html
-  generation/javascript
+  generation/ui
+  generation/action
+  generation/data
   include/MoBL
   lib/editor-common
 
@@ -19,13 +20,12 @@ strategies
       ?Module(qid, _)
       ; analyze
       ; desugar-all
-      ; definitions-to-html
       ; module-to-js
       ; where(path := <qid-to-path> qid
               ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path])
       ; fp := <fopen> (js-filename, "w")
-      ; <fputs> ($[mobiworks.provides("[<qid-to-js> qid]");
+      ; <fputs> ($[mobiworks.provides('[<qid-to-js> qid]');
 ], fp)
-      ; <fputs> (<get-all-js>, fp)
+      ; <fputs> (<get-all>, fp)
       ; <fclose> fp
       ; <refresh-workspace-file> js-filename

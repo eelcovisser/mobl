@@ -22,9 +22,9 @@ function bla() : Int {
   var n : Int := 1;
   return f(doSomethingInteresting(2), 2 * doSomethingInteresting(1), 3) + 1;
 }
-  
+
 function doSomethingInteresting(i : Int) : Int {
-  var n : Int := i;
+  var n : Int := i; 
   n := n + 1;
   //doSomethingInteresting(2);
   log("Bla");  
@@ -49,6 +49,7 @@ screen root() {
     ul {
       listitem { "Item 1" }
       listitem { "Item 2" }
+      listitem { "Item 3" }
     }
     button("Click me")[click:=doSomethingInteresting(8)]  
     /*list(t : Task in l) {   

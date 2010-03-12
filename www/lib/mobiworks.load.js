@@ -28,38 +28,6 @@ mobiworks.provides = function (moduleName) {
     current.isLoaded = true;
 }
 
-mobiworks.modulesToBeLoaded = 0;
-mobiworks.onModulesLoaded = null;
-
-mobiworks.requires = function(moduleName, callback) {
-    mobiworks.modulesToBeLoaded++;
-    if(callback) {
-        mobiworks.onModulesLoaded = callback;
-    }
-    if (!mobiworks.isLoaded(moduleName)) {
-        $.getScript(moduleName + ".js", function () {
-            mobiworks.modulesToBeLoaded--;
-            if(mobiworks.modulesToBeLoaded === 0 && mobiworks.onModulesLoaded) {
-               mobiworks.onModulesLoaded();
-            }
-            if(mobiworks.modulesToBeLoaded === 0 && callback) {
-               callback();
-            }
-        });
-    }
-};
-
-mobiworks.isLoaded = function (moduleName) {
-    var parts = moduleName.split('.');
-    var current = window;
-    for ( var i = 0; i < parts.length; i++) {
-        if (!current[parts[i]]) {
-            return false;
-        }
-        current = current[parts[i]];
-    }
-    return current.isLoaded;
-}
 
 $(window).resize(updateScrollers);
 

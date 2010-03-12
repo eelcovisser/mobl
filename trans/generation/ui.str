@@ -1,4 +1,4 @@
-module generation/html
+module generation/ui
 
 imports
   libstratego-lib
@@ -8,28 +8,19 @@ imports
   lib/editor-common
   desugar
   generation/emit
-  generation/javascript
-  generation/cps-javascript
+  generation/action
+  generation/lift
+  generation/cps-action
 
 rules
 
-  definitions-to-html =
-    where(alltd(definition-to-html))
-
-  props-to-html :
-    [] -> ""
-  
-  props-to-html :
-    [PropertyArg(x, String(s))|k] -> $[ [x]=[s][rest]]
-    with rest := <props-to-html> k 
-
-  props-to-html :
+  /*props-to-html :
     [PropertyArg(x, e)|k] -> $[ [x]=[<expression-to-html> e][rest]]
     where not(String(_) := e)
-    with rest := <props-to-html> k 
+    with rest := <props-to-html> k*/ 
 
-  definition-to-html :
-    Template(qid, farg*, req*, elems) -> <emit-js> $[
+  definition-to-js :
+    Template(qid, farg*, req*, elems) -> <emit> $[
       mobiworks.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
         var [root] = $("<span>");
         [body] 
@@ -43,7 +34,7 @@ rules
 		      ; init-stat* := <filter(?Init(<id>)); concat> elems
 		      ; if not([] := init-stat*) then
 		          init-fn := <newname> "init"
-		          ; <emit-js> $[
+		          ; <emit> $[
 		              function [init-fn](scope, callback) {
 		                [<cps-lift-expressions; cps-statements> init-stat*]
 		              }
@@ -58,34 +49,31 @@ rules
 		        end
 		      |}
 
-  definition-to-html :
-    Screen(qid, farg*, rt, elem*) -> <definition-to-html> Template(qid, farg*, SimpleType(QId("mobl", "void")), elem*)
+  definition-to-js :
+    Screen(qid, farg*, rt, elem*) -> <definition-to-js> Template(qid, farg*, SimpleType(QId("mobl", "void")), elem*)
 
   elems-to-js-callback(|root) =
     <concat; elems-to-js(|root)> [<id>, [$[callback([root]);]]]
-    
 
   elems-to-js(|root) :
-    [TemplateCall(qid, arg*, prop*, elems)|rest*] -> $[
-      var [subScope] = new mobiworks.LinkedMap(scope);
+    [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
+    $[var [subScope] = new mobiworks.LinkedMap(scope);
       [body-stats]
-      (scope.get('[<qid-to-html> qid]'))([args]);
-    ]
+      [templatecall]
+]
     with elem-root := <newname> "root"
        ; subScope := <newname> "subScope"
        ; if not([] := elems) then
-           body-stats := $[
-             [subScope].setLocal('elements', function(scope, callback) {
-               var [elem-root] = $("<span>");
-               [<elems-to-js-callback(|elem-root)> elems]
-             });
-             ]
+           body-stats := $[[subScope].setLocal('elements', function(scope, callback) {
+                             var [elem-root] = $("<span>");
+                             [<elems-to-js-callback(|elem-root)> elems]
+                           });
+]
          else
            body-stats := ""
          end
        ; if not([] := prop*) then
-           props := <map(prop-to-bind)> prop* //, function() { [<expression-to-js> e]; });
-//] where debug(!"ANother: ") \ <+ debug(!"Could not convert property: "); fail)> prop*
+           props := <map(prop-to-bind)> prop*
            ; prop-set := $[
                var children = node.children();
                for(var i = 0; i < children.length; i++) {
@@ -102,6 +90,7 @@ rules
                [<elems-to-js(|root)> rest*]
              }]
          ]]; separate-by(!", "); concat-strings> arg*
+       ; templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
   
   prop-to-bind :
     PropertyArg(x, e) -> $[c.bind('[x]', function() { [<expression-to-js> e]; });]
@@ -124,7 +113,6 @@ rules
   
   elems-to-js(|root) :
     [] -> ""
-
   
   tag-arg-to-html :
     HtmlArg(name, s) -> $[[name]=[s]]
@@ -155,14 +143,14 @@ rules
       [root].append([s]);
       [<elems-to-js(|root)> rest*]]
     
-  ref-expression-to-html :
+  /*ref-expression-to-html :
     e -> $["[<ref-expression-to-js; html-escape> e]"]
 
   expression-to-html :
     e -> $["[<expression-to-js; html-escape> e]"]
   
   html-escape =
-    string-replace(|"\"", "&quot;")
+    string-replace(|"\"", "&quot;")*/
 
 rules // utils
 	

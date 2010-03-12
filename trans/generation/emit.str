@@ -2,22 +2,12 @@ module generation/emit
 
 strategies
 
-  emit-html =
+  emit =
     ?code
-    ; current-html := <EmittedHtml <+ !"">
-    ; rules ( EmittedHtml := <concat-strings> [current-html, code] )
+    ; current := <Emitted <+ !"">
+    ; rules ( Emitted := <concat-strings> [current, code] )
     
-  get-all-html =
-       EmittedHtml
-       ; rules ( EmittedHtml := "")
-    <+ !""
-    
-  emit-js =
-    ?code
-    ; current-js := <EmittedJs <+ !"">
-    ; rules ( EmittedJs := <concat-strings> [current-js, code] )
-    
-  get-all-js =
-       EmittedJs
-       ; rules ( EmittedJs := "")
+  get-all =
+       Emitted
+       ; rules ( Emitted := "")
     <+ !""

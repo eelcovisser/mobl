@@ -26,11 +26,7 @@
         </script>
         <script src="lib/mobiworks.orientation.js" type="application/x-javascript" charset="utf-8">
         </script>
-        <script src="lib/mobiworks.databind.js" type="application/x-javascript" charset="utf-8">
-        </script>
         <script src="lib/mobiworks.view.js" type="application/x-javascript" charset="utf-8">
-        </script>
-        <script src="lib/mobiworks.scope.js" type="application/x-javascript" charset="utf-8">
         </script>
         <script src="lib/mobiworks.event.js" type="application/x-javascript" charset="utf-8">
         </script>
@@ -38,16 +34,18 @@
         </script>
         <script src="lib/iscroll.js" type="application/javascript" charset="utf-8">
         </script>
-        <script type="application/x-javascript" charset="utf-8">
-            <!--
 
-						persistence.connect('mydb', 'My database', 5 * 1024 * 1024);
+        <script type="application/x-javascript" charset="utf-8">
+				persistence.connect('mydb', 'My database', 5 * 1024 * 1024);
+ 			  </script>
+        <script src="mobl.js" type="application/x-javascript" charset="utf-8"></script>
+        <script src="example.js" type="application/x-javascript" charset="utf-8"></script>
+        <script type="application/x-javascript" charset="utf-8">
             $(function(){
                 mobiworks.call("example.root", [], function(){
                     location = "http://zef.me";
                 });
             });
-            //-->
         </script>
     </head>
     <body>

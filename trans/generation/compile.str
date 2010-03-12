@@ -22,12 +22,7 @@ strategies
       ; definitions-to-html
       ; module-to-js
       ; where(path := <qid-to-path> qid
-              ; html-filename := <concat-strings; guarantee-extension(|"html")> [<OutputPath>, "/", path]
               ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path])
-      ; fp2 := <fopen> (html-filename, "w")
-      ; <fputs> (<get-all-html>, fp2)
-      ; <fclose> fp2
-      ; <refresh-workspace-file> html-filename
       ; fp := <fopen> (js-filename, "w")
       ; <fputs> ($[mobiworks.provides("[<qid-to-js> qid]");
 ], fp)

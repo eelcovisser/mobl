@@ -38,17 +38,13 @@ mobiworks.requires = function(moduleName, callback) {
     }
     if (!mobiworks.isLoaded(moduleName)) {
         $.getScript(moduleName + ".js", function () {
-            $.get(moduleName + ".html", function (data) {
-                var htmlDom = $(data);
-                htmlDom.scope(mobiworks.rootScope);
-                mobiworks.modulesToBeLoaded--;
-                if(mobiworks.modulesToBeLoaded === 0 && mobiworks.onModulesLoaded) {
-                    mobiworks.onModulesLoaded();
-                }
-                if(mobiworks.modulesToBeLoaded === 0 && callback) {
-                    callback();
-                }
-            });
+            mobiworks.modulesToBeLoaded--;
+            if(mobiworks.modulesToBeLoaded === 0 && mobiworks.onModulesLoaded) {
+               mobiworks.onModulesLoaded();
+            }
+            if(mobiworks.modulesToBeLoaded === 0 && callback) {
+               callback();
+            }
         });
     }
 };
@@ -101,31 +97,10 @@ mobiworks.call = function (screenName, args, callback) {
     var parts = screenName.split('.');
     var moduleName = parts.slice(0, parts.length - 1).join('.');
     var screenTemplate = parts[parts.length - 1];
-    if (!mobiworks.isLoaded(moduleName)) {
-        mobiworks.requires(moduleName, function () {
-            var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
-            var screenTemplate = subScope.get(screenFrame.div);
-            var node = screenTemplate.apply(null, [subScope].concat(args)).contents();
-            var div = $("<div id='" + screenFrame.div + "'></div>");
-            div.append(node);
-            $("body").append(div);                
-            div.databind();
-            $(function () {
-                var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
-                if (scrollers.length > 0) {
-                    for (i = 0; i < scrollers.length; i++) {
-                        scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
-                    }
-                    updateScrollers();
-                }
-            });
-        });
-    } else {
-        var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
-        var screenTemplate = subScope.get(screenFrame.div);
-        var node = screenTemplate.apply(null, [subScope].concat(args));
+    var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
+    var screenTemplate = subScope.get(screenFrame.div);
+    screenTemplate.apply(null, [subScope].concat(args).concat([function(node) {
         $("body").append(node);
-        
         $(function () {
             var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
             if (scrollers.length > 0) {
@@ -135,5 +110,5 @@ mobiworks.call = function (screenName, args, callback) {
                 updateScrollers();
             }
         });
-    }
+    }]));
 }

@@ -17,27 +17,27 @@ entity Tag {
 function f(n1 : Int, n2 : Int, n3 : Int) : Int {
   return n1 + n2 * 9; 
 }
-
+ 
 function bla() : Int {
   var n : Int := 1;
   return f(doSomethingInteresting(2), 2 * doSomethingInteresting(1), 3) + 1;
 }
-
+  
 function doSomethingInteresting(i : Int) : Int {
   var n : Int := i;
   n := n + 1;
-  doSomethingInteresting(2);
-  log("Bla"); 
-  return n;
-}
+  //doSomethingInteresting(2);
+  log("Bla");  
+  return n;  
+} 
 
 template standardLayout(header : String) {
   header(header)
   elements()
   <hr/>
   "(C) Zef Hemel, 2010"
-}
-
+}  
+ 
 screen root() {
   /*init {
     console::log(doSomethingInteresting(8));
@@ -50,8 +50,8 @@ screen root() {
       listitem { "Item 1" }
       listitem { "Item 2" }
     }
-    button("Click me")[onclick:=doSomethingInteresting(8)] 
-    /*list(t : Task in l) {
+    button("Click me")[click:=doSomethingInteresting(8)]  
+    /*list(t : Task in l) {   
       listitem { outputString(t.name) }
     }*/
   }

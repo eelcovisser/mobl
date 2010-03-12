@@ -9,6 +9,7 @@ imports
   desugar
   generation/emit
   generation/javascript
+  generation/cps-javascript
 
 rules
 
@@ -27,79 +28,132 @@ rules
     where not(String(_) := e)
     with rest := <props-to-html> k 
 
-  elems-to-html =
-    filter(elem-to-html)
-    ; concat-strings
-
   definition-to-html :
-    Screen(qid, args, rt, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs][init]>[body]</div>
-]
+    Template(qid, farg*, req*, elems) -> <emit-js> $[
+      mobiworks.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+        var [root] = $("<span>");
+        [body] 
+      });
+      ]
     with {| InTemplate
 		      : rules ( InTemplate := 1 )
-		      ; body := <elems-to-html> elem*
-		      ; fargs := <map-with-index(farg-to-html); separate-by(!" "); concat-strings> args
-		      ; init-stat* := <filter(?Init(<id>)); concat> elem*
+		      ; root := <newname> "root"
+		      ; body-elem := <elems-to-js-callback(|root)> elems
+		      ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
+		      ; init-stat* := <filter(?Init(<id>)); concat> elems
 		      ; if not([] := init-stat*) then
-		          init-fn-name := <newname> "init"
-		          ; init := $[ oninit="[init-fn-name]"]
+		          init-fn := <newname> "init"
 		          ; <emit-js> $[
-		              function [init-fn-name](scope) {
-		                 [<statements-to-js> init-stat*]
+		              function [init-fn](scope, callback) {
+		                [<cps-lift-expressions; cps-statements> init-stat*]
 		              }
 		            ]
+              ; body := $[
+                  [init-fn](scope, function() {
+                    [body-elem]
+                  });
+              ]
 		        else
-		          init := ""
+		          body := body-elem
 		        end
 		      |}
 
   definition-to-html :
-    Template(qid, args, req*, elem*) -> <emit-html> $[<div class="template" id="[<qid-to-html> qid]" [fargs]>[body]</div>
-]
-    with {| InTemplate
-          : rules ( InTemplate := 1 )
-          ; fargs := <map-with-index(farg-to-html <+ debug(!"FAIL: "); fail); separate-by(!" "); concat-strings> args
-          ; body := <elems-to-html> elem*
-          |}
+    Screen(qid, farg*, rt, elem*) -> <definition-to-html> Template(qid, farg*, SimpleType(QId("mobl", "void")), elem*)
 
-  farg-to-html :
-    (idx, FArg(x, t)) -> $[farg[<subti> (idx, 1)]="[x]"]
-
-  args-to-html =
-    map-with-index(arg-to-html)
-    ; concat-strings
+  elems-to-js-callback(|root) =
+    <concat; elems-to-js(|root)> [<id>, [$[callback([root]);]]]
     
-  arg-to-html :
-    (idx, e) -> $[arg[<subti> (idx, 1)]=[<ref-expression-to-html> e]]
 
-  elem-to-html :
-    TemplateCall(qid, arg*, prop*, elem*) -> $[<div class="templatecall" template="[<qid-to-html> qid]" [args] [props]>[body]</div>]
-    with props := <props-to-html> prop*
-       ; body  := <elems-to-html> elem*
-       ; args  := <args-to-html> arg*
+  elems-to-js(|root) :
+    [TemplateCall(qid, arg*, prop*, elems)|rest*] -> $[
+      var [subScope] = new mobiworks.LinkedMap(scope);
+      [body-stats]
+      (scope.get('[<qid-to-html> qid]'))([args]);
+    ]
+    with elem-root := <newname> "root"
+       ; subScope := <newname> "subScope"
+       ; if not([] := elems) then
+           body-stats := $[
+             [subScope].setLocal('elements', function(scope, callback) {
+               var [elem-root] = $("<span>");
+               [<elems-to-js-callback(|elem-root)> elems]
+             });
+             ]
+         else
+           body-stats := ""
+         end
+       ; if not([] := prop*) then
+           props := <map(prop-to-bind)> prop* //, function() { [<expression-to-js> e]; });
+//] where debug(!"ANother: ") \ <+ debug(!"Could not convert property: "); fail)> prop*
+           ; prop-set := $[
+               var children = node.children();
+               for(var i = 0; i < children.length; i++) {
+                  var c = children.eq(i);
+                  [props]
+               }]
+         else
+           prop-set := ""
+         end
+       ; args  := <map(ref-expression-to-js); <concat> [[subScope], <id>, [
+           $[function(node) {
+               [prop-set]
+               [root].append(node.contents());
+               [<elems-to-js(|root)> rest*]
+             }]
+         ]]; separate-by(!", "); concat-strings> arg*
   
-  elem-to-html :
-    Html(tag, arg*, elem*, _) -> $[<[tag] [args]>[body]</[tag]>]
-    with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
-       ; body := <elems-to-html> elem*
+  prop-to-bind :
+    PropertyArg(x, e) -> $[c.bind('[x]', function() { [<expression-to-js> e]; });]
+  
+  elems-to-js(|root) :
+    [Html(tag, arg*, elems, _)|rest*] -> $[
+      var [node] = $("<[tag] [<escape> args]>");
+      [<filter(databind-tag-arg-to-js(|tag, node)); concat-strings> arg*]
+      [body]
+    ]
+    with args := <filter(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
+       ; node := <newname> "node"
+       ; body := <elems-to-js(|node)> <concat> [elems, [
+           $[[root].append([node]);
+           [<elems-to-js(|root)> rest*]]]]
 
-  elem-to-html :
-    HtmlShort(tag, arg*) -> $[<[tag] [args]/>]
-    with args := <map(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
+  elems-to-js(|root) :
+    [s|rest*] -> $[[s][<elems-to-js(|root)> rest*]]
+    where <is-string> s
+  
+  elems-to-js(|root) :
+    [] -> ""
+
   
   tag-arg-to-html :
     HtmlArg(name, s) -> $[[name]=[s]]
 
-  tag-arg-to-html :
-    HtmlDatabindArg(e) -> $[databind=[es]]
-    with es := <ref-expression-to-html> e
+  databind-tag-arg-to-js(|tag, node) :
+    HtmlDatabindArg(e) -> $[
+      var [r] = [es];
+      [node].[method]([r].get());
+      [r].addSetListener(function(val) {
+        [node].[method](val);
+      });
+    ]
+    with es := <ref-expression-to-js> e
+       ; r  := <newname> "ref"
+       ; if "input" := tag then
+           method := "val"
+         else
+           method := "text"
+         end
     
-  elem-to-html :
+  /*elem-to-js :
     List(x, t, e, elem*) -> $[<ul databind=[es] item="[x]">[body]</ul>]
     with es := <ref-expression-to-html> e
-       ; body := <elems-to-html> elem*
+       ; body := <elems-to-js> elem**/
     
-  elem-to-html :
-    ScreenString(s) -> <un-double-quote> s
+  elems-to-js(|root) :
+    [ScreenString(s)|rest*] -> $[
+      [root].append([s]);
+      [<elems-to-js(|root)> rest*]]
     
   ref-expression-to-html :
     e -> $["[<ref-expression-to-js; html-escape> e]"]

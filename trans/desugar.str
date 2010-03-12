@@ -21,6 +21,9 @@ strategies
   
   desugar :
     IfNoElse(e, stat*) -> If(e, stat*, [])
+    
+  desugar :
+    HtmlShort(tag, attr*) -> Html(tag, attr*, [], tag)
   
   desugar :
     EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)

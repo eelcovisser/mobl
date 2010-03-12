@@ -12,8 +12,8 @@ references
 references
                         
   completion proposer : editor-complete
-  completion lexical  : [A-Za-z0-9_]+
-  completion trigger  : ":"
+  identifier lexical  : [A-Za-z0-9_]+
+  completion trigger  : ": "
                         
   reference _         : editor-resolve
   hover _             : editor-hover

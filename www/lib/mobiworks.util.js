@@ -102,6 +102,17 @@ function log(s) {
             this.e[this.prop] = value;
         }
     };
+    
+    Reference.prototype.addSetListener = function(callback) {
+        var that = this;
+        if(this.e.addListener) {
+            this.e.addListener('set', function(_, _, prop, value) {
+                if(prop === that.prop) {
+                    callback(value);
+                }
+            });
+        }
+    };
 
     mobiworks.LinkedMap = LinkedMap;
     mobiworks.Reference = Reference;

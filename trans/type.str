@@ -18,6 +18,15 @@ strategies
   eq-type-of :
     Call(qid, e*) -> rt
     where ExternalFunction(_, _, rt) := <lookup-function> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+
+  eq-type-of :
+    EntityCons(t, _) -> t
+
+  eq-type-of :
+    MethodCall(e, x, e*) -> rt
+    where m := <lookup-method> (<type-of> e, x, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+        ; (   ExternalMethod(_, _, rt) := m
+           <+ ExternalSyncMethod(_, _, rt) := m)
   
   eq-type-of :
     FieldAccess(e, x) -> <lookup-property> (<type-of> e, x)

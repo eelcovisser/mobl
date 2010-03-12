@@ -11,6 +11,8 @@ exports
     
     "static" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMethodDecl {cons("ExternalStaticMethod")}
     "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMethodDecl {cons("ExternalMethod")}
+    "static" "sync" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMethodDecl {cons("ExternalStaticSyncMethod")}
+    "sync" "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMethodDecl {cons("ExternalSyncMethod")}
     
     "external" "template" QId "requires" {TemplateSig ","}* "(" {FArg ","}* ")" -> Definition {cons("ExternalTemplate")}
     "external" "screen" QId ":" Type "(" {FArg ","}* ")"                        -> Definition {cons("ExternalScreen")}

@@ -30,7 +30,11 @@ rules
     where not(type-of)
 
   constraint-error :
-    t@Call(_, _) -> (t, $[Function not defined])
+    t@Call(_, _) -> (t, $[Function with this signature not defined])
+    where not(type-of)
+
+  constraint-error :
+    t@MethodCall(_, _, _) -> (t, $[Method with this signature not defined])
     where not(type-of)
   
   constraint-error = normalize; constraint-error

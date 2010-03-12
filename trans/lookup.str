@@ -22,7 +22,12 @@ strategies
     SimpleType(qid) -> <GetType> qid
     
   lookup-type-aux :
-    GenericType(qid, t*) -> <GetGenericType> (qid, <length> t*)
+    GenericType(qid, t*) -> ExternalType(<newname> "Generic", SimpleType(QId("mobl", "Object")), method2*)
+    where ExternalGenericType(_, x*, method*) := <GetGenericType> (qid, <length> t*)
+        ; {| RenameGenericType
+           : <zip(\ (x, t) -> <id> where rules ( RenameGenericType : SimpleType(x) -> t ) \)> (x*, t*)
+           ; method2* := <alltd(RenameGenericType)> method*
+           |}
   
   lookup-property :
     (entityType, prop) -> t
@@ -73,10 +78,36 @@ strategies
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
 
-  lookup-statc-method :
-    (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
+  lookup-static-method :
+    (t, x, arg-type*) -> ExternalStaticMethod(x, farg2*, rt2)
     where ExternalType(_, super, method*) := <GetType> t
         ; <filter(?ExternalStaticMethod(x, farg*, rt))> method*
+        ; if not(!farg*); not(super := t) then // could not find a method
+            <lookup-method> (super, x, arg-type*)
+          end
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; arg-types1* := arg-types2*
+
+  lookup-method :
+    (t, x, arg-type*) -> ExternalSyncMethod(x, farg2*, rt2)
+    where ExternalType(_, super, method*) := <lookup-type> t
+        ; <filter(?ExternalSyncMethod(x, farg*, rt))> method*
+        ; if not(!farg*); not(super := t) then // could not find a method
+            <lookup-method> (super, x, arg-type*)
+          end
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; arg-types1* := arg-types2*
+
+  lookup-statc-method :
+    (t, x, arg-type*) -> ExternalStaticSyncMethod(x, farg2*, rt2)
+    where ExternalType(_, super, method*) := <GetType> t
+        ; <filter(?ExternalStaticSyncMethod(x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x, arg-type*)
           end

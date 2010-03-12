@@ -12,14 +12,15 @@ external type Object { }
 
 external type Collection<T> {
   function get() : Array<T>
-  function filter(property : String, op : String, value : Object) : Collection<T>
-  function order(property : String, ascending : Bool) : Collection<T>
-  function limit(n : String) : Collection<T>
-  function offset(n : String) : Collection<T>
+  sync function filter(property : String, op : String, value : Object) : Collection<T>
+  sync function order(property : String, ascending : Bool) : Collection<T>
+  sync function limit(n : String) : Collection<T>
+  sync function offset(n : String) : Collection<T>
+  sync function add(item : T) : void
 }
 
 external type Entity<T> {
-  static function all() : Collection<T>
+  static sync function all() : Collection<T>
 }
 
 external function log(s : String) : void

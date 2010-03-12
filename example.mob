@@ -32,20 +32,21 @@ function doSomethingInteresting(i : Int) : Int {
 } 
 
 template standardLayout(header : String) {
-  header(header)
+  header(header) 
   elements()
   <hr/>
   "(C) Zef Hemel, 2010"
 }  
  
-screen root() {
-  /*init {
-    console::log(doSomethingInteresting(8));
+screen root() { 
+  init {   
     var l : Collection<Task> := Collection<Task>();
+    var myString : String := "Zef";
     l.add(Task { name := "Task 1" });
-    l.add(Task { name := "Task 2" });
-  } */
+    l.add(Task { name := "Task 2" });  
+  }
   standardLayout("My header") {
+    outputString(myString )
     ul {
       listitem { "Item 1" }
       listitem { "Item 2" }

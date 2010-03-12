@@ -7,11 +7,13 @@ var mobiworks = window.mobiworks || {};
 if(!window.mobl) {
     var mobl = {};
 }
-mobl.alert = function(s) {
+mobl.alert = function(s, callback) {
     alert(s);
+    if(callback) callback();
 };
-mobl.log = function(s) {
+mobl.log = function(s, callback) {
     console.log(s);
+    if(callback) callback();
 };
 
 function ref(e, property) {

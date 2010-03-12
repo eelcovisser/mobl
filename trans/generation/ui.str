@@ -14,11 +14,6 @@ imports
 
 rules
 
-  /*props-to-html :
-    [PropertyArg(x, e)|k] -> $[ [x]=[<expression-to-html> e][rest]]
-    where not(String(_) := e)
-    with rest := <props-to-html> k*/ 
-
   definition-to-js :
     Template(qid, farg*, req*, elems) -> <emit> $[
       mobiworks.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
@@ -31,19 +26,10 @@ rules
 		      ; root := <newname> "root"
 		      ; body-elem := <elems-to-js-callback(|root)> elems
 		      ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
-		      ; init-stat* := <filter(?Init(<id>)); concat> elems
-		      ; if not([] := init-stat*) then
+		      ; init-stats := <filter(?Init(<id>)); concat> elems
+		      ; if not([] := init-stats) then
 		          init-fn := <newname> "init"
-		          ; <emit> $[
-		              function [init-fn](scope, callback) {
-		                [<cps-lift-expressions; cps-statements> init-stat*]
-		              }
-		            ]
-              ; body := $[
-                  [init-fn](scope, function() {
-                    [body-elem]
-                  });
-              ]
+		          ; body := <concat; cps-statements> [<cps-lift-expressions; debug> init-stats, [body-elem]]
 		        else
 		          body := body-elem
 		        end
@@ -110,6 +96,9 @@ rules
   elems-to-js(|root) :
     [s|rest*] -> $[[s][<elems-to-js(|root)> rest*]]
     where <is-string> s
+    
+  elems-to-js(|root) :
+    [Init(_)|rest*] -> <elems-to-js(|root)> rest*
   
   elems-to-js(|root) :
     [] -> ""

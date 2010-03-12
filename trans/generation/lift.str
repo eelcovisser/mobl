@@ -4,6 +4,8 @@ imports
   include/MoBL
   rename
   declare
+  lookup
+  type
 
 strategies
   strategies // expression lifting
@@ -89,16 +91,47 @@ strategies
   cps-lift-expression :
     e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
     with v := <newname> "tmp"
-       ; rules ( Exp :+= Var(v) )
        ; {| Exp
           : stats := <map(cps-lift-expression); concat> e*
           ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
           |}
+       ; rules ( Exp :+= Var(v) )
+
+
+  cps-lift-expression :
+    e@EntityCons(qid, propval*) -> <concat> [stats, [VarDeclInferred(v, EntityCons(qid, propval2*))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats := <map(?PropVal(_, <id>); cps-lift-expression); concat> propval*
+          ; propval2* := <bagof-Exp; reverse; <zip(\ (prop, val) -> PropVal(prop, val) \)> (<map(?PropVal(<id>, _))> propval*, <id>)> // taking advantage of Exp ordering here, risky
+          |}
+       ; rules ( Exp :+= Var(v) )
+          
+  cps-lift-expression :
+    MethodCall(e, x, e*) -> <concat> [stats2, stats, [VarDeclInferred(v, MethodCall(e2, x, e2*))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+       ; {| Exp
+          : stats := <map(cps-lift-expression); concat> e*
+          ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
+          |}
+       ; rules ( Exp :+= Var(v) )
+
+  cps-lift-expression :
+    e@CollectionCons(gt, t, e*) -> <concat> [stats, [VarDeclInferred(v, CollectionCons(gt, t, e2*))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats := <map(cps-lift-expression); concat> e*
+          ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
+          |}
+       ; rules ( Exp :+= Var(v) )
 
   cps-lift-expression :
     BinMethodCall(e1, op, e2) -> <concat> [stats1, stats2, [VarDeclInferred(v, BinMethodCall(e3, op, e4))]]
     with v := <newname> "tmp"
-       ; rules ( Exp :+= Var(v) )
        ; {| Exp
           : stats1 := <cps-lift-expression> e1
           ; e3 := <Exp>
@@ -107,6 +140,7 @@ strategies
           : stats2 := <cps-lift-expression> e2
           ; e4 := <Exp>
          |}
+       ; rules ( Exp :+= Var(v) )
 
 strategies
   
@@ -123,3 +157,8 @@ strategies
     ?Call(qid, e*)
     ; <IsSyncFunction> qid
     ; <map(is-sync)> e*
+
+  is-sync =
+    ?MethodCall(e, x, e*)
+    ; <lookup-method> (<type-of> e, x, <map(type-of)> e*)
+    ; ?ExternalSyncMethod(_, _, _)

@@ -9,6 +9,7 @@ imports
   desugar
   generation/emit
   generation/ui
+  generation/lift
   generation/cps-action
   generation/sql
   generation/data
@@ -89,7 +90,12 @@ rules // Statements
     where not(InTemplate)
 
   stat-to-js :
-    VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];]
+    VarDecl(x, t, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
+    where InTemplate
+
+  stat-to-js :
+    VarDeclInferred(x, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
+    where InTemplate
 
   stat-to-js :
     If(e, true-stat*, false-stat*) -> 
@@ -126,33 +132,31 @@ rules // Expressions
   exp-to-js :
     Int(n) -> n
   
-  /*exp-to-js :
-    Var(qid) -> $[fromScope(this, '[<qid-to-js> qid]')]
+  exp-to-js :
+    Var(qid) -> $[scope.get('[<qid-to-js> qid]')]
     where <InTemplate> qid
-        ; <is-string> qid
-        ; not(<is-ref> qid)*/
+        ; not(<is-ref> qid)
+
+  ref-exp-to-js :
+    Var(qid) -> $[ref(scope, '[<qid-to-js> qid]')]
+    where <InTemplate> qid
+        ; not(<is-ref> qid)
 
   exp-to-js :
     Var(qid) -> <qid-to-js> qid
-    where //not(<InTemplate> qid; <is-string> qid)
-        not(<is-ref> qid)
+    where not(<InTemplate> qid)
+        ; not(<is-ref> qid)
 
-  /*exp-to-js :
-    Var(qid) -> $[fromScope(this, '[qid]').get()]
+  exp-to-js :
+    Var(qid) -> $[scope.get('[qid]').get()]
     where <InTemplate> qid
-        ; <is-string> qid
-        ; <is-ref> qid*/
+        ; <is-ref> qid
           
   exp-to-js :
     Var(qid) -> $[[<qid-to-js> qid].get()]
-    where //not(<InTemplate> qid; <is-string> qid)
-        <is-ref> qid
+    where not(<InTemplate> qid)
+        ; <is-ref> qid
 
-  ref-exp-to-js :
-    Var(qid) -> qid
-    where <InTemplate> qid
-        ; <is-string> qid
- 
   exp-to-js :
     Call(qid, e*) -> $[[<qid-to-js> qid]([args])]
     with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*

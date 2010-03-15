@@ -17,6 +17,7 @@ external type Collection<T> {
   sync function limit(n : String) : Collection<T>
   sync function offset(n : String) : Collection<T>
   sync function add(item : T) : void
+  sync function remove(item : T) : void
 }
 
 external type Entity<T> {

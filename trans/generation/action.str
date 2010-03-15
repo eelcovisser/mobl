@@ -148,7 +148,12 @@ rules // Expressions
         ; not(<is-ref> qid)
 
   exp-to-js :
-    Var(qid) -> $[scope.get('[qid]').get()]
+    Var(qid) -> $[[qid].get()]
+    where <InTemplate> qid
+        ; <is-ref> qid
+
+  ref-exp-to-js :
+    Var(qid) -> qid
     where <InTemplate> qid
         ; <is-ref> qid
           

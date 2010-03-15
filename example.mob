@@ -27,7 +27,7 @@ function doSomethingInteresting(i : Int) : Int {
   var n : Int := i; 
   n := n + 1;
   //doSomethingInteresting(2);
-  log("Bla");  
+  alert("Bla");  
   return n;  
 } 
 
@@ -36,26 +36,33 @@ template standardLayout(header : String) {
   elements()
   <hr/>
   "(C) Zef Hemel, 2010"
-}  
+}
+
+function addTask(l : Collection<Task>) {
+  l.add(Task { name := "Task X" });
+}
+
+function removeTask(t : Task, l : Collection<Task>) {
+  l.remove(t);
+}
  
 screen root() { 
-  init {   
+  init {    
     var l : Collection<Task> := Collection<Task>();
-    var myString : String := "Zef";
     l.add(Task { name := "Task 1" });
     l.add(Task { name := "Task 2" });  
+    l.add(Task { name := "Task 3" });  
+    l.add(Task { name := "Task 4" });  
+    l.add(Task { name := "Task 5" });  
   }
   standardLayout("My header") {
-    outputString(myString )
-    ul {
-      listitem { "Item 1" }
-      listitem { "Item 2" }
-      listitem { "Item 3" }
+    list(t : Task in l) {  
+      listitem { 
+        outputString(t.name)
+        button("Delete")[click:=removeTask(t, l)] 
+      }
     }
-    button("Click me")[click:=doSomethingInteresting(8)]  
-    /*list(t : Task in l) {   
-      listitem { outputString(t.name) }
-    }*/
+    button("Click me")[click:=addTask(l)]  
   }
 }
 

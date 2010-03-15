@@ -122,10 +122,46 @@ rules
            method := "text"
          end
     
-  /*elem-to-js :
-    List(x, t, e, elem*) -> $[<ul databind=[es] item="[x]">[body]</ul>]
-    with es := <ref-expression-to-html> e
-       ; body := <elems-to-js> elem**/
+  elems-to-js(|root) :
+    [List(x, t, e, elems)|rest*] -> $[
+      var [node] = $("<ul>");
+      var [list] = [<expression-to-js> e];
+      [root].append([node]);
+      var [rest] = function() {
+        [<elems-to-js(|root)> rest*]
+      };
+      var [renderList] = function(isRerender) {
+        [node].empty();
+	      [list].list(null, function(results) {
+	        results = results.reverse();
+	        var [oldScope] = scope;
+	        function renderOne() {
+              var scope = new mobiworks.LinkedMap([oldScope]);
+	            scope.setLocal('[x]', results.pop());
+	            [<concat; elems-to-js(|node)> [elems, [$[
+	              if(results.length > 0) {
+	                renderOne();
+	              } else if(!isRerender) {
+	                [rest]();
+	              }
+	            ]]]]          
+	        }
+	        if(results.length > 0) {
+	          renderOne();
+	        } else if(!isRerender) {
+	          [rest]();
+	        }
+	      });
+      };
+      [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });
+      [renderList](false);
+    ]
+    with node := <newname> "node"
+       ; rest := <newname> "rest"
+       ; i := <newname> "i"
+       ; renderList := <newname> "renderList"
+       ; list := <newname> "list"
+       ; oldScope := <newname> "oldScope"
     
   elems-to-js(|root) :
     [ScreenString(s)|rest*] -> $[

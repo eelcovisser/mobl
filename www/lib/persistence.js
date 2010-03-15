@@ -1201,11 +1201,13 @@ var persistence = window.persistence || {};
 
       LocalQueryCollection.prototype.add = function(obj) {
         this._data[obj.id] = obj;
+        this.triggerEvent('add', this, obj);
       };
 
       LocalQueryCollection.prototype.remove = function(obj) {
         if(this._data[obj.id]) {
           delete this._data[obj.id];
+          this.triggerEvent('remove', this, obj);
         }
       };
 

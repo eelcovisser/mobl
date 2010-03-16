@@ -23,11 +23,9 @@ rules
        : rules ( ModuleName := qid )
        ; import-all
        ; alltd(add-tl-namespace)
-       ; topdown(try(declare))
-
+       ; declare-all
        ; alltd(add-namespace)
-       ; topdown(try(declare))
-
+       ; declare-all
        ; rename-all
        ; alltd(add-namespace)
        //; topdown(try(declare))

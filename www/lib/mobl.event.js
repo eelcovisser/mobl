@@ -1,9 +1,9 @@
-var mobiworks = window.mobiworks || {};
+var mobl = window.mobl || {};
 
 function replace (node, targetId, template, args, effect) {
     var scope = $(node).scope();
     var targetNode = scope.get(targetId);
-    var subScope = new mobiworks.LinkedMap(scope);
+    var subScope = new mobl.LinkedMap(scope);
     args.unshift(subScope);
     if (effect == 'slide') {
         targetNode.hide('slide', {
@@ -75,11 +75,11 @@ jQuery.fn.enableExtraEvents = function () {
                 node.dblclick(execFn); // debugging
                 break;
             case 'onportrait':
-                node.data(attr + "_sid", mobiworks.orientation.subscribe(
+                node.data(attr + "_sid", mobl.orientation.subscribe(
                         'portrait', execFn));
                 break;
             case 'onlandscape':
-                node.data(attr + "_sid", mobiworks.orientation.subscribe(
+                node.data(attr + "_sid", mobl.orientation.subscribe(
                         'landscape', execFn));
                 break;
             }
@@ -109,11 +109,11 @@ jQuery.fn.disableExtraEvents = function () {
         var node = nodes[i][1];
         switch (attr) {
         case 'onportrait':
-            mobiworks.orientation.unsubscribe('portrait', node.data(attr
+            mobl.orientation.unsubscribe('portrait', node.data(attr
                     + "_sid"));
             break;
         case 'onlandscape':
-            mobiworks.orientation.unsubscribe('landscape', node.data(attr
+            mobl.orientation.unsubscribe('landscape', node.data(attr
                     + "_sid"));
             break;
         }

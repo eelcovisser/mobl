@@ -39,10 +39,7 @@ strategies
     ]
     with qids := <qid-to-js> qid
        ; args := <map(?FArg(<id>, _)); separate-by(!", "); concat-strings> farg*
-       ; {| InSyncFunction
-          : rules ( InSyncFunction := 1 )
-          ; stats := </*cps-lift-expressions; debug; */statements-to-js> stat*
-         |}
+       ; stats := <statements-to-js> stat*
        ; if <is-string> qid then
 			     varname := $[var [qid]]
 			   else
@@ -78,24 +75,23 @@ rules // Statements
 
   stat-to-js :
     Return(e) -> $[return [es];]
-    where InSyncFunction
     with es := <expression-to-js> e
 
   stat-to-js :
     VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];]
-    where not(InTemplate)
+    //where not(InTemplate)
 
   stat-to-js :
     VarDeclInferred(x, e) -> $[var [x] = [<expression-to-js> e];]
-    where not(InTemplate)
+    //where not(InTemplate)
 
-  stat-to-js :
+  /*stat-to-js :
     VarDecl(x, t, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
     where InTemplate
 
   stat-to-js :
     VarDeclInferred(x, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
-    where InTemplate
+    where InTemplate*/
 
   stat-to-js :
     If(e, true-stat*, false-stat*) -> 
@@ -132,35 +128,25 @@ rules // Expressions
   exp-to-js :
     Int(n) -> n
   
-  exp-to-js :
-    Var(qid) -> $[scope.get('[<qid-to-js> qid]')]
-    where <InTemplate> qid
-        ; not(<is-ref> qid)
-
-  ref-exp-to-js :
+  /*ref-exp-to-js :
     Var(qid) -> $[ref(scope, '[<qid-to-js> qid]')]
-    where <InTemplate> qid
-        ; not(<is-ref> qid)
+    where not(<is-ref> qid)*/
 
   exp-to-js :
     Var(qid) -> <qid-to-js> qid
-    where not(<InTemplate> qid)
-        ; not(<is-ref> qid)
+    where not(<is-ref> qid)
 
   exp-to-js :
     Var(qid) -> $[[qid].get()]
-    where <InTemplate> qid
-        ; <is-ref> qid
+    where <is-ref> qid
 
   ref-exp-to-js :
     Var(qid) -> qid
-    where <InTemplate> qid
-        ; <is-ref> qid
+    where <is-ref> qid
           
   exp-to-js :
     Var(qid) -> $[[<qid-to-js> qid].get()]
-    where not(<InTemplate> qid)
-        ; <is-ref> qid
+    where <is-ref> qid
 
   exp-to-js :
     Call(qid, e*) -> $[[<qid-to-js> qid]([args])]

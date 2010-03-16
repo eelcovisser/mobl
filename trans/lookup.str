@@ -64,7 +64,7 @@ strategies
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
         ; arg-types1* := arg-types2*
-
+   
   lookup-method :
     (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
     where ExternalType(_, super, method*) := <GetType> t

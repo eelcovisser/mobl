@@ -16,7 +16,7 @@ rules
 
   definition-to-js :
     Template(qid, farg*, req*, elems) -> <emit> $[
-      mobiworks.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+      mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
         var [root] = $("<span>");
         [body] 
       });
@@ -24,15 +24,9 @@ rules
     with {| InTemplate
 		      : rules ( InTemplate := 1 )
 		      ; root := <newname> "root"
-		      ; body-elem := <elems-to-js-callback(|root)> elems
+		      ; body := <elems-to-js-callback(|root)> elems
 		      ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
 		      ; init-stats := <filter(?Init(<id>)); concat> elems
-		      ; if not([] := init-stats) then
-		          init-fn := <newname> "init"
-		          ; body := <concat; cps-statements> [<cps-lift-expressions; debug> init-stats, [body-elem]]
-		        else
-		          body := body-elem
-		        end
 		      |}
 
   definition-to-js :
@@ -43,7 +37,7 @@ rules
 
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
-    $[var [subScope] = new mobiworks.LinkedMap(scope);
+    $[var [subScope] = new mobl.LinkedMap(scope);
       [body-stats]
       [templatecall]
 ]
@@ -98,7 +92,7 @@ rules
     where <is-string> s
     
   elems-to-js(|root) :
-    [Init(_)|rest*] -> <elems-to-js(|root)> rest*
+    [Init(init-stats)|rest*] -> <concat; cps-statements> [<cps-lift-expressions> init-stats, [<elems-to-js(|root)> rest*]]
   
   elems-to-js(|root) :
     [] -> ""
@@ -110,16 +104,23 @@ rules
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
       [node].[method]([r].get());
-      [r].addSetListener(function(val) {
-        [node].[method](val);
+      [r].addSetListener(function(ref, val) {
+        if(ref === r) [node].[method](val);
       });
+      [subs]
     ]
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
        ; if "input" := tag then
            method := "val"
+           ; subs := $[
+               [node].change(function() {
+                 [es].set([node].[method]());
+               });
+             ]
          else
            method := "text"
+           ; subs := ""
          end
     
   elems-to-js(|root) :
@@ -134,10 +135,8 @@ rules
         [node].empty();
 	      [list].list(null, function(results) {
 	        results = results.reverse();
-	        var [oldScope] = scope;
 	        function renderOne() {
-              var scope = new mobiworks.LinkedMap([oldScope]);
-	            scope.setLocal('[x]', results.pop());
+	            var [x] = results.pop();
 	            [<concat; elems-to-js(|node)> [elems, [$[
 	              if(results.length > 0) {
 	                renderOne();
@@ -167,6 +166,26 @@ rules
     [ScreenString(s)|rest*] -> $[
       [root].append([s]);
       [<elems-to-js(|root)> rest*]]
+
+  elems-to-js(|root) :
+    [vd@VarDecl(x, t, e)|rest] -> <concat; elems-to-js(|root)> [<cps-lift-expressions> [vd], rest]
+    where not(<is-sync> e)
+
+  elems-to-js(|root) :
+    [vd@VarDecl(x, t, e)|rest] -> $[
+      var [x] = ref([<expression-to-js> e]);
+      [<elems-to-js(|root)> rest]]
+    where <is-sync> e
+
+  elems-to-js(|root) :
+    [vd@VarDeclInferred(x, e)|rest] -> <concat; elems-to-js(|root)> [<cps-lift-expressions> [vd], rest]
+    where not(<is-sync> e)
+
+  elems-to-js(|root) :
+    [vd@VarDeclInferred(x, e)|rest] -> $[
+      var [x] = ref([<expression-to-js> e]);
+      [<elems-to-js(|root)> rest]]
+    where <is-sync> e
     
   /*ref-expression-to-html :
     e -> $["[<ref-expression-to-js; html-escape> e]"]

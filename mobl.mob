@@ -33,6 +33,10 @@ template outputString(s : String) {
   <span databind=s></span>
 }
 
+template inputString(s : String) {
+  <input type="text" databind=s/>
+}
+
 template inputCheckbox(b : Bool) {
   <input type="checkbox" databind=b></input>
 }

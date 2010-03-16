@@ -38,17 +38,18 @@ template standardLayout(header : String) {
   "(C) Zef Hemel, 2010"
 }
 
-function addTask(l : Collection<Task>) {
-  l.add(Task { name := "Task X" });
+function removeTask(t : Task, l : Collection<Task>) {
+  l.remove(t); 
 }
 
-function removeTask(t : Task, l : Collection<Task>) {
-  l.remove(t);
+function addTask(t : Task, l : Collection<Task>) {
+  l.add(t);
 }
- 
+
 screen root() { 
+  var l : Collection<Task> := Collection<Task>()
+  var newTask : Task := Task{} 
   init {    
-    var l : Collection<Task> := Collection<Task>();
     l.add(Task { name := "Task 1" });
     l.add(Task { name := "Task 2" });  
     l.add(Task { name := "Task 3" });  
@@ -62,7 +63,9 @@ screen root() {
         button("Delete")[click:=removeTask(t, l)] 
       }
     }
-    button("Click me")[click:=addTask(l)]  
+    "Add task: "
+    inputString(newTask.name)
+    button("Add")[click:=addTask(newTask, l)]  
   }
 }
 

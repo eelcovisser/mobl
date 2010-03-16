@@ -1,4 +1,4 @@
-var mobiworks = window.mobiworks || {};
+var mobl = window.mobl || {};
 
 //var core = window.core || {};
 
@@ -17,7 +17,7 @@ mobl.log = function(s, callback) {
 };
 
 function ref(e, property) {
-    return new mobiworks.Reference(e, property);
+    return new mobl.Reference(e, property);
 }
 
 function fromScope(that, prop) {
@@ -110,12 +110,12 @@ function log(s) {
         if(this.e.addListener) {
             this.e.addListener('set', function(_, _, prop, value) {
                 if(prop === that.prop) {
-                    callback(value);
+                    callback(that, value);
                 }
             });
         }
     };
 
-    mobiworks.LinkedMap = LinkedMap;
-    mobiworks.Reference = Reference;
+    mobl.LinkedMap = LinkedMap;
+    mobl.Reference = Reference;
 }());

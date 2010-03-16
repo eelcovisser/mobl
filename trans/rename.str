@@ -14,6 +14,18 @@ strategies
            RenameId : x -> y
            TypeOf   : y -> t
         )
+
+  rename-local-function : 
+   name -> name2
+   where "template" := <RenameScope>
+   with name2 := name{<newname> name}
+      ; rules(
+           RenameFunction : name -> name2
+        )
+        
+  rename-local-function :
+    name -> name
+    where not("template" := <RenameScope>)
   
   rename-ref-var :
    (x, t) -> y
@@ -31,8 +43,11 @@ strategies
   rename :
     Var(x) -> Var(<RenameId> x)
 
+  rename :
+    Call(x, e*) -> Call(<RenameFunction> x, <rename-all> e*)
+    
   rename-scope(s) =
-    {| RenameId
+    {| RenameId, RenameFunction
      : s
      |}
 
@@ -85,40 +100,54 @@ strategies
            ; body2 := <rename-all> body
          )
 
-  rename :
-    Function(qid, farg*, rt, body) -> Function(qid, farg2*, rt, body2)
-    with action-scope( 
-           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
-           ; body2 := <rename-all> body
-         )
-
-  rename :
-    FunctionNoReturnType(qid, farg*, body) -> FunctionNoReturnType(qid, farg2*, body2)
-    with action-scope( 
-           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
-           ; body2 := <rename-all> body
-         )
-
-  rename :
-    SyncFunction(qid, farg*, rt, body) -> SyncFunction(qid, farg2*, rt, body2)
-    with action-scope( 
-           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
-           ; body2 := <rename-all> body
-         )
-
-  rename :
-    SyncFunctionNoReturnType(qid, farg*, body) -> SyncFunctionNoReturnType(qid, farg2*, body2)
-    with action-scope( 
-           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
-           ; body2 := <rename-all> body
-         )
-
-  rename :
-    VarDecl(name, t, e) -> VarDecl(<rename-var> (name, t), t, <rename-all> e)
+strategies
   
   rename :
-    ScreenVarDecl(name, t, e) -> ScreenVarDecl(<rename-var> (name, t), t, <rename-all> e)
-    
+    Function(qid, farg*, rt, body) -> Function(qid2, farg2*, rt, body2)
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+         ; qid2 := <rename-local-function> qid
+
+  rename :
+    FunctionNoReturnType(qid, farg*, body) -> FunctionNoReturnType(qid2, farg2*, body2)
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+         ; qid2 := <rename-local-function> qid
+
+  rename :
+    SyncFunction(qid, farg*, rt, body) -> SyncFunction(qid2, farg2*, rt, body2)
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) -> FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+         ; qid2 := <rename-local-function> qid
+
+  rename :
+    SyncFunctionNoReturnType(qid, farg*, body) -> SyncFunctionNoReturnType(qid2, farg2*, body2)
+    with action-scope( 
+           farg2* := <map(\ FArg(x, t) ->FArg(<rename-var> (x, t), t) \)> farg*
+           ; body2 := <rename-all> body
+         )
+         ; qid2 := <rename-local-function> qid
+  
+  rename :
+    Init(body) -> Init(body2)
+    with action-scope(body2 := <rename-all> body)
+
+strategies
+  
+  rename :
+    VarDecl(name, t, e) -> VarDecl(<rename-var> (name, t), t, <rename-all> e)
+    where "action" := <RenameScope>
+
+  rename :
+    VarDecl(name, t, e) -> VarDecl(<rename-ref-var> (name, t), t, <rename-all> e)
+    where "template" := <RenameScope>
+   
   rename :
     List(x, t, e, body) -> List(x2, t, e2, body2)
     with rename-scope(

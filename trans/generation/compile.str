@@ -24,7 +24,7 @@ strategies
       ; where(path := <qid-to-path> qid
               ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path])
       ; fp := <fopen> (js-filename, "w")
-      ; <fputs> ($[mobiworks.provides('[<qid-to-js> qid]');
+      ; <fputs> ($[mobl.provides('[<qid-to-js> qid]');
 ], fp)
       ; <fputs> (<get-all>, fp)
       ; <fclose> fp

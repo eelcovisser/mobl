@@ -1,6 +1,6 @@
-var mobiworks = window.mobiworks || {};
-mobiworks.screenStack = [];
-mobiworks.rootScope = new mobiworks.LinkedMap();
+var mobl = window.mobl || {};
+mobl.screenStack = [];
+mobl.rootScope = new mobl.LinkedMap();
 
 function updateScrollers () {
     var scrollwrappers = $("#scrollwrapper:visible");
@@ -16,7 +16,7 @@ function updateScrollers () {
     }
 }
 
-mobiworks.provides = function (moduleName) {
+mobl.provides = function (moduleName) {
     var parts = moduleName.split('.');
     var current = window;
     for ( var i = 0; i < parts.length; i++) {
@@ -34,19 +34,19 @@ $(window).resize(updateScrollers);
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
 // false);
 
-mobiworks.call = function (screenName, args, callback) {
+mobl.call = function (screenName, args, callback) {
     var screenFrame = {
         "name": screenName,
         "args": args,
         "callback": callback,
         "div": screenName.replace('.', '__')
     };
-    mobiworks.screenStack.push(screenFrame);
+    mobl.screenStack.push(screenFrame);
     var callbackFn = function () {
         // when callback function is called (i.e. return)
-        mobiworks.screenStack.pop();
-        if (mobiworks.screenStack.length > 0) {
-            var previousScreen = mobiworks.screenStack[mobiworks.screenStack.length - 1];
+        mobl.screenStack.pop();
+        if (mobl.screenStack.length > 0) {
+            var previousScreen = mobl.screenStack[mobl.screenStack.length - 1];
             $("body > #" + screenFrame.div).hide('slide', {
                 direction: "right"
             }, 150, function () {
@@ -65,7 +65,7 @@ mobiworks.call = function (screenName, args, callback) {
     var parts = screenName.split('.');
     var moduleName = parts.slice(0, parts.length - 1).join('.');
     var screenTemplate = parts[parts.length - 1];
-    var subScope = new mobiworks.LinkedMap(mobiworks.rootScope);
+    var subScope = new mobl.LinkedMap(mobl.rootScope);
     var screenTemplate = subScope.get(screenFrame.div);
     screenTemplate.apply(null, [subScope].concat(args).concat([function(node) {
         $("body").append(node);

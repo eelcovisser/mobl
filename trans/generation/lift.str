@@ -11,12 +11,16 @@ strategies
   strategies // expression lifting
   
   //cps-lift-expressions = debug(!"lift: "); fail
+  
+  cps-lift-expressions =
+       cps-lift-exprs
+    <+ ?[a|k]
+       ; ![a|<cps-lift-expressions> k] 
 
   cps-lift-expressions :
-    [Return(e)|stats] -> [Return(e)|<cps-lift-expressions> stats]
-    where <is-sync> e
+    [] -> []
 
-  cps-lift-expressions :
+  cps-lift-exprs :
     [Return(e)|stats] -> <concat> [stats2, [Return(e2)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
@@ -24,11 +28,7 @@ strategies
           ; e2 := <Exp>
           |}
 
-  cps-lift-expressions :
-    [VarDecl(x, t, e)|stats] ->[VarDecl(x, t, e)|<cps-lift-expressions> stats]
-    where <is-sync> e
-
-  cps-lift-expressions :
+  cps-lift-exprs :
     [VarDecl(x, t, e)|stats] -> <concat> [stats2, [VarDecl(x, t, e2)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
@@ -36,11 +36,15 @@ strategies
           ; e2 := <Exp>
           |}
 
-  cps-lift-expressions :
-    [Assignment(qid, e)|stats] -> [Assignment(qid, e)|<cps-lift-expressions> stats]
-    where <is-sync> e
+  cps-lift-exprs :
+    [VarDeclInferred(x, e)|stats] -> <concat> [stats2, [VarDeclInferred(x, e2)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
 
-  cps-lift-expressions :
+  cps-lift-exprs :
     [Assignment(qid, e)|stats] -> <concat> [stats2, [Assignment(qid, e2)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
@@ -48,11 +52,7 @@ strategies
           ; e2 := <Exp>
           |}
 
-  cps-lift-expressions :
-    [ExpStat(e)|stats] -> [ExpStat(e)|<cps-lift-expressions> stats]
-    where <is-sync> e
-
-  cps-lift-expressions :
+  cps-lift-exprs :
     [ExpStat(e)|stats] -> <concat> [stats2, <cps-lift-expressions> stats]
     where not(<is-sync> e)
     with {| Exp
@@ -60,11 +60,7 @@ strategies
           ; e2 := <Exp>
           |}
 
-  cps-lift-expressions :
-    [If(e, true-stat*, false-stat*)|stats] ->[If(e, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]
-    where <is-sync> e
-
-  cps-lift-expressions :
+  cps-lift-exprs :
     [If(e, true-stat*, false-stat*)|stats] -> 
     <concat> [stats2, [If(e2, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
@@ -73,9 +69,8 @@ strategies
           ; e2 := <Exp>
           |}
 
-  cps-lift-expressions :
-    [] -> []
-
+rules
+  
   cps-lift-expression :
     e@Var(_) -> []
     with rules ( Exp :+= e )
@@ -142,6 +137,15 @@ strategies
          |}
        ; rules ( Exp :+= Var(v) )
 
+  cps-lift-expression :
+    FieldAccess(e1, x) -> <concat> [stats1, [VarDeclInferred(v, FieldAccess(e2, x))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats1 := <cps-lift-expression> e1
+          ; e2 := <Exp>
+         |}
+       ; rules ( Exp :+= Var(v) )
+
 strategies
   
   is-sync = ?Int(_)
@@ -154,6 +158,10 @@ strategies
     ; <is-sync> e2
   
   is-sync =
+    ?FieldAccess(e, x)
+    ; <is-sync> e
+
+  is-sync =
     ?Call(qid, e*)
     ; <IsSyncFunction> qid
     ; <map(is-sync)> e*
@@ -162,3 +170,11 @@ strategies
     ?MethodCall(e, x, e*)
     ; <lookup-method> (<type-of> e, x, <map(type-of)> e*)
     ; ?ExternalSyncMethod(_, _, _)
+
+  is-sync =
+    ?CollectionCons(_, _, e*)
+    ; <map(is-sync)> e*
+        
+  is-sync =
+    ?EntityCons(t, propval*)
+    ; <map(?PropVal(_, <id>); is-sync)> propval*

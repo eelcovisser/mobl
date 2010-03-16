@@ -1,0 +1,41 @@
+module todo
+ 
+import mobl
+
+entity Task {
+  name        : String
+  done        : Bool
+}  
+ 
+template standardLayout(header : String) {
+  header(header) 
+  elements()
+}
+
+function removeTask(t : Task) {
+  remove(t);
+  flush();
+}
+
+function addTask(t : Task) {
+  add(t);
+  flush();
+}
+
+screen root() { 
+  var newTask : Task := Task{}
+  standardLayout("All tasks") {
+    list(t : Task in Task.all().order("done", false)) {  
+      listitem {
+        inputCheckbox(t.done)[change:=flush()] " "
+        outputString(t.name)
+        rightButton("Delete")[click:=removeTask(t)] 
+      }
+    }
+    "Add task: "
+    ul {
+      listitem { inputString(newTask.name) }
+    }
+    redButton("Add")[click:=addTask(newTask)]
+  }
+}

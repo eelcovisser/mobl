@@ -37,14 +37,14 @@ rules
 
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
-    $[var [subScope] = new mobl.LinkedMap(scope);
-      [body-stats]
+    $[[body-stats]
       [templatecall]
 ]
     with elem-root := <newname> "root"
        ; subScope := <newname> "subScope"
        ; if not([] := elems) then
-           body-stats := $[[subScope].setLocal('elements', function(scope, callback) {
+           body-stats := $[var [subScope] = new mobl.LinkedMap(scope);
+                           [subScope].setLocal('elements', function(scope, callback) {
                              var [elem-root] = $("<span>");
                              [<elems-to-js-callback(|elem-root)> elems]
                            });
@@ -63,7 +63,7 @@ rules
          else
            prop-set := ""
          end
-       ; args  := <map(ref-expression-to-js); <concat> [[subScope], <id>, [
+       ; args  := <map(ref-expression-to-js); <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
            $[function(node) {
                [prop-set]
                [root].append(node.contents());
@@ -72,6 +72,7 @@ rules
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
   
+ 
   prop-to-bind :
     PropertyArg(x, e) -> $[c.bind('[x]', function() { [<expression-to-js> e]; });]
   
@@ -105,7 +106,7 @@ rules
       var [r] = [es];
       [node].[method]([r].get());
       [r].addSetListener(function(ref, val) {
-        if(ref === r) [node].[method](val);
+        if(ref === [r]) [node].[method](val);
       });
       [subs]
     ]
@@ -132,8 +133,8 @@ rules
         [<elems-to-js(|root)> rest*]
       };
       var [renderList] = function(isRerender) {
-        [node].empty();
 	      [list].list(null, function(results) {
+          [node].empty();
 	        results = results.reverse();
 	        function renderOne() {
 	            var [x] = results.pop();

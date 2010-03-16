@@ -15,6 +15,23 @@ mobl.log = function(s, callback) {
     console.log(s);
     if(callback) callback();
 };
+mobl.add = function(e, callback) {
+    persistence.add(e);
+    var allEnt = persistence.define(e._type).all(); // NOTE: define() is a hack!
+    allEnt.triggerEvent('add', allEnt, e);
+    if(callback) callback();
+};
+mobl.remove = function(e, callback) {
+    persistence.remove(e);
+    var allEnt = persistence.define(e._type).all();
+    allEnt.triggerEvent('remove', allEnt, e);
+    if(callback) callback();
+};
+
+mobl.flush = function(e, callback) {
+    persistence.flush(null, callback);
+};
+
 
 function ref(e, property) {
     return new mobl.Reference(e, property);
@@ -97,8 +114,7 @@ function log(s) {
     Reference.prototype.set = function(value) {
         if(!this.prop) {
             this.e = value;
-        }
-        if(this.e.set) {
+        } else if(this.e.set) {
             return this.e.set(this.prop, value);
         } else {
             this.e[this.prop] = value;
@@ -107,8 +123,8 @@ function log(s) {
     
     Reference.prototype.addSetListener = function(callback) {
         var that = this;
-        if(this.e.addListener) {
-            this.e.addListener('set', function(_, _, prop, value) {
+        if(this.e.addEventListener) {
+            this.e.addEventListener('set', function(_, _, prop, value) {
                 if(prop === that.prop) {
                     callback(that, value);
                 }

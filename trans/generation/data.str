@@ -13,8 +13,7 @@ strategies
     {| OneToMany
      : map(entity-to-js)
      ; <map(one-to-many-to-js)> <bagof-OneToMany>
-     ; <emit> $[persistence.schemaSync();
-]
+     //; <emit> $[persistence.schemaSync();]
      |}
      
   entity-to-js :

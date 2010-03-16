@@ -42,7 +42,7 @@ strategies
   
   rename :
     Var(x) -> Var(<RenameId> x)
-
+    
   rename :
     Call(x, e*) -> Call(<RenameFunction> x, <rename-all> e*)
     

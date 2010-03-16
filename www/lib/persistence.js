@@ -209,6 +209,7 @@ var persistence = window.persistence || {};
           delete trackedObjects[id]; // Stop tracking
         }
       }
+      objectsToRemove = {};
       function removeOneObject() {
         var obj = removeObjArray.pop();
         remove(obj, tx, function () {
@@ -332,7 +333,7 @@ var persistence = window.persistence || {};
     var entityClassCache = {};
 
     /**
-     * Retrieves or creates an enitty constructor function for a given
+     * Retrieves or creates an entity constructor function for a given
      * entity name
      * @return the entity constructor function to be invoked with `new fn()`
      */
@@ -498,7 +499,10 @@ var persistence = window.persistence || {};
          * of this entity in the database
          */
         Entity.all = function () {
-          return new AllDbQueryCollection(entityName);
+          if(!this.allCollection) { // Cache
+            this.allCollection = new AllDbQueryCollection(entityName);
+          }
+          return this.allCollection;
         }
 
         Entity.load = function(tx, id, callback) {

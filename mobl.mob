@@ -14,8 +14,8 @@ external type Collection<T> {
   function get() : Array<T>
   sync function filter(property : String, op : String, value : Object) : Collection<T>
   sync function order(property : String, ascending : Bool) : Collection<T>
-  sync function limit(n : String) : Collection<T>
-  sync function offset(n : String) : Collection<T>
+  sync function limit(n : Int) : Collection<T>
+  sync function offset(n : Int) : Collection<T>
   sync function add(item : T) : void
   sync function remove(item : T) : void
 }
@@ -27,7 +27,9 @@ external type Entity<T> {
 external function log(s : String) : void
 external function alert(s : String) : void
 
-external function flush() : void 
+external function flush() : void
+external sync function add(e : Object) : void
+external sync function remove(e : Object) : void
 
 template outputString(s : String) {
   <span databind=s></span>
@@ -57,6 +59,10 @@ template listitem() {
   <li>elements()</li>
 }
 
-template button(text : String) {
-  <button databind=text></button>
+template redButton(text : String) {
+  <a href="javascript:void(0)" class="redButton" databind=text></a>
+}
+
+template rightButton(text : String) {
+  <a href="javascript:void(0)" class="button" databind=text></a>
 }

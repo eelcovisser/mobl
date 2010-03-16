@@ -47,14 +47,14 @@ strategies
 			   end
 
   definition-to-js :
-    Function(qid, farg*, rt, stat*) -> <emit> $[
+    Function(qid, farg*, rt, stats) -> <emit> $[
     [varname] = function([args]) {
-      [stats]
+      [stats2]
     };
     ]
     with qids := <qid-to-js> qid
        ; args := <map(?FArg(<id>, _)); <concat> [<id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
-       ; stats := <cps-lift-expressions; cps-statements> stat*
+       ; stats2 := <cps-lift-expressions; <concat> [<id>, [$[if(callback) callback();]]]; cps-statements> stats
        ; if <is-string> qid then
            varname := $[var [qid]]
          else

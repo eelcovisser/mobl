@@ -77,6 +77,13 @@ rules
     where not(lookup-type-aux)
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
 
+  // Add namespace to possible type references which look like vars
+  add-namespace :
+    Var(qid) -> Var(qid2)
+    where <is-string> qid
+    where not(<lookup-type-aux> SimpleType(qid))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-type-aux> SimpleType(<id>); !newid})> [<ModuleName>|<bagof-Imports>]
+
   add-namespace :
     GenericType(qid, t*) -> GenericType(qid2, t2*)
     where not(lookup-type-aux)

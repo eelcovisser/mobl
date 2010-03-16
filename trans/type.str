@@ -23,6 +23,10 @@ strategies
     EntityCons(t, _) -> t
 
   eq-type-of :
+    Var(qid) -> GenericType("Type", [SimpleType(qid)])
+    where <lookup-type-aux> SimpleType(qid)
+
+  eq-type-of :
     MethodCall(e, x, e*) -> rt
     where m := <lookup-method> (<type-of> e, x, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
         ; (   ExternalMethod(_, _, rt) := m
@@ -33,3 +37,11 @@ strategies
 
   eq-type-of :
     BinMethodCall(e1, op, e2) -> <type-of> e1 // @TODO: Fix this
+  
+strategies
+  
+  type-compatible =
+    ?(t, t)
+  
+  type-compatible =
+    ?(t1, t2)

@@ -80,6 +80,14 @@ rules
     with rules ( Exp :+= e )
 
   cps-lift-expression :
+    e@True() -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
+    e@False() -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
     e@String(_) -> []
     with rules ( Exp :+= e )
 
@@ -149,6 +157,8 @@ rules
 strategies
   
   is-sync = ?Int(_)
+  is-sync = ?True()
+  is-sync = ?False()
   is-sync = ?String(_)
   is-sync = ?Var(_)
   

@@ -116,17 +116,17 @@ rules // Expressions
   ref-expression-to-js =
     ref-exp-to-js <+ !$[ref([<expression-to-js>])]
   
-  ref-exp-to-js :
-    String(s) -> $[ref([s])]
-
-  ref-exp-to-js :
-    Int(n) -> $[ref([n])]
-
   exp-to-js :
     String(s) -> s
 
   exp-to-js :
     Int(n) -> n
+
+  exp-to-js :
+    True() -> $[true]
+
+  exp-to-js :
+    False() -> $[false]
   
   /*ref-exp-to-js :
     Var(qid) -> $[ref(scope, '[<qid-to-js> qid]')]

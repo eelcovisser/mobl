@@ -19,7 +19,7 @@ exports
     "module" QId Definition*       -> Start {cons("Module")}
     
     "import" QId                   -> Definition {cons("Import")}
-    
+
     ID ":" Type                    -> FArg {cons("FArg")}
     QId                            -> Type {cons("SimpleType")}
     QId "<" {Type ","}* ">"        -> Type {cons("GenericType")}

@@ -28,6 +28,8 @@ exports
   
     STRING                        -> Exp {cons("String")}
     INT                           -> Exp {cons("Int")}
+    "true"                        -> Exp {cons("True")}
+    "false"                       -> Exp {cons("False")}
     QId                           -> Exp {cons("Var")}
     QId "(" {Exp ","}* ")"        -> Exp {cons("Call")}
     Exp "." ID "(" {Exp ","}* ")" -> Exp {cons("MethodCall")}

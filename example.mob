@@ -51,8 +51,9 @@ function addTask(t : Task) {
 screen root() { 
   var newTask : Task := Task{}
   standardLayout("All tasks") {
-    list(t : Task in Task.all().limit(10)) {  
-      listitem { 
+    list(t : Task in Task.all().order("done", false).limit(10)) {  
+      listitem {
+        inputCheckbox(t.done)[change:=flush()]
         outputString(t.name)
         rightButton("Delete")[click:=removeTask(t)] 
       }
@@ -62,7 +63,6 @@ screen root() {
       listitem { inputString(newTask.name) }
     }
     redButton("Add")[click:=addTask(newTask)]
-    //outputString(newTask.name)  
   }
 }
 

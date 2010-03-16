@@ -77,9 +77,9 @@ rules
     PropertyArg(x, e) -> $[c.bind('[x]', function() { [<expression-to-js> e]; });]
   
   elems-to-js(|root) :
-    [Html(tag, arg*, elems, _)|rest*] -> $[
+    [tg@Html(tag, arg*, elems, _)|rest*] -> $[
       var [node] = $("<[tag] [<escape> args]>");
-      [<filter(databind-tag-arg-to-js(|tag, node)); concat-strings> arg*]
+      [<filter(databind-tag-arg-to-js(|tg, node)); concat-strings> arg*]
       [body]
     ]
     with args := <filter(tag-arg-to-html); separate-by(!" "); concat-strings> arg*
@@ -101,7 +101,7 @@ rules
   tag-arg-to-html :
     HtmlArg(name, s) -> $[[name]=[s]]
 
-  databind-tag-arg-to-js(|tag, node) :
+  databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
       [node].[method]([r].get());
@@ -110,6 +110,8 @@ rules
       });
       [subs]
     ]
+    where Html(tag, arg*, _, _) := tg
+        ; [] := <debug; filter(?HtmlArg("type", "\"checkbox\""))> arg*
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
        ; if "input" := tag then
@@ -123,6 +125,22 @@ rules
            method := "text"
            ; subs := ""
          end
+
+  databind-tag-arg-to-js(|tg, node) :
+    HtmlDatabindArg(e) -> $[
+      var [r] = [es];
+      [node].attr('checked', !![r].get());
+      [r].addSetListener(function(ref, val) {
+        if(ref === [r]) [node].attr('checked', !!val);
+      });
+      [node].change(function() {
+        [es].set(!![node].attr('checked'));
+      });
+    ]
+    where Html("input", arg*, _, _) := tg
+        ; not([] := <filter(?HtmlArg("type", "\"checkbox\""))> arg*)
+    with es := <ref-expression-to-js> e
+       ; r  := <newname> "ref"
     
   elems-to-js(|root) :
     [List(x, t, e, elems)|rest*] -> $[

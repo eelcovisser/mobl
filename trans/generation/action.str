@@ -30,9 +30,13 @@ strategies
     ; <emit> $[[<qid-to-js> qid].isLoaded = true;]
 
 strategies
+  
+  definition-to-js =
+    function-to-js
+    ; emit
 	
-  definition-to-js :
-    SyncFunction(qid, farg*, rt, stat*) -> <emit> $[
+  function-to-js :
+    SyncFunction(qid, farg*, rt, stat*) -> $[
     [varname] = function([args]) {
       [stats]
     };
@@ -46,15 +50,15 @@ strategies
 			     varname := <qid-to-js> qid
 			   end
 
-  definition-to-js :
-    Function(qid, farg*, rt, stats) -> <emit> $[
+  function-to-js :
+    Function(qid, farg*, rt, stats) -> $[
     [varname] = function([args]) {
       [stats2]
     };
     ]
     with qids := <qid-to-js> qid
        ; args := <map(?FArg(<id>, _)); <concat> [<id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
-       ; stats2 := <cps-lift-expressions; <concat> [<id>, [$[if(callback) callback();]]]; cps-statements> stats
+       ; stats2 := <cps-lift-expressions; <concat> [<id>, [$[if(callback) callback(); return;]]]; cps-statements> stats
        ; if <is-string> qid then
            varname := $[var [qid]]
          else
@@ -75,6 +79,11 @@ rules // Statements
 
   stat-to-js :
     Return(e) -> $[return [es];]
+    with es := <expression-to-js> e
+
+  stat-to-js :
+    ScreenReturn(e) -> $[screenCallback([es]);
+                         return;]
     with es := <expression-to-js> e
 
   stat-to-js :
@@ -128,6 +137,9 @@ rules // Expressions
   exp-to-js :
     False() -> $[false]
   
+  exp-to-js :
+    Null() -> $[null]
+
   /*ref-exp-to-js :
     Var(qid) -> $[ref(scope, '[<qid-to-js> qid]')]
     where not(<is-ref> qid)*/
@@ -159,7 +171,7 @@ rules // Expressions
     
   ref-exp-to-js :
     Indexer(e, idxe) -> $[ref([es], [idxes])]
-    with es := <expression-to-js> e
+    with es := <ref-expression-to-js> e
        ; idxes := <expression-to-js> idxe
 
   exp-to-js :
@@ -177,7 +189,7 @@ rules // Expressions
       
   ref-exp-to-js :
     FieldAccess(e, x) -> $[ref([es], '[x]')]
-    with es := <expression-to-js> e
+    with es := <ref-expression-to-js> e
 
   exp-to-js :
     FieldAccess(e, x) -> $[[es].[x]]

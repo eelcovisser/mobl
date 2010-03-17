@@ -1,8 +1,8 @@
 var mobl = window.mobl || {};
 
-//var core = window.core || {};
+// var core = window.core || {};
 
-//core.alert = alert;
+// core.alert = alert;
 
 if(!window.mobl) {
     var mobl = {};
@@ -28,7 +28,7 @@ mobl.remove = function(e, callback) {
     if(callback) callback();
 };
 
-mobl.flush = function(e, callback) {
+mobl.flush = function(callback) {
     persistence.flush(null, callback);
 };
 
@@ -88,43 +88,74 @@ function log(s) {
     /**
      * Represents a reference to a property
      * 
-     * @param e
-     *            object to reference
+     * @param ref
+     *            parent ref to reference
      * @param prop
      *            property to reference, if null/undefined this reference
      *            represents a reference to a decoupled values
      * @constructor
      */
-    function Reference(e, prop) {
-        this.e = e;
+    function Reference(ref, prop) {
+        this.ref = ref;
         this.prop = prop;
+        this.childRefs = [];
+        if(prop) {
+            ref.childRefs.push(this);
+        }
+        this.subscribers = {}; // Observable
     }
+    
+    Reference.prototype = new persistence.Observable();
     
     Reference.prototype.get = function() {
         if(!this.prop) {
-            return this.e;
+            return this.ref;
         }
-        if(this.e.get) {
-            return this.e.get(this.prop);
-        } else {
-            return this.e[this.prop];
+        if(this.ref.get) {
+            return this.ref.get()[this.prop];
         }
     };
     
     Reference.prototype.set = function(value) {
+        // trigger rebinding on all child refs
         if(!this.prop) {
-            this.e = value;
-        } else if(this.e.set) {
-            return this.e.set(this.prop, value);
-        } else {
-            this.e[this.prop] = value;
+            this.ref = value;
+            this.triggerEvent('set', this, value);
+        } else  {
+            this.ref.get()[this.prop] = value;
+        }
+        for(var i = 0; i < this.childRefs.length; i++) {
+            //this.childRefs[i].ref = this;
+            var childRef = this.childRefs[i];
+            childRef.rebind();
+            childRef.triggerEvent('set', childRef, childRef.get());
         }
     };
     
+    Reference.prototype.rebind = function() {
+        var that = this;
+        if(this.prop) {
+            if(this.ref.get().addEventListener) {
+                window.newTask2 = this.ref.get();
+                //console.log("Attaching event listener to property: " + this.prop)
+                this.ref.get().addEventListener('set', function(_, _, prop, value) {
+                    if(prop === that.prop) {
+                        that.triggerEvent('set', that, value);
+                    }
+                });
+            } else {
+                console.log("Could not rebind for: " + this.prop);
+            }
+        }
+        for(var i = 0; i < this.childRefs.length; i++) {
+            this.childRefs[i].rebind(value[this.childRefs[i].prop]);
+        }
+    };
+        
     Reference.prototype.addSetListener = function(callback) {
         var that = this;
-        if(this.e.addEventListener) {
-            this.e.addEventListener('set', function(_, _, prop, value) {
+        if(this.ref.addEventListener) {
+            this.ref.addEventListener('set', function(_, _, prop, value) {
                 if(prop === that.prop) {
                     callback(that, value);
                 }

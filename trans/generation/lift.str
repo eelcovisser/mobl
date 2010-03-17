@@ -29,6 +29,14 @@ strategies
           |}
 
   cps-lift-exprs :
+    [ScreenReturn(e)|stats] -> <concat> [stats2, [ScreenReturn(e2)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-exprs :
     [VarDecl(x, t, e)|stats] -> <concat> [stats2, [VarDecl(x, t, e2)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
@@ -158,6 +166,7 @@ strategies
   
   is-sync = ?Int(_)
   is-sync = ?True()
+  is-sync = ?Null()
   is-sync = ?False()
   is-sync = ?String(_)
   is-sync = ?Var(_)

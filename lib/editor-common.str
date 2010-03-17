@@ -26,7 +26,7 @@ strategies
    *                      Performs semantic analysis on a tree
    */
   open-import(resolve-path, parse-file, externalize):
-    import -> def*
+    import -> defs
     where
       if not(!import => COMPLETION(_)) then
         path       := <resolve-path> import;
@@ -38,15 +38,15 @@ strategies
           if <is-newer> (cache-path, path) then
             file := <ReadFromFile> cache-path
           else
-            file := <parse-file <+ debug(!"Could not parse: "); fail> path;
+            file := <parse-file; externalize <+ debug(!"Could not parse/compile: "); fail> path;
             if <file-exists> path then
               // Only cache if on filesystem (e.g., ignore libstratego-lib)
               <WriteToBinaryFile> (cache-path, file)
             end        
-          end;
+          end; 
           {| CurrentFile:
             rules(CurrentFile := path);
-            def* := <externalize> file
+            defs := file
           |}
         end
       end

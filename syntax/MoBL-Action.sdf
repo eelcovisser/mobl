@@ -23,6 +23,9 @@ exports
     "if" "(" Exp ")" "{" Statement* "}" "else" "{" Statement* "}" -> Statement {cons("If")}
     "if" "(" Exp ")" "{" Statement* "}"                  -> Statement {cons("IfNoElse")}
     "return" Exp ";"                            -> Statement {cons("Return")}
+    "screen" "return" Exp ";"                   -> Statement {cons("ScreenReturn")}
+    "return" ";"                                -> Statement {cons("Return")}
+    "screen" "return" ";"                       -> Statement {cons("ScreenReturn")}
     
   context-free syntax %% Expressions
   
@@ -30,6 +33,7 @@ exports
     INT                           -> Exp {cons("Int")}
     "true"                        -> Exp {cons("True")}
     "false"                       -> Exp {cons("False")}
+    "null"                        -> Exp {cons("Null")}
     QId                           -> Exp {cons("Var")}
     QId "(" {Exp ","}* ")"        -> Exp {cons("Call")}
     Exp "." ID "(" {Exp ","}* ")" -> Exp {cons("MethodCall")}

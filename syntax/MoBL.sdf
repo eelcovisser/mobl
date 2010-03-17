@@ -35,6 +35,8 @@ exports
     "list" -> ID {reject}
     "placeholder" -> ID {reject}
     "function" -> ID {reject}
+    "sync" -> ID {reject}
+    "null" -> ID {reject}
     "if" -> ID {reject}
     "databind" -> ID {reject}
     

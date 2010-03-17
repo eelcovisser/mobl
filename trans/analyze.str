@@ -35,21 +35,26 @@ rules
 
   import-all =
     alltd(import-module)
-    ; topdown(try(flatten-list))
   
   import-module =
     ?Import(qid)
-    ; lookup-import-module
+    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
+            ; <declare-all> Module(qid, <id>))
     ; rules ( Imports :+= qid )
 
-  lookup-import-module :
-    Import(qid) -> [<id>|def*] // preserve import itself
-    where def* := <open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
+  lookup-import-module =
+    ?Import(qid)
+    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
+            ; <declare-all> Module(qid, <id>))
     
   compile-and-externalize-module :
     mod@Module(qid, def*) -> def2*
     with compile
-       ; def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
+       ; def2* := <externalize-module> mod
+
+  externalize-module :
+    mod@Module(qid, def*) -> def2*
+    with def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
     
   qid-to-path =
     is-string

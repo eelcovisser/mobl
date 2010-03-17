@@ -1,41 +1,59 @@
 module todo
  
 import mobl
-
+   
 entity Task {
   name        : String
   done        : Bool
 }  
- 
+
 template standardLayout(header : String) {
   header(header) 
   elements()
-}
+} 
 
-function removeTask(t : Task) {
-  remove(t);
-  flush();
-}
-
-function addTask(t : Task) {
-  add(t);
-  flush();
-}
-
-screen root() { 
+screen addTask() : Task {
   var newTask : Task := Task{}
-  standardLayout("All tasks") {
-    list(t : Task in Task.all().order("done", false)) {  
-      listitem {
-        inputCheckbox(t.done)[change:=flush()] " "
-        outputString(t.name)
-        rightButton("Delete")[click:=removeTask(t)] 
-      }
-    }
-    "Add task: "
+    
+  function add() { 
+    screen return newTask;
+  } 
+  
+  function cancel() {
+    screen return null; 
+  } 
+ 
+  standardLayout("Add task") {
     ul {
       listitem { inputString(newTask.name) }
     }
-    redButton("Add")[click:=addTask(newTask)]
+    button("Add")[click:=add()]
+    button("Back")[click:=cancel()]
+  }
+}  
+ 
+screen root() { 
+	function add() {
+	  var newTask : Task := addTask();
+	  if(newTask != null) {
+	    add(newTask);
+      flush();
+	  }
+	}
+
+	function removeTask(t : Task) {
+	  remove(t); 
+	  flush();
+	}
+	
+  standardLayout("All tasks") {
+    list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
+      listitem {
+        inputCheckbox(t.done)[change:=flush()] " "
+        outputString(t.name)
+        deleteButton("Delete")[click:=removeTask(t)] 
+      }
+    }
+    button("Add")[click:=add()]
   }
 }

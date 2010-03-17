@@ -7,13 +7,31 @@ imports
   generation/ui
   declare
   type
+  rename
+  lookup
 
   //cps-statements = debug(!"statements: "); fail
 strategies
   
   cps-statements :
     [Return(e)|stat*] -> <cps-expression(|[$[if(callback) callback(result);
+                                             return;
 ]|stat*])> e
+
+  cps-statements :
+    [ScreenReturn(e)|stat*] -> <cps-expression(|[$[if(screenCallback) screenCallback(result);
+                                                   return;
+]|stat*])> e
+
+  cps-statements :
+    [Return()|stat*] -> <cps-statements> [$[if(callback) callback();
+                                            return;
+]|stat*]
+
+  cps-statements :
+    [ScreenReturn()|stat*] -> <cps-statements> [$[if(screenCallback) screenCallback();
+                                                  return;
+]|stat*]
 
   cps-statements :
     [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[var [x] = result;
@@ -26,24 +44,38 @@ strategies
     where not(InTemplate)
 
   cps-statements :
-    [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[scope.setLocal('[x]', result);
+    [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[var [x] = result;
 ]|stat*])> e
     where InTemplate
+        ; not(<is-ref> x)
 
   cps-statements :
-    [VarDeclInferred(x, e)|stat*] -> <cps-expression(|[$[scope.setLocal('[x]', result);
+    [VarDecl(x, t, e)|stat*] -> <cps-expression(|[$[var [x] = ref(result);
 ]|stat*])> e
     where InTemplate
+        ; <is-ref> x
+
+  cps-statements :
+    [VarDeclInferred(x, e)|stat*] -> <cps-expression(|[$[var [x] = result;
+]|stat*])> e
+    where InTemplate
+        ; not(<is-ref> x)
+
+  cps-statements :
+    [VarDeclInferred(x, e)|stat*] -> <cps-expression(|[$[var [x] = ref(result);
+]|stat*])> e
+    where InTemplate
+        ; <is-ref> x
 
   cps-statements :
     [Assignment(qid, e)|stat*] -> <cps-expression(|[$[[<qid-to-js> qid] = result;
 ]|stat*])> e
-    where not(InTemplate)
+    where not(<where(<debug(!"Assign: ")> Var(qid)); is-ref> qid)
 
   cps-statements :
-    [Assignment(qid, e)|stat*] -> <cps-expression(|[$[scope.set('[<qid-to-js> qid]', result);
+    [Assignment(qid, e)|stat*] -> <cps-expression(|[$[[<qid-to-js> qid].set(result);
 ]|stat*])> e
-    where InTemplate
+    where <is-ref> qid
 
   cps-statements :
     [ExpStat(e)|stat*] -> <cps-expression(|stat*)> e
@@ -104,10 +136,18 @@ strategies
   cps-exp(|stat*) :
     Call(qid, e*) -> <concat-strings> [<qid-to-js> qid, "(", args, ");"]
     where not(<IsSyncFunction> qid)
+        ; not(<GetScreen> qid)
     with args := <map(expression-to-js); <concat> [<id>, [
 $[function(result) {
     [<cps-statements> stat*]
   }]]]; separate-by(!", "); concat-strings> e*
+
+  cps-exp(|stat*) :
+    Call(qid, e*) -> <concat-strings> ["mobl.call('", <qid-to-js> qid, "', [", args, "], ", $[function(result) {
+    [<cps-statements> stat*]
+  }], ");"]
+    where <GetScreen> qid
+    with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
 
   cps-exp(|stat*) :
     e@Call(qid, e*) -> $[var result = [<expression-to-js> e];

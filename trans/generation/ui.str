@@ -30,10 +30,22 @@ rules
 		      |}
 
   definition-to-js :
-    Screen(qid, farg*, rt, elem*) -> <definition-to-js> Template(qid, farg*, SimpleType(QId("mobl", "void")), elem*)
+    Screen(qid, farg*, rt, elems) -> <emit> $[
+      mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+        var [root] = $("<div>");
+        [body] 
+      });
+      ]
+    with {| InTemplate
+          : rules ( InTemplate := 1 )
+          ; root := <newname> "root"
+          ; body := <elems-to-js-callback(|root)> elems
+          ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
+          ; init-stats := <filter(?Init(<id>)); concat> elems
+          |}
 
   elems-to-js-callback(|root) =
-    <concat; elems-to-js(|root)> [<id>, [$[callback([root]);]]]
+    <concat; elems-to-js(|root)> [<id>, [$[callback([root]); return;]]]
 
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
@@ -89,6 +101,16 @@ rules
            [<elems-to-js(|root)> rest*]]]]
 
   elems-to-js(|root) :
+    [f@Function(_, _, _, _)|rest*] -> $[
+      [<function-to-js> f]
+      [<elems-to-js(|root)> rest*]]
+
+  elems-to-js(|root) :
+    [f@SyncFunction(_, _, _, _)|rest*] -> $[
+      [<function-to-js> f]
+      [<elems-to-js(|root)> rest*]]
+
+  elems-to-js(|root) :
     [s|rest*] -> $[[s][<elems-to-js(|root)> rest*]]
     where <is-string> s
     
@@ -105,13 +127,18 @@ rules
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
       [node].[method]([r].get());
-      [r].addSetListener(function(ref, val) {
-        if(ref === [r]) [node].[method](val);
+      [r].addEventListener('set', function(_, ref, val) {
+        if(ref === [r]) { 
+          [node].[method](val);
+        } else {
+          console.log("Garbage!");
+        }
       });
+      [r].rebind();
       [subs]
     ]
     where Html(tag, arg*, _, _) := tg
-        ; [] := <debug; filter(?HtmlArg("type", "\"checkbox\""))> arg*
+        ; [] := <filter(?HtmlArg("type", "\"checkbox\""))> arg*
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
        ; if "input" := tag then

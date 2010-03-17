@@ -99,5 +99,4 @@ strategies
   
   find-node :
     ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts)) 
-    //where debug
 

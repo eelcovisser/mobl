@@ -59,10 +59,10 @@ template listitem() {
   <li>elements()</li>
 }
 
-template redButton(text : String) {
+template button(text : String) {
   <a href="javascript:void(0)" class="redButton" databind=text></a>
 }
 
-template rightButton(text : String) {
+template deleteButton(text : String) {
   <a href="javascript:void(0)" class="button" databind=text></a>
 }

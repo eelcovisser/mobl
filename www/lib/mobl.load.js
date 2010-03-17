@@ -28,7 +28,6 @@ mobl.provides = function (moduleName) {
     current.isLoaded = true;
 }
 
-
 $(window).resize(updateScrollers);
 
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
@@ -67,8 +66,25 @@ mobl.call = function (screenName, args, callback) {
     var screenTemplate = parts[parts.length - 1];
     var subScope = new mobl.LinkedMap(mobl.rootScope);
     var screenTemplate = subScope.get(screenFrame.div);
-    screenTemplate.apply(null, [subScope].concat(args).concat([function(node) {
-        $("body").append(node);
+    screenTemplate.apply(null, [ subScope ].concat(args).concat( [ function (node) {
+        node.attr('id', screenFrame.div);
+        node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
+        var body = $("body");
+        
+        if (mobl.screenStack.length > 1) {
+            var previousScreen = mobl.screenStack[mobl.screenStack.length - 2];
+            console.log("Sliding out: " + previousScreen.div);
+            console.log(node.html())
+            $("body > #" + previousScreen.div).hide('slide', {
+                direction: "left"
+            }, 150);
+            node.hide().prependTo(body).show('slide', {
+                direction: "right"
+            }, 150);
+        } else {
+            node.prependTo(body);
+        }
+
         $(function () {
             var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
             if (scrollers.length > 0) {
@@ -78,5 +94,5 @@ mobl.call = function (screenName, args, callback) {
                 updateScrollers();
             }
         });
-    }]));
+    }, callbackFn ]));
 }

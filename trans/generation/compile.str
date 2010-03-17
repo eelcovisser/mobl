@@ -18,6 +18,7 @@ strategies
   
   compile =
       ?Module(qid, _)
+      ; where(<debug(!"Now compiling: ")> qid)
       ; analyze
       ; desugar-all
       ; module-to-js

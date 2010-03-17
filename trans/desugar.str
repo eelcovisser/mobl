@@ -35,7 +35,7 @@ strategies
     PropertyNoAnnos(x, t) -> Property(x, t, [])
   
   desugar :
-    ScreenNoReturn(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
+    ScreenNoReturnType(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
   
   desugar :
     TemplateNoRequires(qid, farg*, elem*) -> Template(qid, farg*, [], elem*)

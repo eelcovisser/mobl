@@ -15,7 +15,7 @@ strategies
     where <is-string> x
   
   add-tl-namespace :
-    ScreenNoReturn(x, farg*, elem*) -> ScreenNoReturn(QId(<ModuleName>, x), farg*, elem*)
+    ScreenNoReturnType(x, farg*, elem*) -> ScreenNoReturnType(QId(<ModuleName>, x), farg*, elem*)
     where <is-string> x
 
   add-tl-namespace :
@@ -147,6 +147,13 @@ rules
     where arg-types := <map(type-of)> e*
         ; not(<lookup-function-aux> (qid, arg-types))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-function-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; e2* := <alltd(add-namespace)> e*
+
+  add-namespace :
+    Call(qid, e*) -> Call(qid2, e2*)
+    where arg-types := <map(type-of)> e*
+        ; not(<lookup-screen-aux> (qid, arg-types))
+        ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-screen-aux> (<id>, arg-types); !newid})> [<ModuleName>|<bagof-Imports>]
         ; e2* := <alltd(add-namespace)> e*
 
   prefix-qid(|qid) :

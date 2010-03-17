@@ -48,7 +48,22 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; arg-types1* := arg-types2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
+
+  lookup-screen = 
+      lookup-screen-aux
+   <+ ?(QId(qid, _), _)
+      ; where(<lookup-import-module; alltd(declare)> Import(qid))
+      ; lookup-screen-aux
+
+  lookup-screen-aux :
+    (qid, arg-type*) -> ExternalScreen(qid, farg2*, rt)
+    where <GetScreen> qid
+        ; ?ExternalScreen(_, farg*, rt)
+        ; farg2* := <alltd(add-namespace)> farg*
+        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-function =
       lookup-function-aux

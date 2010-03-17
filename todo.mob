@@ -33,7 +33,7 @@ screen addTask() : Task {
 }  
  
 screen root() { 
-  function add() {
+  function addScreen() {
     var newTask : Task := addTask();
     if(newTask != null) {
       add(newTask);
@@ -47,7 +47,7 @@ screen root() {
   }
 	
   basicView("Tasks") {
-    topRightButton("Add")[click:=add()]
+    topRightButton("Add")[click:=addScreen()]
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
       listitem {

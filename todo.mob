@@ -33,18 +33,18 @@ screen addTask() : Task {
 }  
  
 screen root() { 
-	function add() {
-	  var newTask : Task := addTask();
-	  if(newTask != null) {
-	    add(newTask);
+  function add() {
+    var newTask : Task := addTask();
+    if(newTask != null) {
+      add(newTask);
       flush();
-	  }
-	}
+    }
+  }
 
-	function removeTask(t : Task) {
-	  remove(t); 
-	  flush();
-	}
+  function removeTask(t : Task) {
+    remove(t); 
+    flush();
+  }
 	
   standardLayout("Tasks") {
     topRightButton("Add")[click:=add()]

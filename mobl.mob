@@ -36,7 +36,15 @@ template outputString(s : String) {
 }
 
 template inputString(s : String) {
-  <input type="text" databind=s/>
+  <li>
+    <input type="text" databind=s/>
+  </li>
+}
+
+template inputs() {
+  <ul>
+    elements()
+  </ul>
 }
 
 template inputCheckbox(b : Bool) {

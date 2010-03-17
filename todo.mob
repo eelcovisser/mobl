@@ -7,7 +7,7 @@ entity Task {
   done        : Bool
 }  
 
-template standardLayout(header : String) {
+template basicView(header : String) {
   header(header) 
   elements()
 } 
@@ -23,10 +23,10 @@ screen addTask() : Task {
     screen return null; 
   } 
  
-  standardLayout("Add task") {
+  basicView("Add task") {
     backButton("Back")[click:=cancel()]
-    ul {
-      listitem { inputString(newTask.name) }
+    inputs {
+      inputString(newTask.name)
     }
     button("Add")[click:=add()]
   }
@@ -46,7 +46,7 @@ screen root() {
     flush();
   }
 	
-  standardLayout("Tasks") {
+  basicView("Tasks") {
     topRightButton("Add")[click:=add()]
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  

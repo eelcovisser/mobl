@@ -55,6 +55,8 @@ div#scroller {
     right: 6px;
     -webkit-border-image: url(img/iPhoneButton.png) 0 5 0 5;
     -webkit-border-radius: 0;
+    -moz-border-image: url(img/iPhoneButton.png) 0 5 0 5;
+    -moz-border-radius: 0;
     border-width: 0 5px 0 5px;
     padding: 0;
     height: 28px;
@@ -72,6 +74,7 @@ div#scroller {
     top: 8px;
     left: 6px;
     -webkit-border-image: url(img/iPhoneBackButton.png) 0 8 0 14;
+    -moz-border-image: url(img/iPhoneBackButton.png) 0 8 0 14;
     border-width: 0 8px 0 14px;
     line-height: 28px;
     font-size: 12px;
@@ -97,6 +100,7 @@ a.whiteButton {
     text-shadow: #fff 0px 1px 1px;
     border-width: 0 14px;
     -webkit-border-image: url(img/whiteButton.png) 0 14 0 14;
+    -moz-border-image: url(img/whiteButton.png) 0 14 0 14;
 }
 
 a.redButton {
@@ -114,6 +118,7 @@ a.redButton {
     text-shadow: #000 0 1px 0;
     border-width: 0 14px;
     -webkit-border-image: url(img/redButton.png) 0 14 0 14;
+    -moz-border-image: url(img/redButton.png) 0 14 0 14;
 }
 
 ul {
@@ -137,15 +142,20 @@ ul li {
 ul li:first-child {
     -webkit-border-top-left-radius: 8px;
     -webkit-border-top-right-radius: 8px;
+    -moz-border-radius-topleft: 8px;
+    -moz-border-radius-topright: 8px;
 }
 
 ul li:last-child {
     -webkit-border-bottom-left-radius: 8px;
     -webkit-border-bottom-right-radius: 8px;
+    -moz-border-radius-bottomleft: 8px;
+    -moz-border-radius-bottomright: 8px;
 }
 
 input[type = text] {
     -webkit-text-size-adjust: 140%;
+    -moz-text-size-adjust: 140%;
     color: #777;
     background: #fff url(../.png);
     border: 0;
@@ -187,11 +197,13 @@ div#tabbar div div {
     font-size: 10px;
     color: #c0c0c0;
     -webkit-border-image: url(img/empty.png) 0 5 0 5;
-	width: 70px;
+    -moz-border-image: url(img/empty.png) 0 5 0 5;
+    width: 70px;
 }
 
 div#tabbar div.selected {
     -webkit-border-image: url(img/selectedtabbg.png) 0 5 0 5;
+    -moz-border-image: url(img/selectedtabbg.png) 0 5 0 5;
 }
 
 div#optionpanel h2 {
@@ -217,6 +229,7 @@ li a.button {
     text-decoration: none;
     font-size: 12px;
     -webkit-border-image: url(img/redButton.png) 0 12 0 12;
+    -moz-border-image: url(img/redButton.png) 0 12 0 12;
     color: #fff;
     text-shadow: #7a0001 0 -1px 0;
 }

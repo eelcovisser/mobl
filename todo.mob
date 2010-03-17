@@ -24,11 +24,11 @@ screen addTask() : Task {
   } 
  
   standardLayout("Add task") {
+    backButton("Back")[click:=cancel()]
     ul {
       listitem { inputString(newTask.name) }
     }
     button("Add")[click:=add()]
-    button("Back")[click:=cancel()]
   }
 }  
  
@@ -46,7 +46,9 @@ screen root() {
 	  flush();
 	}
 	
-  standardLayout("All tasks") {
+  standardLayout("Tasks") {
+    topRightButton("Add")[click:=add()]
+
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
       listitem {
         inputCheckbox(t.done)[change:=flush()] " "
@@ -54,6 +56,5 @@ screen root() {
         deleteButton("Delete")[click:=removeTask(t)] 
       }
     }
-    button("Add")[click:=add()]
   }
 }

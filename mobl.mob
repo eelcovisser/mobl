@@ -66,3 +66,11 @@ template button(text : String) {
 template deleteButton(text : String) {
   <a href="javascript:void(0)" class="button" databind=text></a>
 }
+
+template topRightButton(text : String) {
+  <a href="javascript:void(0)" class="topRightButton" databind=text></a>
+}
+
+template backButton(text : String) {
+  <a href="javascript:void(0)" class="backButton" id="back-button" databind=text></a>
+}

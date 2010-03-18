@@ -10,7 +10,7 @@ entity Task {
 template basicView(header : String) {
   header(header) 
   elements()
-} 
+}
 
 screen addTask() : Task {
   var newTask : Task := Task{}

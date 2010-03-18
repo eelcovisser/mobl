@@ -11,6 +11,7 @@ imports
   generation/ui
   generation/action
   generation/data
+  generation/script
   include/MoBL
   lib/editor-common
 

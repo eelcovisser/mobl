@@ -4,35 +4,6 @@ var mobl = window.mobl || {};
 
 // core.alert = alert;
 
-if(!window.mobl) {
-    var mobl = {};
-}
-mobl.alert = function(s, callback) {
-    alert(s);
-    if(callback) callback();
-};
-mobl.log = function(s, callback) {
-    console.log(s);
-    if(callback) callback();
-};
-mobl.add = function(e, callback) {
-    persistence.add(e);
-    var allEnt = persistence.define(e._type).all(); // NOTE: define() is a hack!
-    allEnt.triggerEvent('add', allEnt, e);
-    if(callback) callback();
-};
-mobl.remove = function(e, callback) {
-    persistence.remove(e);
-    var allEnt = persistence.define(e._type).all();
-    allEnt.triggerEvent('remove', allEnt, e);
-    if(callback) callback();
-};
-
-mobl.flush = function(callback) {
-    persistence.flush(null, callback);
-};
-
-
 function ref(e, property) {
     return new mobl.Reference(e, property);
 }

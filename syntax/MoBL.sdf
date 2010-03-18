@@ -23,7 +23,26 @@ exports
     ID ":" Type                    -> FArg {cons("FArg")}
     QId                            -> Type {cons("SimpleType")}
     QId "<" {Type ","}* ">"        -> Type {cons("GenericType")}
+    
+  context-free syntax %% native javascript
+    
+    "<script>" JSPart* "</script>"  -> Definition {cons("Javascript"), prefer}
+  
+    JSString -> JSPart{cons("JSString")}
+  %%"~" Exp -> JSPart{cons("JSExp"), prefer}
+  %%"\\~" -> JSPart{cons("JSTilde"), prefer}
 
+  lexical syntax
+    JSChar*       -> JSString
+    ~[\<\~]       -> JSChar
+    SmallerThan   -> JSChar
+    [\<]          -> SmallerThan
+    ""            -> JSString{reject}
+
+  lexical restrictions
+    SmallerThan   -/- [\/]
+    JSString -/- [\ \t\n\r]
+    JSString -/- ~[\<\~]
 
   lexical syntax
     "template" -> ID {reject}

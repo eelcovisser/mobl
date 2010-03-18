@@ -54,7 +54,7 @@ rules
 
   externalize-module :
     mod@Module(qid, def*) -> def2*
-    with def2* := <analyze; desugar-all; ?Module(_, <id>); map(definition-to-external <+ debug(!"Could not externalize: "); fail)> mod
+    with def2* := <analyze; desugar-all; ?Module(_, <id>); filter(definition-to-external)> mod
     
   qid-to-path =
     is-string

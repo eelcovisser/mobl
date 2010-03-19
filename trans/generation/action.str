@@ -13,6 +13,7 @@ imports
   generation/cps-action
   generation/sql
   generation/data
+  generation/compile
   rename
   declare
   lookup
@@ -20,16 +21,20 @@ imports
 strategies
 
   module-to-js =
-  	?Module(qid, def*)
-    //; imports := <filter(?Import(_))> def*
+  	(?Module(qid, def*) <+ ?Application(qid, _, def*))
     ; entities := <filter(?Entity(_, _, _))> def*
     ; rest := <filter(not(?Entity(_, _, _) <+ ?Import(_)))> def*
-    //; <map(import-to-js)> imports
+    ; to-import := <collect(?QId(<id>, _); not(?qid))> def*
+    ; <map(import-to-js)> to-import
     ; <entities-to-js> entities
     ; <filter(definition-to-js)> rest
     ; <emit> $[[<qid-to-js> qid].isLoaded = true;]
 
 strategies
+  
+  import-to-js :
+    qid -> <emit> $[mobl.load('[<qid-to-path> qid].js');
+]
   
   definition-to-js =
     function-to-js

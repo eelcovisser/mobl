@@ -14,10 +14,14 @@ exports
 
   context-free syntax %% Main
   
-    ID                             -> QId
-    QId "::" ID                    -> QId {cons("QId")}
-    "module" QId Definition*       -> Start {cons("Module")}
+    ID                               -> QId
+    QId "::" ID                      -> QId {cons("QId")}
+    "module" QId Definition*         -> Start {cons("Module")}
+    "application" QId Setting* Definition* -> Start {cons("Application")}
     
+    "title" STRING                   -> Setting {cons("TitleSetting")}
+    "database" STRING                -> Setting {cons("DatabaseSetting")}
+
     "import" QId                   -> Definition {cons("Import")}
 
     ID ":" Type                    -> FArg {cons("FArg")}

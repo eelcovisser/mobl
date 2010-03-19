@@ -8,7 +8,7 @@ strategies
 
   declare-all =
     with(
-      ?Module(_, def*)
+      (?Module(_, def*) <+ ?Application(_, _, def*))
       ; <filter(declare)> def*
     )
       

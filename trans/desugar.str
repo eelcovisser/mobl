@@ -12,6 +12,13 @@ strategies
           : rules ( ModuleName := qid )
           ; def2* := <innermost(desugar)> def*
           |}
+
+  desugar-all :
+    Application(qid, set*, def*) -> Application(qid, set*, def2*)
+    with {| ModuleName
+          : rules ( ModuleName := qid )
+          ; def2* := <innermost(desugar)> def*
+          |}
   
   desugar :
     FunctionNoReturnType(name, farg*, stat*) -> Function(name, farg*, SimpleType("void"), stat*)

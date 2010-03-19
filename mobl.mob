@@ -65,7 +65,7 @@ template ul() {
  
 template listitem() {
   <li>elements()</li>
-}
+} 
 
 template button(text : String) {
   <a href="javascript:void(0)" class="redButton" databind=text></a>
@@ -108,4 +108,5 @@ mobl.remove = function(e, callback) {
 mobl.flush = function(callback) {
     persistence.flush(null, callback);
 };
+
 </script>

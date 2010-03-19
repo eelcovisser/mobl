@@ -32,7 +32,7 @@ strategies
   property-to-js(|ent) :
     Property(x, t@SimpleType(_), anno*) -> $['[x]': '[sqlType]']
     where not(<is-entity-type> t)
-    with sqlType := <sql-type> t
+    with sqlType := <sql-type <+ debug(!"Could not conver to SQL: "); fail> t
 
   property-to-js(|ent) :
     Property(x, GenericType(coll, [t]), anno*) -> <fail>

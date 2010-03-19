@@ -6,3 +6,14 @@ colorer
                                                                       
   // This file can be used for custom colorer rules.                  
   // See the imported file for a brief introduction and examples.     
+  
+  //Statement._: 0 0 255
+  //Exp._: 0 0 255
+  
+  //Exp._.keyword: 0 0 255 bold
+  //environment Statement._: blue
+  //_.TemplateCallNoProperties : red
+  STRING : blue 
+  
+  
+  action = _ 224 224 224

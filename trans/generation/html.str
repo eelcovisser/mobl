@@ -1,8 +1,19 @@
+module generation/html
+
+imports
+  include/MoBL
+  generation/action
+  generation/compile
+  
+strategies
+  
+  generate-index-html :
+    Application(qid, setting*, _) -> $[
 <!DOCTYPE HTML>
 <html>
     <!-- manifest="index.manifest" -->
     <head>
-        <title>Zodo</title>
+        <title>[<!<un-double-quote> title <+ <qid-to-js> qid>]</title>
         <link rel="stylesheet" href="lib/iphone.css" type="text/css"/>
         <link rel="stylesheet" href="lib/jquery.jgrowl.css" type="text/css"/>
         <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
@@ -17,7 +28,7 @@
         <script src="lib/persistence.js" type="application/x-javascript" charset="utf-8">
         </script>
         <script type="application/x-javascript" charset="utf-8">
-            persistence.connect('todo', 'My database', 5 * 1024 * 1024);
+            persistence.connect('[<!<un-double-quote> dbname <+ <qid-to-js> qid>]', 'mobl database', 5 * 1024 * 1024);
         </script>
         <script src="lib/gestures.js" type="application/x-javascript" charset="utf-8">
         </script>
@@ -33,16 +44,11 @@
         </script>
         <script src="lib/iscroll.js" type="application/javascript" charset="utf-8">
         </script>
-        <script src="mobl.js" type="application/x-javascript" charset="utf-8">
-        </script>
-        <script src="todo.js" type="application/x-javascript" charset="utf-8">
-        </script>
         <script type="application/x-javascript" charset="utf-8">
+            mobl.load('[<qid-to-path> qid].js');
             $(function(){
                 persistence.schemaSync(function(tx) {
-                    mobl.call("todo.root", [], function() {
-                        location = "http://zef.me";
-                    });
+                    mobl.call("[<qid-to-js> qid].root", $[$$]$, function() {});
                 });
             });
         </script>
@@ -50,3 +56,6 @@
     <body>
     </body>
 </html>
+    ]
+    with <filter(?TitleSetting(title))> setting*
+       ; <filter(?DatabaseSetting(dbname))> setting*

@@ -1,9 +1,13 @@
-module todo
- 
+application todo
+
+title "Zodo"
+database "zodo"
+
 import mobl
    
 entity Task {
   name        : String
+  description : Text
   done        : Bool
 }  
 
@@ -23,12 +27,26 @@ screen addTask() : Task {
     screen return null; 
   } 
  
-  basicView("Add task") {
+  basicView("Add") {
     backButton("Back")[click:=cancel()]
     inputs {
       inputString(newTask.name)
     }
     button("Add")[click:=add()]
+  }
+}
+
+screen editTask(t : Task) {
+  function done() { 
+    screen return;
+  } 
+ 
+  basicView("Edit") {
+    topRightButton("Done")[click:=done()]
+    inputs {
+      inputString(t.name)
+      inputString(t.description)
+    }
   }
 }  
  
@@ -40,6 +58,10 @@ screen root() {
       flush();
     }
   }
+  function edit(t : Task) {
+    editTask(t);
+    flush();
+  }
 
   function removeTask(t : Task) {
     remove(t); 
@@ -50,7 +72,7 @@ screen root() {
     topRightButton("Add")[click:=addScreen()]
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
-      listitem {
+      listitem[click:=edit(t)] {
         inputCheckbox(t.done)[change:=flush()] " "
         outputString(t.name)
         deleteButton("Delete")[click:=removeTask(t)] 

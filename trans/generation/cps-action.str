@@ -147,7 +147,7 @@ $[function(result) {
     [<cps-statements> stat*]
   }], ");"]
     where <GetScreen> qid
-    with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
+    with args := <map(ref-expression-to-js); separate-by(!", "); concat-strings> e*
 
   cps-exp(|stat*) :
     e@Call(qid, e*) -> $[var result = [<expression-to-js> e];

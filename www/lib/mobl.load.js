@@ -33,6 +33,11 @@ $(window).resize(updateScrollers);
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
 // false);
 
+mobl.load = function(url) {
+    $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
+    console.log("loaded " + url);
+}
+
 mobl.call = function (screenName, args, callback) {
     var screenFrame = {
         "name": screenName,
@@ -73,8 +78,6 @@ mobl.call = function (screenName, args, callback) {
         
         if (mobl.screenStack.length > 1) {
             var previousScreen = mobl.screenStack[mobl.screenStack.length - 2];
-            console.log("Sliding out: " + previousScreen.div);
-            console.log(node.html())
             $("body > #" + previousScreen.div).hide('slide', {
                 direction: "left"
             }, 150);

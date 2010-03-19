@@ -18,7 +18,7 @@ rules
   // Analysis: does a topdown traversal of the tree,
   // and try to apply the record-entity rule.
   analyze =
-    ?Module(qid, _)
+    (?Module(qid, def*) <+ ?Application(qid, _, def*))
     ; {| ModuleName, Imports
        : rules ( ModuleName := qid )
        ; import-all
@@ -53,13 +53,15 @@ rules
        ; def2* := <externalize-module> mod
 
   externalize-module :
-    mod@Module(qid, def*) -> def2*
-    with def2* := <analyze; desugar-all; ?Module(_, <id>); filter(definition-to-external)> mod
-    
-  qid-to-path =
-    is-string
-  
-  qid-to-path :
-    QId(qid, x) -> $[[qids]/[x]]
-    with qids := <qid-to-path> qid
+    Module(qid, def*) -> def2*
+    with def2* := <analyze; desugar-all; ?Module(_, <id>); filter(definition-to-external)>
+
+  compile-and-externalize-module :
+    app@Application(qid, _, def*) -> def2*
+    with compile
+       ; def2* := <externalize-module> app
+
+  externalize-module :
+    Application(qid, _, def*) -> def2*
+    with def2* := <analyze; desugar-all; ?Application(_, _, <id>); filter(definition-to-external)>
     

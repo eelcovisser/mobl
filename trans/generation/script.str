@@ -1,0 +1,10 @@
+module generation/script
+
+imports
+  include/MoBL
+  generation/emit
+
+strategies
+  
+  definition-to-js :
+    Javascript(part*) -> <emit> <map(?JSString(<id>)); concat-strings> part*

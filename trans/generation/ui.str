@@ -7,6 +7,7 @@ imports
   include/MoBL
   lib/editor-common
   desugar
+  type
   generation/emit
   generation/action
   generation/lift
@@ -15,8 +16,9 @@ imports
 rules
 
   definition-to-js :
-    Template(qid, farg*, req*, elems) -> <emit> $[
+    Template(qid, farg*, elems) -> <emit> $[
       mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+        [init-stats]
         var [root] = $("<span>");
         [body] 
       });
@@ -24,14 +26,15 @@ rules
     with {| InTemplate
 		      : rules ( InTemplate := 1 )
 		      ; root := <newname> "root"
+          ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
 		      ; body := <elems-to-js-callback(|root)> elems
-		      ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback"]]; separate-by(!", "); concat-strings> farg*
-		      ; init-stats := <filter(?Init(<id>)); concat> elems
+		      ; init-stats := <fargs-to-init-js> farg*
 		      |}
 
   definition-to-js :
     Screen(qid, farg*, rt, elems) -> <emit> $[
       mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+        [init-stats]
         var [root] = $("<div>");
         [body] 
       });
@@ -40,8 +43,8 @@ rules
           : rules ( InTemplate := 1 )
           ; root := <newname> "root"
           ; body := <elems-to-js-callback(|root)> elems
-          ; fargs :=  <map(?FArg(<id>, _)); <concat> [["scope"], <id>, ["callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
-          ; init-stats := <filter(?Init(<id>)); concat> elems
+          ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
+          ; init-stats := <fargs-to-init-js> farg*
           |}
 
   elems-to-js-callback(|root) =
@@ -54,9 +57,10 @@ rules
 ]
     with elem-root := <newname> "root"
        ; subScope := <newname> "subScope"
+       ; <debug(!"Still here")> qid
        ; if not([] := elems) then
            body-stats := $[var [subScope] = new mobl.LinkedMap(scope);
-                           [subScope].setLocal('elements', function(scope, callback) {
+                           [subScope].setLocal('elements', function(scope, namedArgs, callback) {
                              var [elem-root] = $("<span>");
                              [<elems-to-js-callback(|elem-root)> elems]
                            });
@@ -75,7 +79,7 @@ rules
          else
            prop-set := ""
          end
-       ; args  := <map(ref-expression-to-js); <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
+       ; args  := <ref-arguments-to-js; debug(!"Got this from ref-argumets: "); <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
            $[function(node) {
                [prop-set]
                [root].append(node.contents());
@@ -86,7 +90,7 @@ rules
   
  
   prop-to-bind :
-    PropertyArg(x, e) -> $[c.bind('[x]', function() { [<expression-to-js> e]; });]
+    PropertyArg(x, e) -> $[c.bind('[x]', function(evt) {  evt.stopPropagation(); [<expression-to-js> e]; });]
   
   elems-to-js(|root) :
     [tg@Html(tag, arg*, elems, _)|rest*] -> $[
@@ -121,7 +125,33 @@ rules
     [] -> ""
   
   tag-arg-to-html :
-    HtmlArg(name, s) -> $[[name]=[s]]
+    HtmlArg(name, String(s)) -> $[[name]=[s]]
+
+  databind-tag-arg-to-js(|tg, node) :
+    HtmlArg(name, e) -> $[
+      var [r] = [es];
+      [node].attr('[name]', [r].get());
+      [r].addEventListener('set', function(_, ref, val) {
+        if(ref === [r]) { 
+          [node].attr('[name]', val);
+        } else {
+          console.log("Garbage!");
+        }
+      });
+      [r].rebind();
+    ]
+    where not(String(_) := e)
+        ; not(SimpleType(QId("mobl", "Callback")) := <type-of> e)
+    with es := <ref-expression-to-js> e
+       ; r  := <newname> "ref"
+
+
+  databind-tag-arg-to-js(|tg, node) :
+    HtmlArg(name, e) -> $[
+      [node].bind('[<string-replace(|"on", "")> name]', [es]);
+    ]
+    where SimpleType(QId("mobl", "Callback")) := <type-of> e
+    with es := <expression-to-js> e
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[

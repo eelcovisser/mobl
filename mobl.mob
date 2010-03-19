@@ -6,6 +6,7 @@ external type Int { }
 external type Bool { }
 external type Text { }
 external type Uri { }
+external type Callback {}
 
 external type Array<T> { }
 external type Object { }
@@ -63,9 +64,13 @@ template ul() {
   </ul>
 }
  
-template listitem() {
+template listitem(onclick : Callback := null) {
   <li>elements()</li>
-} 
+}
+
+template image(url : String) {
+  <img src=url/>
+}
 
 template button(text : String) {
   <a href="javascript:void(0)" class="redButton" databind=text></a>
@@ -75,7 +80,7 @@ template deleteButton(text : String) {
   <a href="javascript:void(0)" class="button" databind=text></a>
 }
 
-template topRightButton(text : String) {
+template topRightButton(text : String, onclick : Callback := null) {
   <a href="javascript:void(0)" class="topRightButton" databind=text></a>
 }
 
@@ -84,28 +89,28 @@ template backButton(text : String) {
 }
 
 <script>
-mobl.alert = function(s, callback) {
+mobl.alert = function(s, _, callback) {
     alert(s);
     if(callback) callback();
 };
-mobl.log = function(s, callback) {
+mobl.log = function(s, _, callback) {
     console.log(s);
     if(callback) callback();
 };
-mobl.add = function(e, callback) {
+mobl.add = function(e, _, callback) {
     persistence.add(e);
     var allEnt = persistence.define(e._type).all(); // NOTE: define() is a hack!
     allEnt.triggerEvent('add', allEnt, e);
     if(callback) callback();
 };
-mobl.remove = function(e, callback) {
+mobl.remove = function(e, _, callback) {
     persistence.remove(e);
     var allEnt = persistence.define(e._type).all();
     allEnt.triggerEvent('remove', allEnt, e);
     if(callback) callback();
 };
 
-mobl.flush = function(callback) {
+mobl.flush = function(_, callback) {
     persistence.flush(null, callback);
 };
 

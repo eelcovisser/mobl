@@ -88,6 +88,10 @@ rules
     with rules ( Exp :+= e )
 
   cps-lift-expression :
+    e@Callback(_) -> []
+    with rules ( Exp :+= e )
+
+  cps-lift-expression :
     e@True() -> []
     with rules ( Exp :+= e )
 
@@ -170,6 +174,7 @@ strategies
   is-sync = ?False()
   is-sync = ?String(_)
   is-sync = ?Var(_)
+  is-sync = ?Callback(_)
   
   is-sync =
     ?BinMethodCall(e1, _, e2)

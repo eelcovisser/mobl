@@ -9,11 +9,15 @@ entity Task {
   name        : String
   description : Text
   done        : Bool
-}  
+}
 
 template basicView(header : String) {
   header(header) 
   elements()
+}
+
+template myText(t : String, click : Callback) {
+  <span databind=t onclick=click></span>
 }
 
 screen addTask() : Task {
@@ -39,7 +43,7 @@ screen addTask() : Task {
 screen editTask(t : Task) {
   function done() { 
     screen return;
-  } 
+  }
  
   basicView("Edit") {
     topRightButton("Done")[click:=done()]
@@ -53,11 +57,12 @@ screen editTask(t : Task) {
 screen root() { 
   function addScreen() {
     var newTask : Task := addTask();
+    log(newTask);
     if(newTask != null) {
       add(newTask);
       flush();
     }
-  }
+  }   
   function edit(t : Task) {
     editTask(t);
     flush();
@@ -67,16 +72,18 @@ screen root() {
     remove(t); 
     flush();
   }
-	
+  
   basicView("Tasks") {
-    topRightButton("Add")[click:=addScreen()]
+    topRightButton("Add")[click:=addScreen()] 
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
       listitem[click:=edit(t)] {
         inputCheckbox(t.done)[change:=flush()] " "
         outputString(t.name)
-        deleteButton("Delete")[click:=removeTask(t)] 
+        deleteButton("Delete")[click:=removeTask(t)]
       }
     }
+      myText("Click me", callback { alert("Hello!"); })
+
   }
 }

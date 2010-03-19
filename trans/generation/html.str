@@ -48,7 +48,7 @@ strategies
             mobl.load('[<qid-to-path> qid].js');
             $(function(){
                 persistence.schemaSync(function(tx) {
-                    mobl.call("[<qid-to-js> qid].root", $[$$]$, function() {});
+                    mobl.call("[<qid-to-js> qid].root", $[${}$]$, function() {});
                 });
             });
         </script>

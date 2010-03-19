@@ -11,8 +11,8 @@ exports
     "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturnType")}
     "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
 
-    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("TemplateNoRequires")}
-    "template" QId "(" {FArg ","}* ")" "requires" {TemplateSig ","}* "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    %%"template" QId "(" {FArg ","}* ")" "requires" {TemplateSig ","}* "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
     
     ID "(" {FArg ","}* ")" -> TemplateSig {cons("TemplateSig")}
     
@@ -20,7 +20,7 @@ exports
     
     "<" ID HtmlArg* ">" ScreenElem* "</" ID ">"   -> ScreenElem {cons("Html")}
     "<" ID HtmlArg* "/"">" -> ScreenElem {cons("HtmlShort")}
-    ID "=" STRING                  -> HtmlArg    {cons("HtmlArg")}
+    ID "=" Exp                     -> HtmlArg    {cons("HtmlArg")}
     "databind" "=" Exp             -> HtmlArg    {cons("HtmlDatabindArg")}
     
     TemplateDefinition                                                -> ScreenElem
@@ -40,11 +40,11 @@ exports
     
     "var" ID ":" Type ":=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
     
-    QId "(" {Exp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
+    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
     %% Variants:
-    QId "(" {Exp ","}* ")" "[" PropertyArg* "]"                       -> ScreenElem {cons("TemplateCallNoBody")}
-    QId "(" {Exp ","}* ")" "{" ScreenElem* "}"                        -> ScreenElem {cons("TemplateCallNoProperties")}
-    QId "(" {Exp ","}* ")"                                            -> ScreenElem {cons("TemplateCallNoPropertiesNoBody")}
+    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]"                       -> ScreenElem {cons("TemplateCallNoBody")}
+    QId "(" {NamedExp ","}* ")" "{" ScreenElem* "}"                        -> ScreenElem {cons("TemplateCallNoProperties")}
+    QId "(" {NamedExp ","}* ")"                                            -> ScreenElem {cons("TemplateCallNoPropertiesNoBody")}
     QId "[" PropertyArg* "]" "{" ScreenElem* "}"                      -> ScreenElem {cons("TemplateCallNoArgs")}
     QId "[" PropertyArg* "]"                                          -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
     QId "{" ScreenElem* "}"                                           -> ScreenElem {cons("TemplateCallNoArgsNoProperties")}

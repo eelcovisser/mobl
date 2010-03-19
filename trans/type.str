@@ -25,6 +25,9 @@ strategies
     Null() -> SimpleType(QId("mobl", "Object"))
 
   eq-type-of :
+    Callback(_) -> SimpleType(QId("mobl", "Callback"))
+
+  eq-type-of :
     Call(qid, e*) -> rt
     where ExternalFunction(_, _, rt) := <lookup-function> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
 

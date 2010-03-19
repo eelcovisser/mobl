@@ -25,6 +25,8 @@ exports
     "import" QId                   -> Definition {cons("Import")}
 
     ID ":" Type                    -> FArg {cons("FArg")}
+    ID ":" Type ":=" Exp           -> FArg {cons("FArgOptional")}
+    
     QId                            -> Type {cons("SimpleType")}
     QId "<" {Type ","}* ">"        -> Type {cons("GenericType")}
     
@@ -58,6 +60,7 @@ exports
     "list" -> ID {reject}
     "placeholder" -> ID {reject}
     "function" -> ID {reject}
+    "callback" -> ID {reject}
     "sync" -> ID {reject}
     "null" -> ID {reject}
     "if" -> ID {reject}

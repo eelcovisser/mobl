@@ -35,11 +35,14 @@ exports
     "false"                       -> Exp {cons("False")}
     "null"                        -> Exp {cons("Null")}
     QId                           -> Exp {cons("Var")}
-    QId "(" {Exp ","}* ")"        -> Exp {cons("Call")}
+    QId "(" {NamedExp ","}* ")"   -> Exp {cons("Call")}
     Exp "." ID "(" {Exp ","}* ")" -> Exp {cons("MethodCall")}
     Exp "." ID                    -> Exp {cons("FieldAccess")}
     "uri" "(" Exp ")"             -> Exp {cons("Uri")}
     Exp "[" Exp "]"               -> Exp {left, cons("Indexer")}
+    
+    Exp                           -> NamedExp
+    ID ":=" Exp                   -> NamedExp {cons("NamedExp")}
     
     Exp BoolMethodId Exp         -> Exp {cons("BinMethodCall"), left}
     Exp CompareMethodId Exp      -> Exp {cons("BinMethodCall"), left}
@@ -50,6 +53,8 @@ exports
     ID "<" Type ">" "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
     Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
     "(" Exp ")"                  -> Exp {cons("Brackets")}
+    
+    "callback" "{" Statement* "}" -> Exp {cons("Callback")}
     
     ID ":=" Exp                  -> PropVal {cons("PropVal")}
     

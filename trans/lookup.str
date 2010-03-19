@@ -42,13 +42,13 @@ strategies
       ; lookup-template-aux
 
   lookup-template-aux :
-    (qid, arg-type*) -> ExternalTemplate(qid, farg2*, req*)
+    (qid, arg*) -> ExternalTemplate(qid, farg2*)
     where <GetTemplate> qid
-        ; ?ExternalTemplate(_, farg*, req*)
+        ; ?ExternalTemplate(_, farg*)
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
+        /*; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)*/
 
   lookup-screen = 
       lookup-screen-aux

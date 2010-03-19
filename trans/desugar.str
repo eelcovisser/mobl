@@ -45,9 +45,6 @@ strategies
     ScreenNoReturnType(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
   
   desugar :
-    TemplateNoRequires(qid, farg*, elem*) -> Template(qid, farg*, [], elem*)
-
-  desugar :
     TemplateCallNoArgs(qid, prop*, body) -> TemplateCall(qid, [], prop*, body)
     
   desugar :

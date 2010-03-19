@@ -137,7 +137,7 @@ strategies
     Call(qid, e*) -> <concat-strings> [<qid-to-js> qid, "(", args, ");"]
     where not(<IsSyncFunction> qid)
         ; not(<GetScreen> qid)
-    with args := <map(expression-to-js); <concat> [<id>, [
+    with args := <arguments-to-js; <concat> [<id>, [
 $[function(result) {
     [<cps-statements> stat*]
   }]]]; separate-by(!", "); concat-strings> e*
@@ -147,7 +147,7 @@ $[function(result) {
     [<cps-statements> stat*]
   }], ");"]
     where <GetScreen> qid
-    with args := <map(ref-expression-to-js); separate-by(!", "); concat-strings> e*
+    with args := <ref-arguments-to-js; separate-by(!", "); concat-strings> e*
 
   cps-exp(|stat*) :
     e@Call(qid, e*) -> $[var result = [<expression-to-js> e];

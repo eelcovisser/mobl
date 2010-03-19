@@ -98,16 +98,8 @@ strategies
           IsSyncFunction : qid
         )
         
-  declare:
-    TemplateNoRequires(qid, farg*, body) -> <fail>
-    with
-      extern := <definition-to-external>
-      ; rules (
-          GetTemplate : qid -> extern 
-        )
-
 	declare:
-	  Template(qid, farg*, req*, body) -> <fail>
+	  Template(qid, farg*, body) -> <fail>
 	  with
       extern := <definition-to-external>
 	    ; rules (
@@ -115,7 +107,7 @@ strategies
 	      )
 
   declare:
-    extern@ExternalTemplate(qid, farg*, req*) -> <fail>
+    extern@ExternalTemplate(qid, farg*) -> <fail>
     with rules (
            GetTemplate : qid -> extern 
          )
@@ -163,10 +155,7 @@ strategies // convert to externals
     SyncFunctionNoReturnType(qid, farg*, stat*) -> ExternalSyncFunction(qid, farg*, SimpleType(QId("mobl", "void")))
   
   definition-to-external :
-    Template(qid, farg*, req*, elem*) -> ExternalTemplate(qid, farg*, req*)
-
-  definition-to-external :
-    TemplateNoRequires(qid, farg*, elem*) -> ExternalTemplate(qid, farg*, [])
+    Template(qid, farg*, elem*) -> ExternalTemplate(qid, farg*)
 
   definition-to-external :
     Screen(qid, farg*, rt, _) -> ExternalScreen(qid, farg*, rt)

@@ -79,14 +79,6 @@ strategies
 
   cps-statements :
     [ExpStat(e)|stat*] -> <cps-expression(|stat*)> e
-
-  cps-statements :
-    [Block(block-stat*)|stat*] -> 
-    $[{
-         [<cps-statements> block-stat*]
-      }
-      [<cps-statements> stat*]
-]
   
   cps-statements :
     [If(e, true-stat*, false-stat*)|stat*] -> 

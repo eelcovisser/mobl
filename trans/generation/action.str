@@ -78,6 +78,17 @@ strategies
     FArgOptional(x, t, e) -> $[var [x] = '[x]' in namedArgs ? namedArgs.[x] : [<expression-to-js> e];
 ]
 
+  fargs-to-ref-init-js =
+    map(farg-to-ref-init-js)
+    ; concat-strings
+  
+  farg-to-ref-init-js :
+    FArg(_, _) -> ""
+  
+  farg-to-ref-init-js :
+    FArgOptional(x, t, e) -> $[var [x] = '[x]' in namedArgs ? namedArgs.[x] : [<ref-expression-to-js> e];
+]
+
   function-to-js :
     Function(qid, farg*, rt, stats) -> $[
     [varname] = function([args]) {
@@ -242,28 +253,28 @@ rules // Expressions
   exp-to-js :
     Callback(stat*) -> $[function(evt) {
                            if(evt) evt.stopPropagation();
-                           [<statements-to-js> stat*]
+                           [<cps-lift-expressions; cps-statements> stat*]
                          }]
 
 strategies
   
   arguments-to-js :
-    arg* -> <concat; debug(!"Arg result: ")> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
+    arg* -> <concat> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
     with
       {| Arg
        : normal-args := <map(not(?NamedExp(_,_)); expression-to-js <+ rules ( Arg :+= <id>) )> arg*
        ; named := <bagof-Arg>
        |}
-       ; named-args := <debug(!"Named arguments: "); map(\ NamedExp(x, e) -> $[[x]': [<expression-to-js> e]] \)> named  
+       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<expression-to-js> e]] \)> named  
 
   ref-arguments-to-js :
-    arg* -> <concat; debug(!"Arg result: ")> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
-    with debug;
+    arg* -> <concat> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
+    with
       {| Arg
-       : normal-args := <map(not(?NamedExp(_,_)); ref-expression-to-js <+ rules ( Arg :+= <id>) )> arg*
+       : normal-args := <filter(not(?NamedExp(_,_)); ref-expression-to-js <+ rules ( Arg :+= <id>); fail )> arg*
        ; named := <bagof-Arg>
        |}
-       ; named-args := <debug(!"Named arguments: "); map(\ NamedExp(x, e) -> $[[x]': [<ref-expression-to-js> e]] \)> named 
+       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<ref-expression-to-js> e]] \)> named 
 
 rules // util
   qid-to-js :

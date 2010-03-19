@@ -139,6 +139,12 @@ ul li {
     text-decoration: none;
 }
 
+ul li.arrow {
+    background-image: url(img/chevron.png);
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
 ul li:first-child {
     -webkit-border-top-left-radius: 8px;
     -webkit-border-top-right-radius: 8px;
@@ -232,10 +238,4 @@ li a.button {
     -moz-border-image: url(img/redButton.png) 0 12 0 12;
     color: #fff;
     text-shadow: #7a0001 0 -1px 0;
-}
-
-li.arrow {
-    background-image: url(img/chevron.png);
-    background-position: right center;
-    background-repeat: no-repeat;
 }

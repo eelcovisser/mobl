@@ -34,12 +34,13 @@ strategies
       ; <fclose> fp
 	    ; if !app then
 	      with(
-	        fp2 := <debug; fopen <+ debug(!"Could not open file: "); fail> (index-html-filename, "w")
+	        fp2 := <fopen <+ debug(!"Could not open file: "); fail> (index-html-filename, "w")
 	        ; <fputs> (<generate-index-html <+ debug(!"Could not generate index.html")> app, fp2)
 	        ; <fclose> fp2
 	      )
         end
       ; <refresh-workspace-file> js-filename
+      ; <refresh-workspace-file> index-html-filename
 
 strategies
   

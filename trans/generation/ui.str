@@ -28,7 +28,7 @@ rules
 		      ; root := <newname> "root"
           ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
 		      ; body := <elems-to-js-callback(|root)> elems
-		      ; init-stats := <fargs-to-init-js> farg*
+		      ; init-stats := <fargs-to-ref-init-js> farg*
 		      |}
 
   definition-to-js :
@@ -44,7 +44,7 @@ rules
           ; root := <newname> "root"
           ; body := <elems-to-js-callback(|root)> elems
           ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
-          ; init-stats := <fargs-to-init-js> farg*
+          ; init-stats := <fargs-to-ref-init-js> farg*
           |}
 
   elems-to-js-callback(|root) =
@@ -57,7 +57,6 @@ rules
 ]
     with elem-root := <newname> "root"
        ; subScope := <newname> "subScope"
-       ; <debug(!"Still here")> qid
        ; if not([] := elems) then
            body-stats := $[var [subScope] = new mobl.LinkedMap(scope);
                            [subScope].setLocal('elements', function(scope, namedArgs, callback) {
@@ -79,7 +78,7 @@ rules
          else
            prop-set := ""
          end
-       ; args  := <ref-arguments-to-js; debug(!"Got this from ref-argumets: "); <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
+       ; args  := <ref-arguments-to-js; <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
            $[function(node) {
                [prop-set]
                [root].append(node.contents());
@@ -130,14 +129,16 @@ rules
   databind-tag-arg-to-js(|tg, node) :
     HtmlArg(name, e) -> $[
       var [r] = [es];
-      [node].attr('[name]', [r].get());
-      [r].addEventListener('set', function(_, ref, val) {
-        if(ref === [r]) { 
-          [node].attr('[name]', val);
-        } else {
-          console.log("Garbage!");
-        }
-      });
+      if(r.get() !== null) {
+	      [node].attr('[name]', [r].get());
+	      [r].addEventListener('set', function(_, ref, val) {
+	        if(ref === [r]) { 
+	          [node].attr('[name]', val);
+	        } else {
+	          console.log("Garbage!");
+	        }
+	      });
+      }
       [r].rebind();
     ]
     where not(String(_) := e)
@@ -148,10 +149,14 @@ rules
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlArg(name, e) -> $[
-      [node].bind('[<string-replace(|"on", "")> name]', [es]);
+      var [val] = [es];
+      if([val] !== null) {
+        [node].bind('[<string-replace(|"on", "")> name]', [val]);
+      }
     ]
     where SimpleType(QId("mobl", "Callback")) := <type-of> e
     with es := <expression-to-js> e
+       ; val  := <newname> "val"
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[
@@ -168,7 +173,7 @@ rules
       [subs]
     ]
     where Html(tag, arg*, _, _) := tg
-        ; [] := <filter(?HtmlArg("type", "\"checkbox\""))> arg*
+        ; [] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
        ; if "input" := tag then
@@ -195,7 +200,7 @@ rules
       });
     ]
     where Html("input", arg*, _, _) := tg
-        ; not([] := <filter(?HtmlArg("type", "\"checkbox\""))> arg*)
+        ; not([] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*)
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
     

@@ -16,19 +16,17 @@ template basicView(header : String) {
   elements()
 }
 
-template myText(t : String, click : Callback) {
-  <span databind=t onclick=click></span>
-}
-
-screen addTask() : Task {
+screen addTask() {
   var newTask : Task := Task{}
     
-  function add() { 
-    screen return newTask;
+  function add() {
+    add(newTask);
+    flush(); 
+    screen return;
   } 
   
   function cancel() {
-    screen return null; 
+    screen return; 
   } 
  
   basicView("Add") {
@@ -53,37 +51,18 @@ screen editTask(t : Task) {
     }
   }
 }  
- 
-screen root() { 
-  function addScreen() {
-    var newTask : Task := addTask();
-    log(newTask);
-    if(newTask != null) {
-      add(newTask);
-      flush();
-    }
-  }   
-  function edit(t : Task) {
-    editTask(t);
-    flush();
-  }
 
-  function removeTask(t : Task) {
-    remove(t); 
-    flush();
-  }
-  
+screen root() { 
   basicView("Tasks") {
-    topRightButton("Add")[click:=addScreen()] 
+    topRightButton("Add", onclick:={ addTask(); }) 
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
-      listitem[click:=edit(t)] {
-        inputCheckbox(t.done)[change:=flush()] " "
+      listitem(onclick:={ editTask(t); flush(); }) {
+        inputCheckbox(t.done, onclick:={ flush(); }) " "
         outputString(t.name)
-        deleteButton("Delete")[click:=removeTask(t)]
+        deleteButton("Delete", onclick:={ remove(t); flush(); })
       }
     }
-      myText("Click me", callback { alert("Hello!"); })
-
+    button("Ask for my name", onclick:={ alert("Hello there " + promptString("What is your name?"));})
   }
 }

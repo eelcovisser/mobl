@@ -28,7 +28,6 @@ external type Entity<T> {
 external function log(s : String) : void
 external function alert(s : String) : void
 
-external function flush() : void
 external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
 
@@ -45,9 +44,9 @@ screen promptString(question : String) : String {
   button("Ok", onclick:={ screen return answer; })  
 }
 
-template inputString(s : String, onchange : Callback := null) {
+template inputString(s : String, placeholder : String := null, onchange : Callback := null) {
   <li>
-    <input type="text" databind=s/>
+    <input type="text" placeholder=placeholder databind=s/>
   </li>
 }
 
@@ -122,9 +121,4 @@ mobl.remove = function(e, _, callback) {
     allEnt.triggerEvent('remove', allEnt, e);
     if(callback) callback();
 };
-
-mobl.flush = function(_, callback) {
-    persistence.flush(null, callback);
-};
-
 </script>

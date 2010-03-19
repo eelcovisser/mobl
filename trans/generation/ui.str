@@ -129,7 +129,7 @@ rules
   databind-tag-arg-to-js(|tg, node) :
     HtmlArg(name, e) -> $[
       var [r] = [es];
-      if(r.get() !== null) {
+      if([r].get() !== null) {
 	      [node].attr('[name]', [r].get());
 	      [r].addEventListener('set', function(_, ref, val) {
 	        if(ref === [r]) { 

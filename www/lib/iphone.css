@@ -162,7 +162,7 @@ ul li:last-child {
 input[type = text] {
     -webkit-text-size-adjust: 140%;
     -moz-text-size-adjust: 140%;
-    color: #777;
+    color: #555;
     background: #fff url(../.png);
     border: 0;
     font: normal 17px Helvetica;

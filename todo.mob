@@ -21,7 +21,6 @@ screen addTask() {
     
   function add() {
     add(newTask);
-    flush(); 
     screen return;
   } 
   
@@ -32,7 +31,7 @@ screen addTask() {
   basicView("Add") {
     backButton("Back")[click:=cancel()]
     inputs {
-      inputString(newTask.name)
+      inputString(newTask.name, placeholder:="Task name")
     }
     button("Add")[click:=add()]
   }
@@ -44,11 +43,12 @@ screen editTask(t : Task) {
   }
  
   basicView("Edit") {
-    topRightButton("Done")[click:=done()]
+    topRightButton("Done", onclick:={ screen return; })
     inputs {
-      inputString(t.name)
-      inputString(t.description)
+      inputString(t.name, placeholder:="Task name")
+      inputString(t.description, placeholder:="Task description")
     }
+    button("Delete", onclick:={ remove(t); screen return; })
   }
 }  
 
@@ -57,10 +57,10 @@ screen root() {
     topRightButton("Add", onclick:={ addTask(); }) 
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
-      listitem(onclick:={ editTask(t); flush(); }) {
-        inputCheckbox(t.done, onclick:={ flush(); }) " "
+      listitem(onclick:={ editTask(t); }) {
+        inputCheckbox(t.done, onclick:= {}) " "
         outputString(t.name)
-        deleteButton("Delete", onclick:={ remove(t); flush(); })
+        deleteButton("Delete", onclick:={ remove(t); })
       }
     }
     button("Ask for my name", onclick:={ alert("Hello there " + promptString("What is your name?"));})

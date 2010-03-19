@@ -30,6 +30,11 @@ mobl.provides = function (moduleName) {
 
 $(window).resize(updateScrollers);
 
+$(function() {
+    // Set flushing at interval
+    setInterval(function() { persistence.flush(); }, 2500);
+});
+
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
 // false);
 

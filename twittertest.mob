@@ -1,0 +1,14 @@
+application twittertest
+
+title "Twitter test"
+database "twitter"
+
+import twitter
+import mobl
+
+screen root() {
+  header("Zef's twitter updates")
+  list(update : TwitterUpdate in getUpdates("zef")) {
+    listitem { outputString(update.text) }
+  }
+}

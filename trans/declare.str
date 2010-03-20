@@ -49,6 +49,11 @@ strategies
              GetGenericType : (qid, arity) -> extern
            )
 
+  declare:
+    extern@ExternalEntity(qid, super, prop*) -> <fail>
+    with rules (
+             GetEntity : qid -> extern
+           )
 
   declare:
     extern@ExternalFunction(qid, farg*, rt) -> <fail>

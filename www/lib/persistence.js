@@ -117,7 +117,7 @@ var persistence = window.persistence || {};
           rowDef = '';
           for (var prop in meta.fields) {
             if (meta.fields.hasOwnProperty(prop)) {
-              rowDef += prop + " " + meta.fields[prop] + ", ";
+              rowDef += "`" + prop + "` " + meta.fields[prop] + ", ";
             }
           }
           for (var rel in meta.hasOne) {

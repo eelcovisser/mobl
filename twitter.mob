@@ -1,0 +1,30 @@
+module twitter
+
+import mobl
+
+entity TwitterUpdate {
+  text : String
+}
+
+external sync function getUpdates(username : String) : Collection<TwitterUpdate>
+
+<script>
+twitter.getUpdates = function(username, callback) {
+  return {
+    addEventListener: function() {},
+    list: function(_, callback) {
+		  $.getJSON("http://twitter.com/status/user_timeline/" + username + ".json?count=5&callback=?", function(data) {
+		    var results = [];
+		    var update;
+		    for(var i = 0; i < data.length; i++) {
+		      update = new twitter.TwitterUpdate();
+		      update.text = data[i].text;
+		      results.push(update);
+		    }
+		    callback(results);
+		  });
+    }
+  };
+};
+
+</script>

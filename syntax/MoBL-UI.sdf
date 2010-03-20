@@ -40,13 +40,13 @@ exports
     
     "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
     
-    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
+    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall"), deprecated("Property arguments are deprecated, use named arguments instead")}
     %% Variants:
-    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]"                       -> ScreenElem {cons("TemplateCallNoBody")}
+    QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]"                       -> ScreenElem {cons("TemplateCallNoBody"), deprecated("Property arguments are deprecated, use named arguments instead")}
     QId "(" {NamedExp ","}* ")" "{" ScreenElem* "}"                        -> ScreenElem {cons("TemplateCallNoProperties")}
     QId "(" {NamedExp ","}* ")"                                            -> ScreenElem {cons("TemplateCallNoPropertiesNoBody")}
-    QId "[" PropertyArg* "]" "{" ScreenElem* "}"                      -> ScreenElem {cons("TemplateCallNoArgs")}
-    QId "[" PropertyArg* "]"                                          -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
+    QId "[" PropertyArg* "]" "{" ScreenElem* "}"                      -> ScreenElem {cons("TemplateCallNoArgs"), deprecated("Property arguments are deprecated, use named arguments instead")}
+    QId "[" PropertyArg* "]"                                          -> ScreenElem {cons("TemplateCallNoArgsNoBody"), deprecated("Property arguments are deprecated, use named arguments instead")}
     QId "{" ScreenElem* "}"                                           -> ScreenElem {cons("TemplateCallNoArgsNoProperties")}
     QId                                                               -> ScreenElem {cons("TemplateCallNoArgsNoPropertiesNoBody")}
 

@@ -55,6 +55,7 @@ rules
     $[[body-stats]
       var [nodes] = $("<span>");
       [root].append([nodes]);
+      [subscriptions]
       function [renderTemplate](rerender) {
         [templatecall]
       }
@@ -93,7 +94,6 @@ rules
                [nodes] = node.contents();
                oldNodes.replaceWith([nodes]);
                [prop-set]
-               [subscriptions]
                if(!rerender) {
                  [<elems-to-js(|root)> rest*]
                }

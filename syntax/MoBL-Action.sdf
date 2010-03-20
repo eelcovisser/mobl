@@ -14,10 +14,10 @@ exports
     FunctionDef -> Definition
     
   context-free syntax %% Statements
-    "var" ID ":" Type ":=" Exp ";"              -> Statement {cons("VarDecl")}
-    "var" ID ":=" Exp ";"                       -> Statement {cons("VarDeclInferred")}
+    "var" ID ":" Type "=" Exp ";"              -> Statement {cons("VarDecl")}
+    "var" ID "=" Exp ";"                       -> Statement {cons("VarDeclInferred")}
     
-    QId ":=" Exp ";"                            -> Statement {cons("Assignment")}
+    QId "=" Exp ";"                            -> Statement {cons("Assignment")}
     Exp ";"                                     -> Statement {cons("ExpStat")}
     "if" "(" Exp ")" "{" Statement* "}" "else" "{" Statement* "}" -> Statement {cons("If")}
     "if" "(" Exp ")" "{" Statement* "}"                  -> Statement {cons("IfNoElse")}
@@ -41,7 +41,7 @@ exports
     Exp "[" Exp "]"               -> Exp {left, cons("Indexer")}
     
     Exp                           -> NamedExp
-    ID ":=" Exp                   -> NamedExp {cons("NamedExp")}
+    ID "=" Exp                   -> NamedExp {cons("NamedExp")}
     
     Exp BoolMethodId Exp         -> Exp {cons("BinMethodCall"), left}
     Exp CompareMethodId Exp      -> Exp {cons("BinMethodCall"), left}
@@ -55,7 +55,7 @@ exports
     
     "{" Statement* "}"           -> Exp {cons("Callback")}
     
-    ID ":=" Exp                  -> PropVal {cons("PropVal")}
+    ID "=" Exp                  -> PropVal {cons("PropVal")}
     
   context-free syntax %% Filters
     "[" Exp Filter "]"                       -> Exp {cons("SetComp")}

@@ -36,15 +36,15 @@ template outputString(s : String) {
 }
 
 screen promptString(question : String) : String {
-  var answer : String := ""
+  var answer : String = ""
   header(question)
   inputs {
     inputString(answer)
   }
-  button("Ok", onclick:={ screen return answer; })  
+  button("Ok", onclick={ screen return answer; })  
 }
 
-template inputString(s : String, placeholder : String := null, onchange : Callback := null) {
+template inputString(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
     <input type="text" placeholder=placeholder databind=s/>
   </li>
@@ -56,7 +56,7 @@ template inputs() {
   </ul>
 }
 
-template inputCheckbox(b : Bool, onchange : Callback := null, onclick : Callback := null) {
+template inputCheckbox(b : Bool, onchange : Callback = null, onclick : Callback = null) {
   <input type="checkbox" databind=b onchange=onchange onclick=onclick/>
 }
 
@@ -72,31 +72,31 @@ template ul() {
   </ul>
 }
  
-template listitem(onclick : Callback := null) {
+template listitem(onclick : Callback = null) {
   <li onclick=onclick>elements()</li>
 }
 
-template listitemArrow(onclick : Callback := null) {
+template listitemArrow(onclick : Callback = null) {
   <li onclick=onclick class="arrow">elements()</li>
 }
 
-template image(url : String, onclick : Callback := null) {
+template image(url : String, onclick : Callback = null) {
   <img src=url onclick=onclick/>
 }
 
-template button(text : String, onclick : Callback := null) {
+template button(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="redButton" databind=text onclick=onclick></a>
 }
 
-template deleteButton(text : String, onclick : Callback := null) {
+template deleteButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="button" databind=text onclick=onclick></a>
 }
 
-template topRightButton(text : String, onclick : Callback := null) {
+template topRightButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="topRightButton" databind=text onclick=onclick></a>
 }
 
-template backButton(text : String, onclick : Callback := null) {
+template backButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="backButton" id="back-button" databind=text onclick=onclick></a>
 }
 

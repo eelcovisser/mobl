@@ -25,8 +25,8 @@ exports
     
     TemplateDefinition                                                -> ScreenElem
     
-    "var" ID ":" Type ":=" Exp                                        -> ScreenElem {cons("VarDecl")}
-    "var" ID ":=" Exp                                                 -> ScreenElem {cons("VarDeclInferred")}
+    "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("VarDecl")}
+    "var" ID "=" Exp                                                 -> ScreenElem {cons("VarDeclInferred")}
 
     FunctionDef                                                       -> ScreenElem
     
@@ -38,7 +38,7 @@ exports
     "placeholder"  ID "{" ScreenElem* "}"                             -> ScreenElem {cons("PlaceHolder")}
     "cond" "(" Exp ")" "{" ScreenElem* "}"                            -> ScreenElem {cons("ConditionalDisplay")}
     
-    "var" ID ":" Type ":=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
+    "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
     
     QId "(" {NamedExp ","}* ")" "[" PropertyArg* "]" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
     %% Variants:
@@ -50,5 +50,5 @@ exports
     QId "{" ScreenElem* "}"                                           -> ScreenElem {cons("TemplateCallNoArgsNoProperties")}
     QId                                                               -> ScreenElem {cons("TemplateCallNoArgsNoPropertiesNoBody")}
 
-    ID ":=" Exp  -> PropertyArg {cons("PropertyArg")}
+    ID "=" Exp  -> PropertyArg {cons("PropertyArg")}
   

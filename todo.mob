@@ -17,7 +17,7 @@ template basicView(header : String) {
 }
 
 screen addTask() {
-  var newTask : Task := Task{}
+  var newTask : Task = Task{}
     
   function add() {
     add(newTask);
@@ -29,11 +29,11 @@ screen addTask() {
   } 
  
   basicView("Add") {
-    backButton("Back")[click:=cancel()]
+    backButton("Back")[click=cancel()]
     inputs {
-      inputString(newTask.name, placeholder:="Task name")
+      inputString(newTask.name, placeholder="Task name")
     }
-    button("Add")[click:=add()]
+    button("Add", onclick={ add(); })
   }
 }
 
@@ -43,26 +43,26 @@ screen editTask(t : Task) {
   }
  
   basicView("Edit") {
-    topRightButton("Done", onclick:={ screen return; })
+    topRightButton("Done", onclick={ screen return; })
     inputs {
-      inputString(t.name, placeholder:="Task name")
-      inputString(t.description, placeholder:="Task description")
+      inputString(t.name, placeholder="Task name")
+      inputString(t.description, placeholder="Task description")
     }
-    button("Delete", onclick:={ remove(t); screen return; })
+    button("Delete", onclick={ remove(t); screen return; })
   }
 }  
 
 screen root() { 
   basicView("Tasks") {
-    topRightButton("Add", onclick:={ addTask(); }) 
+    topRightButton("Add", onclick={ addTask(); }) 
 
     list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
-      listitem(onclick:={ editTask(t); }) {
-        inputCheckbox(t.done, onclick:= {}) " "
+      listitem(onclick={ editTask(t); }) {
+        inputCheckbox(t.done, onclick={}) " "
         outputString(t.name)
-        deleteButton("Delete", onclick:={ remove(t); })
+        deleteButton("Delete", onclick={ remove(t); })
       }
     }
-    button("Ask for my name", onclick:={ alert("Hello there " + promptString("What is your name?"));})
+    button("Ask for my name", onclick={ alert("Hello there " + promptString("What is your name?"));})
   }
 }

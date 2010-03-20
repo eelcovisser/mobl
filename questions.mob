@@ -1,0 +1,20 @@
+application questions
+
+title "Questions"
+database "questions"
+
+import mobl
+
+screen root() {
+  header("Questions")
+  var message : String = "<message will appear here>"
+  ul {
+    listitem { outputString(message) }
+  }
+  button("Ask for name", onclick={
+    message = "Hello, " + promptString("What is your name?");
+  })
+  altButton("Ask for age", onclick={
+    message = "You are " + promptString("How old are you?") + " years old";
+  })
+}

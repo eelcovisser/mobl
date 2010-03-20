@@ -88,6 +88,11 @@ template button(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="redButton" databind=text onclick=onclick></a>
 }
 
+template altButton(text : String, onclick : Callback = null) {
+  <a href="javascript:void(0)" class="whiteButton" databind=text onclick=onclick></a>
+}
+
+
 template deleteButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="button" databind=text onclick=onclick></a>
 }

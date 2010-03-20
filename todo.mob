@@ -50,6 +50,5 @@ screen root() {
         deleteButton("Delete", onclick={ remove(t); })
       }
     }
-    button("Ask for my name", onclick={ alert("Hello there " + promptString("What is your name?"));})
   }
 }

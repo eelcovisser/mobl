@@ -35,6 +35,10 @@ template outputString(s : String) {
   <span databind=s></span>
 }
 
+template outputInt(n : Int) {
+  <span databind=n></span>
+}
+
 screen promptString(question : String) : String {
   var answer : String = ""
   header(question)
@@ -47,6 +51,12 @@ screen promptString(question : String) : String {
 template inputString(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
     <input type="text" placeholder=placeholder databind=s/>
+  </li>
+}
+
+template inputInt(i : Int, placeholder : String = null, onchange : Callback = null) {
+  <li>
+    <input type="text" placeholder=placeholder databind=i/>
   </li>
 }
 

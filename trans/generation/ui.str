@@ -53,10 +53,17 @@ rules
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
     $[[body-stats]
-      [templatecall]
+      var [nodes] = $("<span>");
+      [root].append([nodes]);
+      function [renderTemplate](rerender) {
+        [templatecall]
+      }
+      [renderTemplate]();
 ]
     with elem-root := <newname> "root"
        ; subScope := <newname> "subScope"
+       ; nodes := <newname> "nodes"
+       ; renderTemplate := <newname> "renderTemplate"
        ; if not([] := elems) then
            body-stats := $[var [subScope] = new mobl.LinkedMap(scope);
                            [subScope].setLocal('elements', function(scope, namedArgs, callback) {
@@ -78,16 +85,33 @@ rules
          else
            prop-set := ""
          end
+       ; watch-expr* := <map(find-watchable-expressions); concat> arg*
+       ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> watch-expr*
        ; args  := <ref-arguments-to-js; <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
            $[function(node) {
+               var oldNodes = [nodes];
+               [nodes] = node.contents();
+               oldNodes.replaceWith([nodes]);
                [prop-set]
-               [root].append(node.contents());
-               [<elems-to-js(|root)> rest*]
+               [subscriptions]
+               if(!rerender) {
+                 [<elems-to-js(|root)> rest*]
+               }
              }]
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
   
- 
+   find-watchable-expressions =
+        (?BinMethodCall(_, _, _) <+ ?Call(_, _))
+        ; collect(?Var(_) <+ ?FieldAccess(_, _))
+     <+ ![]
+  
+  exp-to-watcher-js(|renderTemplate) :
+    e -> $[[<ref-expression-to-js> e].addEventListener('set', function() {
+             [renderTemplate](true);
+           });
+]
+     
   prop-to-bind :
     PropertyArg(x, e) -> $[c.bind('[x]', function(evt) {  evt.stopPropagation(); [<expression-to-js> e]; });]
   
@@ -146,7 +170,6 @@ rules
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
 
-
   databind-tag-arg-to-js(|tg, node) :
     HtmlArg(name, e) -> $[
       var [val] = [es];
@@ -164,7 +187,7 @@ rules
       [node].[method]([r].get());
       [r].addEventListener('set', function(_, ref, val) {
         if(ref === [r]) { 
-          [node].[method](val);
+          [node].[method]([typeconverter](val));
         } else {
           console.log("Garbage!");
         }
@@ -176,11 +199,12 @@ rules
         ; [] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
+       ; typeconverter := <concat-strings> ["mobl.stringTo", <type-of; ?SimpleType(<id>); qid-to-html> e]
        ; if "input" := tag then
            method := "val"
            ; subs := $[
                [node].change(function() {
-                 [es].set([node].[method]());
+                 [es].set([typeconverter]([node].[method]()));
                });
              ]
          else

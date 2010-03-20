@@ -16,6 +16,14 @@ function fromScope(that, prop) {
     }
 }
 
+mobl.stringTomobl__Int = function (s) {
+    return parseInt(s, 10);
+}
+
+mobl.stringTomobl__String =function (s) {
+    return s;
+}
+
 function log(s) {
     console.log(s);
 }

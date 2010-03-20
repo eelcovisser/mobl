@@ -9,7 +9,7 @@ entity TwitterUpdate {
 external sync function getUpdates(username : String) : Collection<TwitterUpdate>
 
 <script>
-twitter.getUpdates = function(username, callback) {
+twitter.getUpdates = function(username, optionalArgs) {
   return {
     addEventListener: function() {},
     list: function(_, callback) {

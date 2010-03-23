@@ -39,9 +39,14 @@ $(function() {
 // false);
 
 mobl.load = function(url) {
-    $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
-    console.log("loaded " + url);
-}
+    if(url.substring(url.length-3) === '.js') {
+        $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
+    } else if(url.substring(url.length-4) === '.css') {
+        $("head").append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + url + "\">");
+    } else {
+        console.log("Unkown type to load: " + url);
+    }
+};
 
 mobl.call = function (screenName, args, callback) {
     var screenFrame = {

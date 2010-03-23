@@ -5,7 +5,7 @@ body {
     font-size: 14px;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     -webkit-user-select: none;
     -webkit-text-size-adjust: none;
     background: rgb(197, 204, 211) url(img/stripes.png);

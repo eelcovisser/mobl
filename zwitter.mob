@@ -1,0 +1,39 @@
+application zwitter
+
+title "Zwitter"
+database "zwitter"
+database version 1
+
+import mobl
+import twitter
+
+entity Account {
+  username : String
+  password : String
+}
+
+function updateStream(account : Account) {
+   var updates : Collection<TwitterUpdate> = twitter::getUpdates(account.username, account.password);
+   for(update : TwitterUpdate in updates) {
+     if(TwitterUpdate.all().filter("updateId", "=", update.updateId).one() == null) { 
+       add(update);
+     }
+   }
+}
+
+screen root() {
+  header("Accounts")
+  
+}
+
+screen showUpdates(account : Account) {
+  header(account.username)
+  list(update : TwitterUpdate in TwitterUpdate.all()) {
+    <div> 
+      <img src=update.iconUrl/>
+      <tt>outputString(update.screenName) ": "</tt>
+      outputString(update.text)
+    </div>
+  }
+  button("Reload", onclick={ updateStream(account); })
+}

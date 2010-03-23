@@ -77,9 +77,33 @@ strategies
           ; e2 := <Exp>
           |}
 
+  cps-lift-exprs :
+    [For(x, t, e, stat*)|stats] ->
+    <concat> [stats2, [For(x, t, e2, <cps-lift-expressions> stat*)|<cps-lift-expressions> stats]]
+    where not(<is-sync> e)
+    with {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+
+  cps-lift-exprs :
+    [If(e, true-stat*, false-stat*)|stats] -> 
+    [If(e, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
+  cps-lift-exprs :
+    [For(x, t, e, stat*)|stats] ->
+    [For(x, t, e, <cps-lift-expressions> stat*)|<cps-lift-expressions> stats]
+    where <is-sync> e
+
 rules
   
   cps-lift-expression :
+    e -> []
+    where is-sync
+    with rules ( Exp :+= e)
+  
+  /*cps-lift-expression :
     e@Var(_) -> []
     with rules ( Exp :+= e )
 
@@ -101,7 +125,7 @@ rules
 
   cps-lift-expression :
     e@String(_) -> []
-    with rules ( Exp :+= e )
+    with rules ( Exp :+= e )*/
 
   cps-lift-expression :
     e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
@@ -137,6 +161,7 @@ rules
 
   cps-lift-expression :
     e@CollectionCons(gt, t, e*) -> <concat> [stats, [VarDeclInferred(v, CollectionCons(gt, t, e2*))]]
+    where not(is-sync)
     with v := <newname> "tmp"
        ; {| Exp
           : stats := <map(cps-lift-expression); concat> e*
@@ -192,7 +217,7 @@ strategies
 
   is-sync =
     ?MethodCall(e, x, e*)
-    ; <lookup-method> (<type-of> e, x, <map(type-of)> e*)
+    ; <lookup-method> (<type-of> e, x, <map(where(is-sync); type-of)> e*)
     ; ?ExternalSyncMethod(_, _, _)
 
   is-sync =

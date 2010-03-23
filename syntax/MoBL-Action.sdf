@@ -21,6 +21,7 @@ exports
     Exp ";"                                     -> Statement {cons("ExpStat")}
     "if" "(" Exp ")" "{" Statement* "}" "else" "{" Statement* "}" -> Statement {cons("If")}
     "if" "(" Exp ")" "{" Statement* "}"                  -> Statement {cons("IfNoElse")}
+    "for" "(" ID ":" Type "in" Exp ")" "{" Statement* "}"  -> Statement {cons("For")}
     "return" Exp ";"                            -> Statement {cons("Return")}
     "screen" "return" Exp ";"                   -> Statement {cons("ScreenReturn")}
     "return" ";"                                -> Statement {cons("Return")}

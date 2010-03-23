@@ -84,7 +84,7 @@ strategies
   lookup-method :
     (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
     where not(GenericType("Type", _) := t)
-    where ExternalType(_, super, method*) := <GetType> t
+    where ExternalType(_, super, method*) := <lookup-type> t
         ; <filter(?ExternalMethod(x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x, arg-type*)
@@ -93,7 +93,7 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; arg-types1* := arg-types2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-method :
     (t, x, arg-type*) -> ExternalSyncMethod(x, farg2*, rt2)
@@ -106,7 +106,7 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; arg-types1* := arg-types2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-method :
     (t2, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
@@ -120,7 +120,7 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; arg-types1* := arg-types2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-method :
     (t2, x, arg-type*) -> ExternalSyncMethod(x, farg2*, rt2)
@@ -134,7 +134,7 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
         ; arg-types1* := <alltd(add-namespace)> arg-type*
         ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; arg-types1* := arg-types2*
+        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
   
   is-entity-type =
     lookup-type

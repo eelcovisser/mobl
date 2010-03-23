@@ -36,6 +36,10 @@ strategies
     qid -> <emit> $[mobl.load('[<qid-to-path> qid].js');
 ]
   
+  definition-to-js :
+    Load(url) -> <emit> $[mobl.load('[<un-double-quote> url]');
+]
+  
   definition-to-js =
     function-to-js
     ; emit
@@ -99,7 +103,7 @@ strategies
     with qids := <qid-to-js> qid
        ; args := <filter(farg-to-js); <concat> [<id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
        ; init-stats := <fargs-to-init-js> farg*
-       ; stats2 := <cps-lift-expressions; <concat> [<id>, [$[if(callback) callback(); return;]]]; cps-statements> stats
+       ; stats2 := <cps-lift-expressions; <concat> [<id>, [$[if(callback) callback(); return;]]]; cps-statements <+ debug(!"Could not translate to stats: "); fail> stats
        ; if <is-string> qid then
            varname := $[var [qid]]
          else
@@ -129,19 +133,9 @@ rules // Statements
 
   stat-to-js :
     VarDecl(x, t, e) -> $[var [x] = [<expression-to-js> e];]
-    //where not(InTemplate)
 
   stat-to-js :
     VarDeclInferred(x, e) -> $[var [x] = [<expression-to-js> e];]
-    //where not(InTemplate)
-
-  /*stat-to-js :
-    VarDecl(x, t, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
-    where InTemplate
-
-  stat-to-js :
-    VarDeclInferred(x, e) -> $[scope.setLocal('[x]', [<expression-to-js> e]);]
-    where InTemplate*/
 
   stat-to-js :
     If(e, true-stat*, false-stat*) -> 
@@ -150,6 +144,21 @@ rules // Statements
         } else {
           [<statements-to-js> false-stat*]
         }]
+
+  // Never used, currently
+  stat-to-js :
+    For(x, _, e, stat*) -> 
+      $[var [coll] = [<expression-to-js> e];
+        var [length] = [coll].length;
+        for(var [i] = 0; [i] < [length]; [i]++) {
+          (function() {
+            var [x] = [coll]$[$[i]$]$;
+            [<statements-to-js> stat*]
+          }());
+        }]
+    with coll := <newname> "coll"
+       ; length := <newname> "length"
+       ; i := <newname> "i"
 
   stat-to-js :
     Assignment(qid, e) -> $[[<qid-to-js> qid].set([<expression-to-js> e]);]

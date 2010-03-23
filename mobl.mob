@@ -1,5 +1,7 @@
 module mobl
 
+load "lib/iphone.css"
+
 external type void {}
 external type String { }
 external type Int { }
@@ -12,7 +14,8 @@ external type Array<T> { }
 external type Object { }
 
 external type Collection<T> {
-  function get() : Array<T>
+  //function get() : Array<T>
+  function one() : T
   sync function filter(property : String, op : String, value : Object) : Collection<T>
   sync function order(property : String, ascending : Bool) : Collection<T>
   sync function limit(n : Int) : Collection<T>

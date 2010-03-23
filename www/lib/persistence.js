@@ -50,8 +50,8 @@ var persistence = window.persistence || {};
      * @param size
      *            the maximum size of the database in bytes
      */
-    persistence.connect = function (dbname, description, size) {
-      persistence._conn = persistence.db.connect(dbname, description, size);
+    persistence.connect = function (dbname, description, size, version) {
+      persistence._conn = persistence.db.connect(dbname, description, size, version);
       if(!persistence._conn) {
         throw {
           type: "NoSupportedDatabaseFound",
@@ -261,6 +261,10 @@ var persistence = window.persistence || {};
      * Remove all tables in the database (as defined by the model)
      */
     persistence.reset = function (tx) {
+      if(!tx) {
+        persistence.transaction(function(tx) { persistence.reset(tx); });
+        return;
+      }
       var tableArray = [];
       for (p in generatedTables) {
         if (generatedTables.hasOwnProperty(p)) {
@@ -588,6 +592,38 @@ var persistence = window.persistence || {};
         entityClassCache[entityName] = Entity;
         return Entity;
       }
+
+
+      /**
+       * Dumps the entire database into an object (that can be serialized to JSON for instance)
+       * @param entities a list of entity constructor functions to serialize, defaults to all
+       * @param callback (object) the callback function called with the results.
+       */
+      persistence.dump = function(tx, entities, callback) {
+        if(!entities) { // Default: all entity types
+          entities = [];
+          for(e in entityClassCache) {
+            if(entityClassCache.hasOwnProperty(e)) {
+              entities.push(entityClassCache[e]);
+            }
+          }
+        }
+
+        var finishedCount = 0;
+        var result = {};
+        for(var i = 0; i < entities.length; i++) {
+          (function() {
+              var Entity = entities[i];
+              Entity.all().list(tx, function(all) {
+                  result[Entity.meta.name] = all.map(function(e) { return e._data; });
+                  finishedCount++;
+                  if(finishedCount === entities.length) {
+                    callback(result);
+                  }
+                });
+            }());
+        }
+      };
 
       /**
        * Internal function to persist an object to the database
@@ -1017,12 +1053,37 @@ var persistence = window.persistence || {};
 
       DbQueryCollection.prototype = new QueryCollection();
 
+      /**
+       * Execute a function for each item in the list
+       * @param tx the transaction to use (or null to open a new one)
+       * @param eachFn (elem) the function to be executed for each item
+       */
       DbQueryCollection.prototype.each = function (tx, eachFn) {
+        if(tx && !tx.executeSql) { // provided oneFn as first argument
+          eachFn = tx;
+          tx = null;
+        }
+
         this.list(tx, function(results) {
             for(var i = 0; i < results.length; i++) {
               eachFn(results[i]);
             }
           });
+      }
+
+      DbQueryCollection.prototype.one = function (tx, oneFn) {
+        if(tx && !tx.executeSql) { // provided oneFn as first argument
+          oneFn = tx;
+          tx = null;
+        }
+
+        this.limit(1).list(tx, function(results) {
+            if(results.length === 0) {
+              oneFn(null);
+            } else {
+              oneFn(results[0]);
+            }
+        });
       }
 
       /**
@@ -1294,9 +1355,9 @@ var persistence = window.persistence || {};
 
       persistence.db.html5 = {};
 
-      persistence.db.html5.connect = function (dbname, description, size) {
+      persistence.db.html5.connect = function (dbname, description, size, version) {
           var that = {};
-          var conn = openDatabase(dbname, '1.0', description, size);
+          var conn = openDatabase(dbname, version, description, size);
 
           that.transaction = function (fn) {
               return conn.transaction(function (sqlt) {
@@ -1361,9 +1422,9 @@ var persistence = window.persistence || {};
           return that;
       };
 
-      persistence.db.connect = function (dbname, description, size) {
+      persistence.db.connect = function (dbname, description, size, version) {
           if (persistence.db.implementation == "html5") {
-              return persistence.db.html5.connect(dbname, description, size);
+              return persistence.db.html5.connect(dbname, description, size, version);
           } else if (persistence.db.implementation == "gears") {
               return persistence.db.gears.connect(dbname);
           }

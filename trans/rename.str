@@ -169,3 +169,11 @@ strategies
            ; e2 := <rename-all> e
            ; body2 := <rename-all> body
          )
+
+  rename :
+    For(x, t, e, stat*) -> For(x2, t, e2, stat2*)
+    with rename-scope(
+           x2 := <rename-var> (x, t)
+           ; e2 := <rename-all> e
+           ; stat2* := <rename-all> stat*
+         )

@@ -3,26 +3,43 @@ module twitter
 import mobl
 
 entity TwitterUpdate {
-  text : String
+  updateId   : Int
+  screenName : String
+  iconUrl    : String
+  text       : String
 }
 
-external sync function getUpdates(username : String) : Collection<TwitterUpdate>
+external sync function getUpdates(username : String, password : String) : Collection<TwitterUpdate>
 
 <script>
-twitter.getUpdates = function(username, optionalArgs) {
+
+twitter.getUpdates = function(username, username, password, optionalArgs) {
   return {
     addEventListener: function() {},
     list: function(_, callback) {
-		  $.getJSON("http://twitter.com/status/user_timeline/" + username + ".json?count=5&callback=?", function(data) {
-		    var results = [];
-		    var update;
-		    for(var i = 0; i < data.length; i++) {
-		      update = new twitter.TwitterUpdate();
-		      update.text = data[i].text;
-		      results.push(update);
-		    }
-		    callback(results);
-		  });
+      $.ajax({
+			   url: mobl.proxyUrl('http://api.twitter.com/1/statuses/home_timeline.json', username, password),
+			   datatype: "json",
+			   error: function(_, message, error) {
+			     console.log(message);
+			     console.log(error);
+           callback([]);
+			   },
+			   success: function(data) {
+		        var results = [];
+		        var update;
+		        for(var i = 0; i < data.length; i++) {
+		          update = new twitter.TwitterUpdate();
+		          var up = data[i];
+		          update.screenName = up.user.screen_name;
+		          update.updateId = up.id;
+		          update.iconUrl = up.user.profile_image_url;
+		          update.text = up.text;
+		          results.push(update);
+		        }
+		        callback(results);
+			   }
+			});
     }
   };
 };

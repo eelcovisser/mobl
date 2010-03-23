@@ -24,6 +24,12 @@ mobl.stringTomobl__String =function (s) {
     return s;
 }
 
+mobl.proxyUrl = function(url, user, password) {
+    var proxyUrl = '/proxy.php?user=' + user + '&pwd=' + password + '&proxy_url=' + url;
+    //console.log(proxyUrl);
+    return proxyUrl;
+}
+
 function log(s) {
     console.log(s);
 }

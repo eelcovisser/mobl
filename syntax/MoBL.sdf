@@ -21,8 +21,10 @@ exports
     
     "title" STRING                   -> Setting {cons("TitleSetting")}
     "database" STRING                -> Setting {cons("DatabaseSetting")}
+    "database" "version" INT         -> Setting {cons("DatabaseVersionSetting")}
 
     "import" QId                   -> Definition {cons("Import")}
+    "load" STRING                  -> Definition {cons("Load")}
 
     ID ":" Type                    -> FArg {cons("FArg")}
     ID ":" Type "=" Exp           -> FArg {cons("FArgOptional")}
@@ -40,7 +42,7 @@ exports
 
   lexical syntax
     JSChar*       -> JSString
-    ~[\<\~]       -> JSChar
+    ~[\<]       -> JSChar
     SmallerThan   -> JSChar
     [\<]          -> SmallerThan
     ""            -> JSString{reject}

@@ -69,6 +69,10 @@ strategies
           |}
 
   cps-lift-exprs :
+    [Async(stat*)|stats] -> 
+    [Async(<cps-lift-expressions> stat*)|<cps-lift-expressions> stats]
+
+  cps-lift-exprs :
     [If(e, true-stat*, false-stat*)|stats] -> 
     <concat> [stats2, [If(e2, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)

@@ -7,13 +7,18 @@ function updateScrollers () {
     if (scrollwrappers.length > 0) {
         var height = window.innerHeight;
         height -= $("#header:visible").height();
-        height -= $("#tabbar:visible").height();
-        scrollwrappers.height(height + 5);
+        height -= $("#footer:visible").height();
+        scrollwrappers.height(height);
     }
     var scrollers = $("#scrollwrapper div#content:visible");
     for ( var i = 0; i < scrollers.length; i++) {
         scrollers.eq(i).data("scroller").refresh();
     }
+}
+
+mobl.delayedUpdateScrollers = function() {
+    console.log("Updating scrollers");
+    setTimeout(updateScrollers, 200);
 }
 
 mobl.provides = function (moduleName) {
@@ -38,7 +43,12 @@ $(function() {
 // document.addEventListener('touchmove', function(e){ e.preventDefault(); },
 // false);
 
+mobl.loadedFiles = {};
+
 mobl.load = function(url) {
+    if(url in mobl.loadedFiles) {
+        return;
+    }
     if(url.substring(url.length-3) === '.js') {
         $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
     } else if(url.substring(url.length-4) === '.css') {
@@ -46,6 +56,7 @@ mobl.load = function(url) {
     } else {
         console.log("Unkown type to load: " + url);
     }
+    mobl.loadedFiles[url] = true;
 };
 
 mobl.call = function (screenName, args, callback) {

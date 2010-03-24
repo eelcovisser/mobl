@@ -14,19 +14,19 @@ strategies
       
   // Records the definition of an entity in a dynamic rule GetEntity.
   declare:
-    Entity(x, super, body) -> <fail>
+    Entity(qid, super, body) -> <fail>
     with
       extern := <definition-to-external>
       ; rules(
-          GetEntity : x -> extern
+          GetEntity : qid -> extern
         )
 
   declare:
-    EntityNoSuper(x, body) -> <fail>
+    EntityNoSuper(qid, body) -> <fail>
     with
       extern := <definition-to-external>
       ; rules(
-          GetEntity : x -> extern
+          GetEntity : qid -> extern
         )
 
   declare:

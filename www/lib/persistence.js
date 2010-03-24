@@ -976,7 +976,7 @@ var persistence = window.persistence || {};
        * @return the query collection with imposed ordering
        */
       QueryCollection.prototype.order = function (property, ascending) {
-        ascending = ascending || true;
+        ascending = ascending === undefined ? true : ascending;
         var c = this.clone();
         c._orderColumns.push( [ property, ascending ]);
         return c;

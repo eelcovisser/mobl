@@ -1,0 +1,14 @@
+module growl
+
+load "lib/jquery.jgrowl.js"
+load "lib/jquery.jgrowl.css"
+
+import mobl
+
+external sync function notify(message : String) : void
+
+<script>
+growl.notify = function(message) {
+  $.jGrowl(message);
+};
+</script>

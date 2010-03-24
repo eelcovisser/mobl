@@ -6,15 +6,21 @@ imports
   declare
   resolve
   type
+  mobl
 
 strategies
+  
+  import-and-retry(s|qid2) =
+    where(
+      QId(qid, _) := qid2
+      ; not(qid := <CompilingModule>)
+      ; <lookup-import-module; alltd(declare)> Import(qid))
+    ; s
 
   lookup-type =
        lookup-type-aux
-    <+ 
-      ?SimpleType(QId(qid, _))
-      ; where(<lookup-import-module; alltd(declare)> Import(qid))
-      ; lookup-type-aux
+     <+ ?SimpleType(qid)
+        ; import-and-retry(lookup-type-aux|qid)
     
   lookup-type-aux :
     SimpleType(qid) -> <GetEntity> qid
@@ -34,12 +40,17 @@ strategies
     (entityType, prop) -> t
     where ExternalEntity(_, super, prop*) := <lookup-type> entityType
           ; <filter(?Property(prop, t, _))> prop*
+
+  // TODO: Take inheritance into account
+  lookup-property :
+    (type, field) -> t
+    where ExternalType(_, super, member*) := <lookup-type> type
+          ; <filter(?ExternalField(field, t))> member*
+          //; (!t <+ <lookup-property> )
   
   lookup-template =
       lookup-template-aux
-   <+ ?(QId(qid, _), _)
-      ; where(<lookup-import-module; alltd(declare)> Import(qid))
-      ; lookup-template-aux
+     <+ ?(qid, _); import-and-retry(lookup-template-aux|qid)
 
   lookup-template-aux :
     (qid, arg*) -> ExternalTemplate(qid, farg2*)
@@ -52,9 +63,7 @@ strategies
 
   lookup-screen = 
       lookup-screen-aux
-   <+ ?(QId(qid, _), _)
-      ; where(<lookup-import-module; alltd(declare)> Import(qid))
-      ; lookup-screen-aux
+   <+ ?(qid, _); import-and-retry(lookup-screen-aux|qid)
 
   lookup-screen-aux :
     (qid, arg-type*) -> ExternalScreen(qid, farg2*, rt)
@@ -67,9 +76,7 @@ strategies
 
   lookup-function =
       lookup-function-aux
-   <+ ?(QId(qid, _), _)
-      ; where(<lookup-import-module; alltd(declare)> Import(qid))
-      ; lookup-function-aux
+   <+ ?(qid, _); import-and-retry(lookup-function-aux|qid)
 
   lookup-function-aux :
     (qid, arg-type*) -> ExternalFunction(qid, farg2*, rt2)

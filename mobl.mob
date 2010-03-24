@@ -4,14 +4,20 @@ load "lib/iphone.css"
 
 external type void {}
 external type String { }
-external type Int { }
-external type Bool { }
-external type Text { }
+external type Int { 
+  sync function toString() : String
+}
+external type Bool {
+  sync function toString() : String
+}
+external type Text {
+  sync function toString() : String
+}
 external type Uri { }
 external type Callback {}
-
-external type Array<T> { }
-external type Object { }
+external type DateTime {}
+external type Array<T> {}
+external type Object {}
 
 external type Collection<T> {
   //function get() : Array<T>
@@ -33,6 +39,8 @@ external function alert(s : String) : void
 
 external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
+external function resetDatabase() : void
+external sync function formatDate(d : DateTime) : String
 
 template outputString(s : String) {
   <span databind=s></span>
@@ -40,6 +48,10 @@ template outputString(s : String) {
 
 template outputInt(n : Int) {
   <span databind=n></span>
+}
+
+template outputDate(d : DateTime) {
+  <span databind=formatDate(d)/>
 }
 
 screen promptString(question : String) : String {
@@ -54,6 +66,18 @@ screen promptString(question : String) : String {
 template inputString(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
     <input type="text" placeholder=placeholder databind=s/>
+  </li>
+}
+
+template inputText(s : String, placeholder : String = null, onchange : Callback = null) {
+  <li>
+    <textarea placeholder=placeholder databind=s/>
+  </li>
+}
+
+template inputSecret(s : String, placeholder : String = null, onchange : Callback = null) {
+  <li>
+    <input type="password" placeholder=placeholder databind=s/>
   </li>
 }
 
@@ -77,6 +101,21 @@ template header(title : String) {
   <div id="header">
     <h1 databind=title></h1>
   </div>
+}
+
+template basicView(title : String) {
+  header(title)
+  <div id="scrollwrapper">
+    <div id="content">
+      elements()
+    </div>
+  </div>
+  <div id="footer">
+  toolBar()
+  </div>
+}
+
+template toolBar() {
 }
 
 template ul() {
@@ -118,6 +157,10 @@ template backButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="backButton" id="back-button" databind=text onclick=onclick></a>
 }
 
+template toolbarButton(type : String, onclick : Callback = null) {
+  <img src="lib/toolbar/icon_" + type + ".png" width="30" height="30" class="toolbarButton" onclick=onclick/>
+}
+
 <script>
 mobl.alert = function(s, _, callback) {
     alert(s);
@@ -138,5 +181,26 @@ mobl.remove = function(e, _, callback) {
     var allEnt = persistence.define(e._type).all();
     allEnt.triggerEvent('remove', allEnt, e);
     if(callback) callback();
+};
+mobl.resetDatabase = function(_, callback) {
+    persistence.reset(null, callback);
+};
+
+mobl.formatDate = function(timestamp) {
+  var date = new Date(timestamp);
+  var diff = (((new Date()).getTime() - date.getTime()) / 1000);
+  var day_diff = Math.floor(diff / 86400);
+  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
+    return;
+
+  return day_diff == 0 && (
+      diff < 60 && "just now" ||
+      diff < 120 && "1 minute ago" ||
+      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+      diff < 7200 && "1 hour ago" ||
+      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+      day_diff == 1 && "Yesterday" ||
+      day_diff < 7 && day_diff + " days ago" ||
+      day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
 };
 </script>

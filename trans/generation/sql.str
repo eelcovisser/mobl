@@ -19,3 +19,6 @@ strategies
 
   sql-type :
     SimpleType(QId("mobl", "Bool")) -> "BOOL"
+
+  sql-type :
+    SimpleType(QId("mobl", "DateTime")) -> "INT"

@@ -49,6 +49,19 @@ div#scroller {
     border-bottom: 1px solid #2d3642;
 }
 
+#footer {
+    box-sizing: border-box;
+    margin: 0;
+    text-overflow: ellipsis;
+    color: #FFFFFF;
+		/*height: 40px;*/
+    background: url(img/iPhoneToolbar.png) #6d84a2 repeat-x;
+}
+
+img.toolbarButton {
+	padding: 5px 0 5px 10px;
+}
+
 .topRightButton {
     position: absolute;
     top: 8px;
@@ -67,6 +80,12 @@ div#scroller {
     text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
     text-decoration: none;
     background: none;
+}
+
+.topRight {
+    position: absolute;
+    top: 8px;
+    right: 6px;
 }
 
 .backButton {
@@ -159,7 +178,36 @@ ul li:last-child {
     -moz-border-radius-bottomright: 8px;
 }
 
-input[type = text] {
+input[type=text] {
+    -webkit-text-size-adjust: 140%;
+    -moz-text-size-adjust: 140%;
+    color: #555;
+    background: #fff url(../.png);
+    border: 0;
+    font: normal 17px Helvetica;
+    padding: 0;
+    display: inline-block;
+    margin-left: 0px;
+    width: 100%;
+    -webkit-appearance: textarea;
+}
+
+textarea {
+    -webkit-text-size-adjust: 140%;
+    -moz-text-size-adjust: 140%;
+    color: #555;
+    background: #fff url(../.png);
+    border: 0;
+    font: normal 17px Helvetica;
+    padding: 0;
+    display: inline-block;
+    margin-left: 0px;
+    width: 100%;
+		height: 5em;
+    -webkit-appearance: textarea;
+}
+
+input[type=password] {
     -webkit-text-size-adjust: 140%;
     -moz-text-size-adjust: 140%;
     color: #555;

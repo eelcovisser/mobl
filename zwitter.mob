@@ -2,38 +2,153 @@ application zwitter
 
 title "Zwitter"
 database "zwitter"
-database version 1
 
 import mobl
-import twitter
+
+load "zwitter.css"
 
 entity Account {
   username : String
   password : String
+  updates  : Collection<TwitterUpdate> (inverse: account)
 }
 
+entity TwitterUpdate {
+  account    : Account (inverse: updates)
+  updateId   : Int
+  screenName : String
+  iconUrl    : String
+  text       : String
+  favorite   : Bool
+  date       : DateTime
+} 
+
 function updateStream(account : Account) {
-   var updates : Collection<TwitterUpdate> = twitter::getUpdates(account.username, account.password);
-   for(update : TwitterUpdate in updates) {
-     if(TwitterUpdate.all().filter("updateId", "=", update.updateId).one() == null) { 
-       add(update);
+   var updates : Collection<twitter::Update> = twitter::getUpdates(account.username, account.password);
+   for(twupdate : twitter::Update in updates) {
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
+       account.updates.add(TwitterUpdate{
+         updateId = twupdate.id,
+         screenName = twupdate.user.screen_name,
+         iconUrl = twupdate.user.profile_image_url,
+         text = twupdate.text,
+         date = twupdate.created_at,
+         favorite = twupdate.favorited
+       });
      }
    }
 }
 
+screen addAccount() {
+  header("Add account")
+  var account : Account = Account{}
+  inputs {
+    inputString(account.username, placeholder="Twitter username")
+    inputSecret(account.password, placeholder="Twitter password")
+  }
+  button("Add", onclick={ add(account); screen return; })
+}
+
 screen root() {
+  init {
+    //resetDatabase();
+    var account : Account = Account.all().one();
+    if(account != null) {
+      showUpdates(account);
+    }
+  }
   header("Accounts")
-  
+  topRightButton("Add", onclick={ addAccount(); })
+  ul {
+	  list(account : Account in Account.all().order("username", true)) {
+	    listitemArrow(onclick={ showUpdates(account); }) { 
+	      outputString(account.username)
+	    }
+	  }
+  }
+}
+
+screen newTweet(account : Account) {
+  var text : String = ""
+  topRightButton("Tweet", onclick={
+    async {
+	    twitter::postUpdate(account.username, account.password, text);
+	    growl::notify("Tweet posted!");
+    }
+    screen return;
+  })
+  backButton("Timeline", onclick={ screen return; })
+  basicView("Compose") {
+    inputs {
+      inputText(text)
+    }
+  }
+}
+
+screen replyTweet(update : TwitterUpdate) {
+  var text : String = "@" + update.screenName + " "
+  topRightButton("Reply", onclick={
+    async {
+	    twitter::postReply(update.account.username, update.account.password, update.updateId, text);
+	    growl::notify("Tweet posted!");
+    }
+    screen return;
+  })
+  backButton("Tweet", onclick={ screen return; })
+  basicView("Reply @" + update.screenName) {
+    inputs {
+      inputText(text)
+    }
+  }
 }
 
 screen showUpdates(account : Account) {
-  header(account.username)
-  list(update : TwitterUpdate in TwitterUpdate.all()) {
-    <div> 
-      <img src=update.iconUrl/>
-      <tt>outputString(update.screenName) ": "</tt>
+  init {
+    async {
+      updateStream(account);
+    }   
+  }
+  template mobl::toolBar() {
+    toolbarButton("circle_arrow_right", onclick={ updateStream(account); })
+  }
+  backButton("Accounts", onclick={ screen return; })
+  <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
+
+  basicView(account.username) {
+    <div id="tweets">
+	  list(update : TwitterUpdate in account.updates.order("date", false).limit(10)) {
+	    <div class="tweet" onclick={ showUpdate(update); }>
+	      <span class="icon"><img src=update.iconUrl width="48" height="48"/></span>
+	      <span class="text">
+	        <strong>outputString(update.screenName) ": "</strong>
+	        outputString(update.text)
+	        <span class="meta">"Posted " outputDate(update.date)</span>
+	      </span>
+	    </div>
+	  }
+	  </div>
+  }
+}
+
+template bubble() {
+  <div class="bubble">
+    elements()
+  </div>
+}
+
+screen showUpdate(update : TwitterUpdate) {
+  template mobl::toolBar() {
+    toolbarButton("post", onclick={ replyTweet(update); })
+  }
+  backButton("Timeline", onclick={ screen return; })
+  basicView("Tweet") {
+    bubble {
       outputString(update.text)
+      <span class="meta">"Posted " outputDate(update.date)</span>
+    }
+    <div class="postermeta">
+      <img src=update.iconUrl width="48" height="48" align="middle"/> " "
+      outputString(update.screenName)
     </div>
   }
-  button("Reload", onclick={ updateStream(account); })
 }

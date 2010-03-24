@@ -50,6 +50,21 @@ rules
   elems-to-js-callback(|root) =
     <concat; elems-to-js(|root)> [<id>, [$[callback([root]); return;]]]
 
+
+  elems-to-js(|root) :
+    [Template(qid, farg*, elems)|rest*] -> $[
+      scope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+        [init-stats]
+        var [root2] = $("<span>");
+        [body] 
+      });
+      [<elems-to-js(|root)> rest*]
+      ]
+    with root2 := <newname> "root"
+       ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
+       ; body := <elems-to-js-callback(|root2)> elems
+       ; init-stats := <fargs-to-ref-init-js> farg*
+
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
     $[[body-stats]
@@ -200,7 +215,7 @@ rules
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
        ; typeconverter := <concat-strings> ["mobl.stringTo", <type-of; ?SimpleType(<id>); qid-to-html> e]
-       ; if "input" := tag then
+       ; if "input" := tag <+ "textarea" := tag then
            method := "val"
            ; subs := $[
                [node].change(function() {
@@ -230,7 +245,7 @@ rules
     
   elems-to-js(|root) :
     [List(x, t, e, elems)|rest*] -> $[
-      var [node] = $("<ul>");
+      var [node] = $("<span>");
       var [list] = [<expression-to-js> e];
       [root].append([node]);
       var [rest] = function() {
@@ -246,15 +261,21 @@ rules
 	              if(results.length > 0) {
 	                renderOne();
 	              } else if(!isRerender) {
+	                mobl.delayedUpdateScrollers();
 	                [rest]();
+	              } else {
+                  mobl.delayedUpdateScrollers();
 	              }
 	            ]]]]          
 	        }
 	        if(results.length > 0) {
 	          renderOne();
 	        } else if(!isRerender) {
+            mobl.delayedUpdateScrollers();
 	          [rest]();
-	        }
+	        } else {
+            mobl.delayedUpdateScrollers();
+          }
 	      });
       };
       [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });

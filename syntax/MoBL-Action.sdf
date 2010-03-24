@@ -26,6 +26,7 @@ exports
     "screen" "return" Exp ";"                   -> Statement {cons("ScreenReturn")}
     "return" ";"                                -> Statement {cons("Return")}
     "screen" "return" ";"                       -> Statement {cons("ScreenReturn")}
+    "async" "{" Statement* "}"                  -> Statement {cons("Async")}
     
   context-free syntax %% Expressions
   
@@ -42,7 +43,7 @@ exports
     Exp "[" Exp "]"               -> Exp {left, cons("Indexer")}
     
     Exp                           -> NamedExp
-    ID "=" Exp                   -> NamedExp {cons("NamedExp")}
+    ID "=" Exp                    -> NamedExp {cons("NamedExp")}
     
     Exp BoolMethodId Exp         -> Exp {cons("BinMethodCall"), left}
     Exp CompareMethodId Exp      -> Exp {cons("BinMethodCall"), left}
@@ -85,7 +86,8 @@ exports
     
     
   context-free priorities
-    Exp TermOperatorMethodId Exp -> Exp
+    Exp "." ID -> Exp
+  > Exp TermOperatorMethodId Exp -> Exp
   > Exp OperatorMethodId Exp -> Exp
   > Exp CompareMethodId Exp -> Exp
   > Exp BoolMethodId Exp -> Exp

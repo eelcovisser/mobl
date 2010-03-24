@@ -78,6 +78,12 @@ strategies
     where <is-ref> qid
 
   cps-statements :
+    [Async(stats)|stat*] -> 
+      $[[<cps-statements> stats]
+        [<cps-statements> stat*]
+]
+
+  cps-statements :
     [ExpStat(e)|stat*] -> <cps-expression(|stat*)> e
   
   cps-statements :

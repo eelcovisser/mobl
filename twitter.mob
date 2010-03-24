@@ -2,18 +2,32 @@ module twitter
 
 import mobl
 
-entity TwitterUpdate {
-  updateId   : Int
-  screenName : String
-  iconUrl    : String
-  text       : String
+external type Update {
+  id                    : Int
+  created_at            : DateTime
+  text                  : String
+  source                : String
+  in_reply_to_status_id : Int
+  in_reply_to_user_id   : Int
+  favorited             : Bool
+  user                  : User
 }
 
-external sync function getUpdates(username : String, password : String) : Collection<TwitterUpdate>
+external type User {
+  screen_name       : String
+  name              : String
+  location          : String
+  url               : String
+  profile_image_url : String
+}
+
+external sync function getUpdates(username : String, password : String) : Collection<Update>
+external function postUpdate(username : String, password : String, text : String) : Bool
+external function postReply(username : String, password : String, replyToId : Int, text : String) : Bool
 
 <script>
 
-twitter.getUpdates = function(username, username, password, optionalArgs) {
+twitter.getUpdates = function(username, password, optionalArgs) {
   return {
     addEventListener: function() {},
     list: function(_, callback) {
@@ -29,12 +43,8 @@ twitter.getUpdates = function(username, username, password, optionalArgs) {
 		        var results = [];
 		        var update;
 		        for(var i = 0; i < data.length; i++) {
-		          update = new twitter.TwitterUpdate();
-		          var up = data[i];
-		          update.screenName = up.user.screen_name;
-		          update.updateId = up.id;
-		          update.iconUrl = up.user.profile_image_url;
-		          update.text = up.text;
+		          update = data[i];
+		          update.created_at = Date.parse(update.created_at);
 		          results.push(update);
 		        }
 		        callback(results);
@@ -42,6 +52,43 @@ twitter.getUpdates = function(username, username, password, optionalArgs) {
 			});
     }
   };
+};
+
+twitter.postUpdate = function(username, password, text, optionalArgs, callback) {
+  $.ajax({
+     url: mobl.proxyUrl('http://api.twitter.com/1/statuses/update.json', username, password),
+     datatype: "json",
+     data: {status: text},
+     type: 'POST',
+     beforeSend: function(xhr) {
+       xhr.setRequestHeader('X-Twitter-Client', 'zwitter');
+     },
+     error: function(_, message, error) {
+       console.log(message);
+       console.log(error);
+       callback(false);
+     },
+     success: function(data) {
+       callback(true);
+     }
+  });
+};
+
+twitter.postReply = function(username, password, replyToId, text, optionalArgs, callback) {
+  $.ajax({
+     url: mobl.proxyUrl('http://api.twitter.com/1/statuses/update.json', username, password),
+     datatype: "json",
+     data: {status: text, in_reply_to_status_id: replyToId},
+     type: 'POST',
+     error: function(_, message, error) {
+       console.log(message);
+       console.log(error);
+       callback(false);
+     },
+     success: function(data) {
+       callback(true);
+     }
+  });
 };
 
 </script>

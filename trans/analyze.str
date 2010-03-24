@@ -28,7 +28,7 @@ rules
        ; declare-all
        ; rename-all
        ; alltd(add-namespace)
-       //; topdown(try(declare))
+       //; declare-all
        //; rename-all
          //; debug
        |}

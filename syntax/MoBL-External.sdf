@@ -5,14 +5,15 @@ imports Common
 exports
 
   context-free syntax
-    "external" "type" QId "{" ExternalMethodDecl* "}"                          -> Definition {cons("ExternalTypeNoSuper")}
-    "external" "type" QId ":" Type "{" ExternalMethodDecl* "}"                          -> Definition {cons("ExternalType")}
-    "external" "type" QId "<" {ID ","}* ">" "{" ExternalMethodDecl* "}"        -> Definition {cons("ExternalGenericType")}
+    "external" "type" QId "{" ExternalMemberDecl* "}"                          -> Definition {cons("ExternalTypeNoSuper")}
+    "external" "type" QId ":" Type "{" ExternalMemberDecl* "}"                          -> Definition {cons("ExternalType")}
+    "external" "type" QId "<" {ID ","}* ">" "{" ExternalMemberDecl* "}"        -> Definition {cons("ExternalGenericType")}
     
-    "static" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMethodDecl {cons("ExternalStaticMethod")}
-    "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMethodDecl {cons("ExternalMethod")}
-    "static" "sync" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMethodDecl {cons("ExternalStaticSyncMethod")}
-    "sync" "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMethodDecl {cons("ExternalSyncMethod")}
+    "static" "function" ID "(" {FArg ","}* ")" ":" Type          -> ExternalMemberDecl {cons("ExternalStaticMethod")}
+    "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMemberDecl {cons("ExternalMethod")}
+    "static" "sync" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMemberDecl {cons("ExternalStaticSyncMethod")}
+    "sync" "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMemberDecl {cons("ExternalSyncMethod")}
+    ID ":" Type                                                  -> ExternalMemberDecl {cons("ExternalField")}
     
     "external" "template" QId "(" {FArg ","}* ")"                               -> Definition {cons("ExternalTemplate")}
     "external" "screen" QId ":" Type "(" {FArg ","}* ")"                        -> Definition {cons("ExternalScreen")}

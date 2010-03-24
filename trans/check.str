@@ -4,6 +4,7 @@ imports
   include/MoBL
   lookup
   type
+  rename
   
 rules
     
@@ -23,6 +24,7 @@ rules
   constraint-error :
     TemplateCall(qid, arg*, prop*, body) -> (qid, $[No such template defined with these arguments])
     where not("elements" := qid; [] := arg*)
+    where not(<IsTemplateArgument> qid)
     where not(<lookup-template> (qid, arg*))
     
   constraint-error :

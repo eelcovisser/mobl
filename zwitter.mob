@@ -114,7 +114,10 @@ screen showUpdates(account : Account) {
   backButton("Accounts", onclick={ screen return; })
   <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
 
-  basicView(account.username) {
+  newView(account.username, bar=template {
+		                              toolbarButton("circle_arrow_right", onclick={ updateStream(account); })
+		                            })
+  {
     <div id="tweets">
 	  list(update : TwitterUpdate in account.updates.order("date", false).limit(10)) {
 	    <div class="tweet" onclick={ showUpdate(update); }>
@@ -130,22 +133,16 @@ screen showUpdates(account : Account) {
   }
 }
 
-template bubble() {
-  <div class="bubble">
-    elements()
-  </div>
-}
-
 screen showUpdate(update : TwitterUpdate) {
   template mobl::toolBar() {
     toolbarButton("post", onclick={ replyTweet(update); })
   }
   backButton("Timeline", onclick={ screen return; })
   basicView("Tweet") {
-    bubble {
+    <div class="bubble">
       outputString(update.text)
       <span class="meta">"Posted " outputDate(update.date)</span>
-    }
+    </div>
     <div class="postermeta">
       <img src=update.iconUrl width="48" height="48" align="middle"/> " "
       outputString(update.screenName)

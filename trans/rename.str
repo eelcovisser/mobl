@@ -35,6 +35,10 @@ strategies
       ; rules(
            IsRefVar : y
         )
+      ; if SimpleType(QId("mobl", "Template")) := t then
+          rules ( IsTemplateArgument : y
+                  RenameTemplate     : x -> y )
+        end   
   
   is-ref :
     y -> <IsRefVar> y
@@ -50,9 +54,13 @@ strategies
     
   rename :
     Call(x, e*) -> Call(<RenameFunction> x, <rename-all> e*)
+
+  rename :
+    c#([qid|rest]) -> c#([<RenameTemplate> qid|<rename-all> rest])
+    where <string-starts-with(|"TemplateCall")> c
     
   rename-scope(s) =
-    {| RenameId, RenameFunction
+    {| RenameId, RenameFunction, RenameTemplate
      : s
      |}
 
@@ -88,7 +96,7 @@ strategies
     FArg(x, t) -> FArg(<rename-ref-var> (x, t), t)    
 
   rename-ref-farg :
-    FArgOptional(x, t, e) -> FArgOptional(<rename-ref-var> (x, t), t, <rename-all> e)    
+    FArgOptional(x, t, e) -> FArgOptional(<rename-ref-var> (x, t), t, <rename-all> e)
 
   rename-farg :
     FArg(x, t) -> FArg(<rename-var> (x, t), t)    
@@ -151,6 +159,10 @@ strategies
   rename :
     Callback(body) -> Callback(body2)
     with action-scope(body2 := <rename-all> body)
+
+  rename :
+    AnonymousTemplate(body) -> AnonymousTemplate(body2)
+    with template-scope(body2 := <rename-all> body)
 
 strategies
   

@@ -2,6 +2,7 @@ module MoBL-Action
 
 imports
   Common
+  MoBL-UI
 
 exports
 
@@ -55,7 +56,8 @@ exports
     Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
     "(" Exp ")"                  -> Exp {cons("Brackets")}
     
-    "{" Statement* "}"           -> Exp {cons("Callback")}
+    "{" Statement* "}"             -> Exp {cons("Callback")}
+    "template" "{" ScreenElem* "}" -> Exp {cons("AnonymousTemplate")}
     
     ID "=" Exp                  -> PropVal {cons("PropVal")}
     

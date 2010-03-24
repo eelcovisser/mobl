@@ -87,16 +87,18 @@ rules
         ; t2* := <alltd(add-namespace)> t*
     
   add-namespace :
-    TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg*, prop2*, elem2*)
+    TemplateCall(qid, arg*, prop*, elem*) -> TemplateCall(qid2, arg2*, prop2*, elem2*)
     where not(<lookup-template-aux> (qid, arg*))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg*); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; arg2*  := <alltd(add-namespace)> arg*
         ; elem2* := <alltd(add-namespace)> elem*
         ; prop2* := <alltd(add-namespace)> prop*
 
   add-namespace :
-    TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCallNoPropertiesNoBody(qid2, arg*)
+    TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCallNoPropertiesNoBody(qid2, arg2*)
     where not(<lookup-template-aux> (qid, arg*))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg*); !newid})> [<ModuleName>|<bagof-Imports>]
+        ; arg2*  := <alltd(add-namespace)> arg*
 
   add-namespace :
     TemplateCallNoArgsNoProperties(qid, elem*) -> TemplateCallNoArgsNoProperties(qid2, elem2*)
@@ -123,16 +125,18 @@ rules
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, []); !newid})> [<ModuleName>|<bagof-Imports>]
 
   add-namespace :
-    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCallNoBody(qid2, arg*, prop2*)
+    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCallNoBody(qid2, arg2*, prop2*)
     where not(<lookup-template-aux> (qid, arg*))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg*); !newid})> [<ModuleName>|<bagof-Imports>]
         ; prop2* := <alltd(add-namespace)> prop*
+        ; arg2*  := <alltd(add-namespace)> arg*
 
   add-namespace :
-    TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg*, elem2*)
+    TemplateCallNoProperties(qid, arg*, elem*) -> TemplateCallNoProperties(qid2, arg2*, elem2*)
     where not(<lookup-template-aux> (qid, arg*))
         ; [qid2] := <filter({c, newid: ?c; <prefix-qid(|c)> qid; ?newid; <lookup-template-aux> (<id>, arg*); !newid})> [<ModuleName>|<bagof-Imports>]
         ; elem2* := <alltd(add-namespace)> elem*
+        ; arg2*  := <alltd(add-namespace)> arg*
 
   add-namespace :
     Call(qid, e*) -> Call(qid2, e2*)

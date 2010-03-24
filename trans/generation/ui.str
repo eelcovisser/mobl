@@ -8,6 +8,7 @@ imports
   lib/editor-common
   desugar
   type
+  rename
   generation/emit
   generation/action
   generation/lift
@@ -114,7 +115,11 @@ rules
                }
              }]
          ]]; separate-by(!", "); concat-strings> arg*
-       ; templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
+       ; if <IsTemplateArgument> qid then
+           templatecall := <concat-strings> ["(", qid, ".get())(", args, ");"]
+         else
+           templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
+         end
   
    find-watchable-expressions =
         (?BinMethodCall(_, _, _) <+ ?Call(_, _))

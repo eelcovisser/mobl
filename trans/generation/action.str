@@ -265,6 +265,18 @@ rules // Expressions
                            [<cps-lift-expressions; cps-statements> stat*]
                          }]
 
+
+  exp-to-js :
+    AnonymousTemplate(elems) -> $[function(scope, namedArgs, callback) {
+                                    var [root] = $("<span>");
+                                    [body] 
+                                  }]
+    with {| InTemplate
+          : rules ( InTemplate := 1 )
+          ; root := <newname> "root"
+          ; body := <elems-to-js-callback(|root)> elems
+          |}
+
 strategies
   
   arguments-to-js :

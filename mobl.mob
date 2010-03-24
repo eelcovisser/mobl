@@ -14,7 +14,10 @@ external type Text {
   sync function toString() : String
 }
 external type Uri { }
+
 external type Callback {}
+external type Template {}
+
 external type DateTime {}
 external type Array<T> {}
 external type Object {}
@@ -114,6 +117,19 @@ template basicView(title : String) {
   toolBar()
   </div>
 }
+
+template newView(title : String, bar : Template = null) {
+  header(title)
+  <div id="scrollwrapper">
+    <div id="content">
+      elements()
+    </div>
+  </div>
+  <div id="footer">
+  bar()
+  </div>
+}
+
 
 template toolBar() {
 }

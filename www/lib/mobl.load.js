@@ -88,11 +88,12 @@ mobl.call = function (screenName, args, callback) {
         }
     };
     var parts = screenName.split('.');
-    var moduleName = parts.slice(0, parts.length - 1).join('.');
-    var screenTemplate = parts[parts.length - 1];
-    var subScope = new mobl.LinkedMap(mobl.rootScope);
-    var screenTemplate = subScope.get(screenFrame.div);
-    screenTemplate.apply(null, [ subScope ].concat(args).concat( [ function (node) {
+    var current = window;
+    for(var i = 0; i < parts.length; i++) {
+        current = current[parts[i]];
+    }
+    var screenTemplate = current;
+    screenTemplate.apply(null, args.concat( [ function (node) {
         node.attr('id', screenFrame.div);
         node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
         var body = $("body");

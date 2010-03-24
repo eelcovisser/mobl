@@ -11,16 +11,11 @@ entity Task {
   done        : Bool
 }
 
-template basicView(header : String) {
-  header(header) 
-  elements()
-}
-
 screen addTask() {
   var newTask : Task = Task{}
     
+  backButton("Back", onclick={ screen return; })
   basicView("Add") {
-    backButton("Back", onclick={ screen return; })
     inputs {
       inputString(newTask.name, placeholder="Task name")
     }
@@ -29,8 +24,8 @@ screen addTask() {
 }
 
 screen editTask(t : Task) {
+  topRightButton("Done", onclick={ screen return; })
   basicView("Edit") {
-    topRightButton("Done", onclick={ screen return; })
     inputs {
       inputString(t.name, placeholder="Task name")
       inputString(t.description, placeholder="Task description")
@@ -40,15 +35,16 @@ screen editTask(t : Task) {
 }  
 
 screen root() { 
+  topRightButton("Add", onclick={ addTask(); }) 
   basicView("Tasks") {
-    topRightButton("Add", onclick={ addTask(); }) 
-
-    list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
-      listitem(onclick={ editTask(t); }) {
-        inputCheckbox(t.done, onclick={}) " "
-        outputString(t.name)
-        deleteButton("Delete", onclick={ remove(t); })
-      }
+    ul {
+	    list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
+	      listitem(onclick={ editTask(t); }) {
+	        inputCheckbox(t.done, onclick={}) " "
+	        outputString(t.name)
+	        deleteButton("Delete", onclick={ remove(t); })
+	      }
+	    }
     }
   }
 }

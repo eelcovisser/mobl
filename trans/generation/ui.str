@@ -18,43 +18,42 @@ rules
 
   definition-to-js :
     Template(qid, farg*, elems) -> <emit> $[
-      mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+      [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<span>");
         [body] 
-      });
+      };
       ]
     with {| InTemplate
 		      : rules ( InTemplate := 1 )
 		      ; root := <newname> "root"
-          ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
+          ; fargs :=  <filter(farg-to-js); <concat> [<id>, ["namedArgs", "elements", "callback"]]; separate-by(!", "); concat-strings> farg*
 		      ; body := <elems-to-js-callback(|root)> elems
 		      ; init-stats := <fargs-to-ref-init-js> farg*
 		      |}
 
   definition-to-js :
     Screen(qid, farg*, rt, elems) -> <emit> $[
-      mobl.rootScope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+      [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<div>");
         [body] 
-      });
+      };
       ]
     with {| InTemplate
           : rules ( InTemplate := 1 )
           ; root := <newname> "root"
           ; body := <elems-to-js-callback(|root)> elems
-          ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
+          ; fargs :=  <filter(farg-to-js); <concat> [<id>, ["namedArgs", "callback", "screenCallback"]]; separate-by(!", "); concat-strings> farg*
           ; init-stats := <fargs-to-ref-init-js> farg*
           |}
 
   elems-to-js-callback(|root) =
     <concat; elems-to-js(|root)> [<id>, [$[callback([root]); return;]]]
 
-
   elems-to-js(|root) :
     [Template(qid, farg*, elems)|rest*] -> $[
-      scope.setLocal('[<qid-to-html> qid]', function([fargs]) {
+      var [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root2] = $("<span>");
         [body] 
@@ -62,14 +61,13 @@ rules
       [<elems-to-js(|root)> rest*]
       ]
     with root2 := <newname> "root"
-       ; fargs :=  <filter(farg-to-js); <concat> [["scope"], <id>, ["namedArgs", "callback"]]; separate-by(!", "); concat-strings> farg*
+       ; fargs :=  <filter(farg-to-js); <concat> [<id>, ["namedArgs", "elements", "callback"]]; separate-by(!", "); concat-strings> farg*
        ; body := <elems-to-js-callback(|root2)> elems
        ; init-stats := <fargs-to-ref-init-js> farg*
 
   elems-to-js(|root) :
     [TemplateCall(qid, arg*, prop*, elems)|rest*] -> 
-    $[[body-stats]
-      var [nodes] = $("<span>");
+    $[var [nodes] = $("<span>");
       [root].append([nodes]);
       [subscriptions]
       function [renderTemplate](rerender) {
@@ -81,45 +79,23 @@ rules
        ; subScope := <newname> "subScope"
        ; nodes := <newname> "nodes"
        ; renderTemplate := <newname> "renderTemplate"
-       ; if not([] := elems) then
-           body-stats := $[var [subScope] = new mobl.LinkedMap(scope);
-                           [subScope].setLocal('elements', function(scope, namedArgs, callback) {
-                             var [elem-root] = $("<span>");
-                             [<elems-to-js-callback(|elem-root)> elems]
-                           });
-]
-         else
-           body-stats := ""
-         end
-       ; if not([] := prop*) then
-           props := <map(prop-to-bind)> prop*
-           ; prop-set := $[
-               var children = node.children();
-               for(var i = 0; i < children.length; i++) {
-                  var c = children.eq(i);
-                  [props]
-               }]
-         else
-           prop-set := ""
-         end
+       ; elems-fun := $[function(namedArgs, elements, callback) {
+                          var [elem-root] = $("<span>");
+                          [<elems-to-js-callback(|elem-root)> elems]
+                        }]
        ; watch-expr* := <map(find-watchable-expressions); concat> arg*
        ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> watch-expr*
-       ; args  := <ref-arguments-to-js; <concat> [[<[] := elems; !"scope" <+ !subScope>], <id>, [
+       ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun, 
            $[function(node) {
                var oldNodes = [nodes];
                [nodes] = node.contents();
                oldNodes.replaceWith([nodes]);
-               [prop-set]
                if(!rerender) {
                  [<elems-to-js(|root)> rest*]
                }
              }]
          ]]; separate-by(!", "); concat-strings> arg*
-       ; if <IsTemplateArgument> qid then
-           templatecall := <concat-strings> ["(", qid, ".get())(", args, ");"]
-         else
-           templatecall := <concat-strings> ["(scope.get('", <qid-to-html> qid, "'))(", args, ");"]
-         end
+       ; templatecall := <concat-strings> ["(", <expression-to-js> Var(qid), ")(", args, ");"]
   
    find-watchable-expressions =
         (?BinMethodCall(_, _, _) <+ ?Call(_, _))
@@ -131,10 +107,11 @@ rules
              [renderTemplate](true);
            });
 ]
-     
+
+/*
   prop-to-bind :
     PropertyArg(x, e) -> $[c.bind('[x]', function(evt) {  evt.stopPropagation(); [<expression-to-js> e]; });]
-  
+*/  
   elems-to-js(|root) :
     [tg@Html(tag, arg*, elems, _)|rest*] -> $[
       var [node] = $("<[tag] [<escape> args]>");
@@ -317,15 +294,6 @@ rules
       var [x] = ref([<expression-to-js> e]);
       [<elems-to-js(|root)> rest]]
     where <is-sync> e
-    
-  /*ref-expression-to-html :
-    e -> $["[<ref-expression-to-js; html-escape> e]"]
-
-  expression-to-html :
-    e -> $["[<expression-to-js; html-escape> e]"]
-  
-  html-escape =
-    string-replace(|"\"", "&quot;")*/
 
 rules // utils
 	

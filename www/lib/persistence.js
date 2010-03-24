@@ -407,6 +407,9 @@ var persistence = window.persistence || {};
                 that.__defineGetter__(ref, function () {
                     if (that._data[ref] === null || that._data_obj[ref] !== undefined) {
                       return that._data_obj[ref];
+                    } else if(that._data[ref] !== null && trackedObjects[that._data[ref]]) {
+                      that._data_obj[ref] = trackedObjects[that._data[ref]];
+                      return that._data_obj[ref];
                     } else {
                       throw "Property '" + ref + "' with id: " + that._data[ref]
                       + " not fetched, either prefetch it or fetch it manually.";

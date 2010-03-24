@@ -25,6 +25,7 @@ external type Object {}
 external type Collection<T> {
   //function get() : Array<T>
   function one() : T
+  sync function prefetch(property : String) : Collection<T>
   sync function filter(property : String, op : String, value : Object) : Collection<T>
   sync function order(property : String, ascending : Bool) : Collection<T>
   sync function limit(n : Int) : Collection<T>
@@ -106,7 +107,7 @@ template header(title : String) {
   </div>
 }
 
-template basicView(title : String) {
+template basicView(title : String, toolBar : Template = template{}) {
   header(title)
   <div id="scrollwrapper">
     <div id="content">
@@ -116,22 +117,6 @@ template basicView(title : String) {
   <div id="footer">
   toolBar()
   </div>
-}
-
-template newView(title : String, bar : Template = null) {
-  header(title)
-  <div id="scrollwrapper">
-    <div id="content">
-      elements()
-    </div>
-  </div>
-  <div id="footer">
-  bar()
-  </div>
-}
-
-
-template toolBar() {
 }
 
 template ul() {

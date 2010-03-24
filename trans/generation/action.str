@@ -267,7 +267,7 @@ rules // Expressions
 
 
   exp-to-js :
-    AnonymousTemplate(elems) -> $[function(scope, namedArgs, callback) {
+    AnonymousTemplate(elems) -> $[function(namedArgs, elements, callback) {
                                     var [root] = $("<span>");
                                     [body] 
                                   }]

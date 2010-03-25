@@ -48,6 +48,15 @@ strategies
           ; <filter(?ExternalField(field, t))> member*
           //; (!t <+ <lookup-property> )
   
+  // returns (name, type) tuples
+  get-all-properties :
+    type -> <debug(!"All members: "); filter(\ ExternalField(x, t) -> (x, t) \)> member*
+    where ExternalType(_, super, member*) := <lookup-type> type
+
+  get-all-properties :
+    type -> <filter(\ Property(prop, t, _) -> (prop, t) \)> prop*
+    where ExternalEntity(_, super, prop*) := <lookup-type> type
+  
   lookup-template =
       lookup-template-aux
      <+ ?(qid, _); import-and-retry(lookup-template-aux|qid)

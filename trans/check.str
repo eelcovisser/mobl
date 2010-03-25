@@ -5,6 +5,7 @@ imports
   lookup
   type
   rename
+  desugar
   
 rules
     
@@ -22,7 +23,7 @@ rules
     where not(tag := closeTag)
     
   constraint-error :
-    TemplateCall(qid, arg*, prop*, body) -> (qid, $[No such template defined with these arguments])
+    TemplateCall(qid, arg*, body) -> (qid, $[No such template defined with these arguments])
     where not("elements" := qid; [] := arg*)
     where not(<IsTemplateArgument> qid)
     where not(<lookup-template> (qid, arg*))
@@ -45,30 +46,6 @@ rules
   
   constraint-error = normalize; constraint-error
    
-  normalize :
-    TemplateCallNoArgs(name, prop*, body) -> TemplateCall(name, [], prop*, body)
-
-  normalize :
-    TemplateCallNoArgsNoBody(name, prop*) -> TemplateCall(name, [], prop*, [])
-
-  normalize :
-    TemplateCallNoArgsNoProperties(name, body) -> TemplateCall(name, [], [], body)
-
-  normalize :
-    TemplateCallNoArgsNoPropertiesNoBody(name) -> TemplateCall(name, [], [], [])
-
-  normalize :
-    TemplateCallNoBody(name, arg*, prop*) -> TemplateCall(name, arg*, prop*, [])
-
-  normalize :
-    TemplateCallNoProperties(name, arg*, body) -> TemplateCall(name, arg*, [], body)
-
-  normalize :
-    TemplateCallNoPropertiesNoBody(name, arg*) -> TemplateCall(name, arg*, [], [])
-
-  normalize :
-    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
-  
   constraint-warning:
     Entity(qid, _, _) -> (x, $[Entity names must start with a capital])
     where

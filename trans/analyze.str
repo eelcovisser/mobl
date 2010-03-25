@@ -38,13 +38,13 @@ rules
   
   import-module =
     ?Import(qid)
-    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
+    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mobl"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
             ; <declare-all> Module(qid, <id>))
     ; rules ( Imports :+= qid )
 
   lookup-import-module =
     ?Import(qid)
-    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mob"] \, parse-file, externalize-module)> <qid-to-path> qid
+    ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid
             ; <declare-all> Module(qid, <id>))
     
   compile-and-externalize-module :

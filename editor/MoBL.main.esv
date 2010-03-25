@@ -8,9 +8,9 @@ language General properties
   id            : mobl
   extends       : Root
                   
-  description   : "Spoofax/IMP-generated editor for the MoBL language"
-  url           : http://strategoxt.org
+  description   : "a language for developing mobile web applications"
+  url           : http://mobl-lang.org
                   
-  extensions    : mob
+  extensions    : mobl
   table         : include/MoBL.tbl
   start symbols : Start

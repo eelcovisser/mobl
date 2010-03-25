@@ -44,23 +44,17 @@ strategies
   desugar :
     ScreenNoReturnType(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
   
-  desugar :
-    TemplateCallNoArgs(qid, prop*, body) -> TemplateCall(qid, [], prop*, body)
-    
-  desugar :
-    TemplateCallNoArgsNoBody(qid, prop*) -> TemplateCall(qid, [], prop*, [])
-    
-  desugar :
-    TemplateCallNoArgsNoProperties(qid, body) -> TemplateCall(qid, [], [], body)
-    
-  desugar :
-    TemplateCallNoArgsNoPropertiesNoBody(qid) -> TemplateCall(qid, [], [], [])
-    
-  desugar :
-    TemplateCallNoBody(qid, arg*, prop*) -> TemplateCall(qid, arg*, prop*, [])
+  desugar = normalize
   
-  desugar :
-    TemplateCallNoProperties(qid, arg*, body) -> TemplateCall(qid, arg*, [], body)
+  normalize :
+    TemplateCallNoArgs(qid, body) -> TemplateCall(qid, [], body)
+    
+  normalize :
+    TemplateCallNoArgsNoBody(qid) -> TemplateCall(qid, [], [])
+    
+  normalize :
+    TemplateCallNoBody(qid, arg*) -> TemplateCall(qid, arg*, [])
   
-  desugar :
-    TemplateCallNoPropertiesNoBody(qid, arg*) -> TemplateCall(qid, arg*, [], [])
+  normalize :
+    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+  

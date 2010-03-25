@@ -19,6 +19,7 @@ imports
   lookup
   resolve
   analyze
+  type
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
   
@@ -84,6 +85,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     where
       all-types := <get-all-types>;
       proposals    := <map(type-name-to-proposal)> all-types
+
+  editor-complete:
+    (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> <type-of; get-all-properties; map(\ (x, t) -> ([x], "") \)> e
+    where FieldAccess(e, _) := <lookup-node> position
 
   type-name-to-proposal:
     x -> ([x], "")

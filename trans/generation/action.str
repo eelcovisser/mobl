@@ -22,8 +22,8 @@ strategies
 
   module-to-js =
   	(?Module(qid, def*) <+ ?Application(qid, _, def*))
-    ; entities := <filter(?Entity(_, _, _))> def*
-    ; rest := <filter(not(?Entity(_, _, _) <+ ?Import(_)))> def*
+    ; entities := <filter(?Entity(_, _, _, _))> def*
+    ; rest := <filter(not(?Entity(_, _, _, _) <+ ?Import(_)))> def*
     ; to-import := <collect(?QId(<id>, _); not(?qid))> def*
     ; <map(import-to-js)> to-import
     ; <entities-to-js> entities
@@ -45,7 +45,7 @@ strategies
     ; emit
 	
   function-to-js :
-    SyncFunction(qid, farg*, rt, stat*) -> $[
+    SyncFunction(_, qid, farg*, rt, stat*) -> $[
     [varname] = function([args]) {
       [init-stats]
       [stats]
@@ -94,7 +94,7 @@ strategies
 ]
 
   function-to-js :
-    Function(qid, farg*, rt, stats) -> $[
+    Function(_, qid, farg*, rt, stats) -> $[
     [varname] = function([args]) {
       [init-stats]
       [stats2]

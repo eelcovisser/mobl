@@ -7,10 +7,11 @@ imports
 exports
 
   context-free syntax %% Logic
-    "function" QId "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> FunctionDef {cons("Function")}
-    "function" QId "(" {FArg ","}* ")" "{" Statement* "}" -> FunctionDef {cons("FunctionNoReturnType")}
-    "sync" "function" QId "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> FunctionDef {cons("SyncFunction")}
-    "sync" "function" QId "(" {FArg ","}* ")" "{" Statement* "}" -> FunctionDef {cons("SyncFunctionNoReturnType")}
+    
+    MetaAnno* "function" QId "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> FunctionDef {cons("Function")}
+    MetaAnno* "function" QId "(" {FArg ","}* ")" "{" Statement* "}" -> FunctionDef {cons("FunctionNoReturnType")}
+    MetaAnno* "sync" "function" QId "(" {FArg ","}* ")" ":" Type "{" Statement* "}" -> FunctionDef {cons("SyncFunction")}
+    MetaAnno* "sync" "function" QId "(" {FArg ","}* ")" "{" Statement* "}" -> FunctionDef {cons("SyncFunctionNoReturnType")}
     
     FunctionDef -> Definition
     

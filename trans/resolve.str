@@ -11,59 +11,59 @@ imports
 strategies
 
   add-tl-namespace :
-    Screen(x, farg*, rt, elem*) -> Screen(QId(<ModuleName>, x), farg*, rt, elem*)
+    Screen(manno*, x, farg*, rt, elem*) -> Screen(manno*, QId(<ModuleName>, x), farg*, rt, elem*)
     where <is-string> x
   
   add-tl-namespace :
-    ScreenNoReturnType(x, farg*, elem*) -> ScreenNoReturnType(QId(<ModuleName>, x), farg*, elem*)
+    ScreenNoReturnType(manno*, x, farg*, elem*) -> ScreenNoReturnType(manno*, QId(<ModuleName>, x), farg*, elem*)
     where <is-string> x
 
   add-tl-namespace :
-    Entity(x, super, prop*) -> Entity(QId(<ModuleName>, x), super, prop*)
+    Entity(manno*, x, super, prop*) -> Entity(manno*, QId(<ModuleName>, x), super, prop*)
     where <is-string> x
 
   add-tl-namespace :
-    EntityNoSuper(x, prop*) -> EntityNoSuper(QId(<ModuleName>, x), prop*)
+    EntityNoSuper(manno*, x, prop*) -> EntityNoSuper(manno*, QId(<ModuleName>, x), prop*)
     where <is-string> x
     
   add-tl-namespace :
-    ExternalFunction(x, farg*, rt) -> ExternalFunction(QId(<ModuleName>, x), farg*, rt)
+    ExternalFunction(manno*, x, farg*, rt) -> ExternalFunction(manno*, QId(<ModuleName>, x), farg*, rt)
     where <is-string> x
 
   add-tl-namespace :
-    ExternalSyncFunction(x, farg*, rt) -> ExternalSyncFunction(QId(<ModuleName>, x), farg*, rt)
+    ExternalSyncFunction(manno*, x, farg*, rt) -> ExternalSyncFunction(manno*, QId(<ModuleName>, x), farg*, rt)
     where <is-string> x
 
   add-tl-namespace :
-    Function(x, farg*, rt, stat*) -> Function(QId(<ModuleName>, x), farg*, rt, stat*)
+    Function(manno*, x, farg*, rt, stat*) -> Function(manno*, QId(<ModuleName>, x), farg*, rt, stat*)
     where <is-string> x
 
   add-tl-namespace :
-    FunctionNoReturnType(x, farg*, stat*) -> FunctionNoReturnType(QId(<ModuleName>, x), farg*, stat*)
+    FunctionNoReturnType(manno*, x, farg*, stat*) -> FunctionNoReturnType(manno*, QId(<ModuleName>, x), farg*, stat*)
     where <is-string> x
 
   add-tl-namespace :
-    SyncFunction(x, farg*, rt, stat*) -> SyncFunction(QId(<ModuleName>, x), farg*, rt, stat*)
+    SyncFunction(manno*, x, farg*, rt, stat*) -> SyncFunction(manno*, QId(<ModuleName>, x), farg*, rt, stat*)
     where <is-string> x
 
   add-tl-namespace :
-    SyncFunctionNoReturnType(x, farg*, stat*) -> SyncFunctionNoReturnType(QId(<ModuleName>, x), farg*, stat*)
+    SyncFunctionNoReturnType(manno*, x, farg*, stat*) -> SyncFunctionNoReturnType(manno*, QId(<ModuleName>, x), farg*, stat*)
     where <is-string> x
   
   add-tl-namespace :
-    ExternalGenericType(x, t*, method*) -> ExternalGenericType(QId(<ModuleName>, x), t*, method*)
+    ExternalGenericType(manno*, x, t*, method*) -> ExternalGenericType(manno*, QId(<ModuleName>, x), t*, method*)
     where <is-string> x
     
   add-tl-namespace :
-    ExternalType(x, super, method*) -> ExternalType(QId(<ModuleName>, x), super, method*)
+    ExternalType(manno*, x, super, method*) -> ExternalType(manno*, QId(<ModuleName>, x), super, method*)
     where <is-string> x
 
   add-tl-namespace :
-    ExternalTypeNoSuper(x, method*) -> ExternalTypeNoSuper(QId(<ModuleName>, x), method*)
+    ExternalTypeNoSuper(manno*, x, method*) -> ExternalTypeNoSuper(manno*, QId(<ModuleName>, x), method*)
     where <is-string> x
     
   add-tl-namespace :
-    Template(x, farg*, elem*) -> Template(QId(<ModuleName>, x), farg*, elem*)
+    Template(manno*, x, farg*, elem*) -> Template(manno*, QId(<ModuleName>, x), farg*, elem*)
     where <is-string> x
     
 rules

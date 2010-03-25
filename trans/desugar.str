@@ -21,10 +21,10 @@ strategies
           |}
   
   desugar :
-    FunctionNoReturnType(name, farg*, stat*) -> Function(name, farg*, SimpleType("void"), stat*)
+    FunctionNoReturnType(manno*, name, farg*, stat*) -> Function(manno*, name, farg*, SimpleType("void"), stat*)
 
   desugar :
-    SyncFunctionNoReturnType(name, farg*, stat*) -> SyncFunction(name, farg*, SimpleType("void"), stat*)
+    SyncFunctionNoReturnType(manno*, name, farg*, stat*) -> SyncFunction(manno*, name, farg*, SimpleType("void"), stat*)
 
   desugar :
     IfNoElse(e, stat*) -> If(e, stat*, [])
@@ -33,16 +33,16 @@ strategies
     HtmlShort(tag, attr*) -> Html(tag, attr*, [], tag)
   
   desugar :
-    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
 
   desugar :
-    ExternalTypeNoSuper(qid, method*) -> ExternalType(qid, SimpleType(QId("mobl", "Object")), method*)
+    ExternalTypeNoSuper(manno*, qid, method*) -> ExternalType(manno*, qid, SimpleType(QId("mobl", "Object")), method*)
     
   desugar :
-    PropertyNoAnnos(x, t) -> Property(x, t, [])
+    PropertyNoAnnos(manno*, x, t) -> Property(manno*, x, t, [])
   
   desugar :
-    ScreenNoReturnType(name, farg*, body) -> Screen(name, farg*, SimpleType("void"), body)
+    ScreenNoReturnType(manno*, name, farg*, body) -> Screen(manno*, name, farg*, SimpleType("void"), body)
   
   desugar = normalize
   
@@ -56,5 +56,5 @@ strategies
     TemplateCallNoBody(qid, arg*) -> TemplateCall(qid, arg*, [])
   
   normalize :
-    EntityNoSuper(qid, prop*) -> Entity(qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
   

@@ -17,16 +17,16 @@ strategies
         )
 
   rename-local-function : 
-   c#([name|rest]) -> name2
+   c#([mannos, name|rest]) -> name2
    where "template" := <RenameScope>
    with name2 := name{<newname> name}
       ; rules(
            RenameFunction : name -> name2
         )
-      ; <try(declare)> c#([name2|rest])
+      ; <try(declare)> c#([mannos, name2|rest])
         
   rename-local-function :
-    c#([name|rest]) -> name
+    c#([_, name|rest]) -> name
     where not("template" := <RenameScope>)
   
   rename-ref-var :
@@ -77,7 +77,7 @@ strategies
      |}
   
   rename :
-    ExternalGenericType(qid, x*, method*) -> ExternalGenericType(qid, x*, method2*)
+    ExternalGenericType(manno*, qid, x*, method*) -> ExternalGenericType(manno*, qid, x*, method2*)
     with {| RenameType
           : <map(\ x -> x where rules ( RenameType : SimpleType(x) -> SimpleType(x){"TemplateType"} ) \)> x*
           ; method2* := <rename-all> method*
@@ -86,7 +86,7 @@ strategies
   rename = RenameType
 
   rename :
-    Template(name, farg*, body) -> Template(name, farg2*, body2)
+    Template(manno*, name, farg*, body) -> Template(manno*, name, farg2*, body2)
     with template-scope( 
            farg2* := <map(rename-ref-farg)> farg*
            ; body2 := <rename-all> body
@@ -105,14 +105,14 @@ strategies
     FArgOptional(x, t, e) -> FArg(<rename-var> (x, t), t)    
 
   rename :
-    Screen(name, arg*, rt, body) -> Screen(name, arg2*, rt, body2)
+    Screen(manno*, name, arg*, rt, body) -> Screen(manno*, name, arg2*, rt, body2)
     with template-scope( 
            arg2* := <map(rename-ref-farg)> arg*
            ; body2 := <rename-all> body
          )
 
   rename :
-    ScreenNoReturnType(name, farg*, body) -> ScreenNoReturnType(name, farg2*, body2)
+    ScreenNoReturnType(manno*, name, farg*, body) -> ScreenNoReturnType(manno*, name, farg2*, body2)
     with template-scope( 
            farg2* := <map(rename-ref-farg)> farg*
            ; body2 := <rename-all> body
@@ -121,7 +121,7 @@ strategies
 strategies
   
   rename :
-    f@Function(qid, farg*, rt, body) -> Function(qid2, farg2*, rt, body2)
+    f@Function(manno*, qid, farg*, rt, body) -> Function(manno*, qid2, farg2*, rt, body2)
     with action-scope( 
            farg2* := <map(rename-farg)> farg*
            ; body2 := <rename-all> body
@@ -129,7 +129,7 @@ strategies
          ; qid2 := <rename-local-function> f
 
   rename :
-    f@FunctionNoReturnType(qid, farg*, body) -> FunctionNoReturnType(qid2, farg2*, body2)
+    f@FunctionNoReturnType(manno*, qid, farg*, body) -> FunctionNoReturnType(manno*, qid2, farg2*, body2)
     with action-scope( 
            farg2* := <map(rename-farg)> farg*
            ; body2 := <rename-all> body
@@ -137,7 +137,7 @@ strategies
          ; qid2 := <rename-local-function> f
 
   rename :
-    f@SyncFunction(qid, farg*, rt, body) -> SyncFunction(qid2, farg2*, rt, body2)
+    f@SyncFunction(manno*, qid, farg*, rt, body) -> SyncFunction(manno*, qid2, farg2*, rt, body2)
     with action-scope( 
            farg2* := <map(rename-farg)> farg*
            ; body2 := <rename-all> body
@@ -145,7 +145,7 @@ strategies
          ; qid2 := <rename-local-function> f
 
   rename :
-    f@SyncFunctionNoReturnType(qid, farg*, body) -> SyncFunctionNoReturnType(qid2, farg2*, body2)
+    f@SyncFunctionNoReturnType(manno*, qid, farg*, body) -> SyncFunctionNoReturnType(manno*, qid2, farg2*, body2)
     with action-scope( 
            farg2* := <map(rename-farg)> farg*
            ; body2 := <rename-all> body

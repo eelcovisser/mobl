@@ -29,8 +29,8 @@ strategies
     SimpleType(qid) -> <GetType> qid
    
   lookup-type-aux :
-    GenericType(qid, t*) -> ExternalType(<newname> "Generic", SimpleType(QId("mobl", "Object")), method2*)
-    where ExternalGenericType(_, x*, method*) := <GetGenericType> qid
+    GenericType(qid, t*) -> ExternalType(manno*, <newname> "Generic", SimpleType(QId("mobl", "Object")), method2*)
+    where ExternalGenericType(manno*, _, x*, method*) := <GetGenericType> qid
         ; {| RenameGenericType
            : <zip(\ (x, t) -> <id> where rules ( RenameGenericType : SimpleType(x) -> t ) \)> (x*, t*)
            ; method2* := <alltd(RenameGenericType)> method*
@@ -39,16 +39,16 @@ strategies
   lookup-property :
     (type, prop) -> t
     where decl := <lookup-type> type
-          ; (ExternalType(_, super, member*) := decl <+ ExternalEntity(_, super, member*) := decl)
-          ; <filter(?Property(prop, t, _))> member*
+          ; (ExternalType(_, _, super, member*) := decl <+ ExternalEntity(_, _, super, member*) := decl)
+          ; <filter(?Property(_, prop, t, _))> member*
           ; if not(!t); not(SimpleType(QId("mobl", "Object")) := super) then
               t := <lookup-property> (super, prop)
             end
   
   get-all-properties :
     type -> props
-    where c#([_, super, members]) := <lookup-type> type
-        ; own-props := <filter(?Property(_, _, _))> members
+    where c#([_, _, super, members]) := <lookup-type> type
+        ; own-props := <filter(?Property(_, _, _, _))> members
         ; if not(SimpleType(QId("mobl", "Object")) := super) then
             props := <concat> [own-props, <get-all-properties> super]
           else
@@ -60,9 +60,9 @@ strategies
      <+ import-and-retry(lookup-template-aux|<id>)
 
   lookup-template-aux :
-    qid -> ExternalTemplate(qid, farg2*)
+    qid -> ExternalTemplate(manno*, qid, farg2*)
     where <GetTemplate> qid
-        ; ?ExternalTemplate(_, farg*)
+        ; ?ExternalTemplate(manno*, _, farg*)
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-screen = 
@@ -70,9 +70,9 @@ strategies
    <+ import-and-retry(lookup-screen-aux|<id>)
 
   lookup-screen-aux :
-    qid -> ExternalScreen(qid, farg2*, rt)
+    qid -> ExternalScreen(manno*, qid, farg2*, rt)
     where <GetScreen> qid
-        ; ?ExternalScreen(_, farg*, rt)
+        ; ?ExternalScreen(manno*, _, farg*, rt)
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-function =
@@ -80,22 +80,22 @@ strategies
    <+ import-and-retry(lookup-function-aux|<id>)
 
   lookup-function-aux :
-    qid -> ExternalFunction(qid, farg2*, rt2)
-    where ExternalFunction(_, farg*, rt) := <GetFunction> qid
+    qid -> ExternalFunction(manno*, qid, farg2*, rt2)
+    where ExternalFunction(manno*, _, farg*, rt) := <GetFunction> qid
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-function-aux :
-    qid -> ExternalSyncFunction(qid, farg2*, rt2)
-    where ExternalSyncFunction(_, farg*, rt) := <GetFunction> qid
+    qid -> ExternalSyncFunction(manno*, qid, farg2*, rt2)
+    where ExternalSyncFunction(manno*, _, farg*, rt) := <GetFunction> qid
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
    
   lookup-method :
-    (t, x) -> ExternalSyncMethod(x, farg2*, rt2)
+    (t, x) -> ExternalSyncMethod(manno*, x, farg2*, rt2)
     where not(GenericType("Type", _) := t)
-    where ExternalType(_, super, method*) := <lookup-type> t
-        ; <filter(?ExternalSyncMethod(x, farg*, rt))> method*
+    where ExternalType(_, _, super, method*) := <lookup-type> t
+        ; [ExternalSyncMethod(manno*, _, _, _)] := <filter(?ExternalSyncMethod(_, x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x)
           end
@@ -103,10 +103,10 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-method :
-    (t, x) -> ExternalMethod(x, farg2*, rt2)
+    (t, x) -> ExternalMethod(manno*, x, farg2*, rt2)
     where not(GenericType("Type", _) := t)
-    where ExternalType(_, super, method*) := <lookup-type> t
-        ; <filter(?ExternalMethod(x, farg*, rt))> method*
+    where ExternalType(_, _, super, method*) := <lookup-type> t
+        ; [ExternalMethod(manno*, _, _, _)] := <filter(?ExternalMethod(_, x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x)
           end
@@ -114,10 +114,10 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-method :
-    (t2, x) -> ExternalMethod(x, farg2*, rt2)
+    (t2, x) -> ExternalMethod(manno*, x, farg2*, rt2)
     where GenericType("Type", [t@SimpleType(qid)]) := t2 // for static methods
-    where ExternalType(_, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
-        ; <filter(?ExternalStaticMethod(x, farg*, rt))> method*
+    where ExternalType(_, _, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
+        ; [ExternalStaticMethod(manno*, _, _, _)] := <filter(?ExternalStaticMethod(_, x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x)
           end
@@ -125,10 +125,10 @@ strategies
         ; farg2* := <alltd(add-namespace)> farg*
 
   lookup-method :
-    (t2, x) -> ExternalSyncMethod(x, farg2*, rt2)
+    (t2, x) -> ExternalSyncMethod(manno*, x, farg2*, rt2)
     where GenericType("Type", [t@SimpleType(qid)]) := t2 // for static methods
-    where ExternalType(_, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
-        ; <filter(?ExternalStaticSyncMethod(x, farg*, rt))> method*
+    where ExternalType(_, _, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
+        ; [ExternalStaticSyncMethod(manno*, _, _, _)] := <filter(?ExternalStaticSyncMethod(_, x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
             <lookup-method> (super, x)
           end
@@ -139,8 +139,8 @@ strategies
   get-all-methods :
     type -> methods
     where not(GenericType("Type", [t@SimpleType(qid)]) := type) // for static methods
-    where c#([_, super, members]) := <lookup-type> type
-        ; own-methods := <filter(?ExternalMethod(_, _, _) <+ ?ExternalSyncMethod(_, _, _))> members
+    where c#([_, _, super, members]) := <lookup-type> type
+        ; own-methods := <filter(?ExternalMethod(_, _, _, _) <+ ?ExternalSyncMethod(_, _, _, _))> members
         ; if not(SimpleType(QId("mobl", "Object")) := super) then
             methods := <concat> [own-methods, <get-all-methods> super]
           else
@@ -150,12 +150,12 @@ strategies
   get-all-methods :
     type -> own-methods
     where GenericType("Type", [t@SimpleType(qid)]) := type // for static methods
-    where c#([_, super, member*]) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
-        ; own-methods := <filter(?ExternalStaticMethod(_, _, _) <+ ?ExternalStaticSyncMethod(_, _, _))> member*
+    where c#([_, _, super, member*]) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
+        ; own-methods := <filter(?ExternalStaticMethod(_, _, _, _) <+ ?ExternalStaticSyncMethod(_, _, _, _))> member*
 
   is-entity-type =
     lookup-type
-    ; ?ExternalEntity(_, _, _)
+    ; ?ExternalEntity(_, _, _, _)
 
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <all-keys-GetGenericType>]

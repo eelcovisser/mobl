@@ -2,15 +2,19 @@ module mobl
 
 load "lib/iphone.css"
 
+@doc "A value representing nothing"
 external type void {}
+
+@doc "A string type"
 external type String : Object { }
+
 external type Int : Object { }
 external type Bool : Object { }
-external type Text : Object { }
 
 external type Callback {}
 external type Template {}
 
+external type Text : Object { }
 external type DateTime {}
 external type Array<T> {}
 
@@ -18,10 +22,16 @@ external type Object {
   sync function toString() : String
 }
 
+@doc "A virtual queryable collection"
 external type Collection<T> {
   //function get() : Array<T>
+  @doc "Return one item in the collection, or null if the collection is empty"
   function one() : T
+  
+  @doc "Prefetch a reference property"
   sync function prefetch(property : String) : Collection<T>
+  
+  @doc "Filter the collection on a property based on an operator `op` (options: '=', '<', '>', '<=', '>=' or '!=') and a value"
   sync function filter(property : String, op : String, value : Object) : Collection<T>
   sync function order(property : String, ascending : Bool) : Collection<T>
   sync function limit(n : Int) : Collection<T>
@@ -31,6 +41,7 @@ external type Collection<T> {
 }
 
 external type Entity<T> {
+  @doc "A virtual collection containing all instances of this entity"
   static sync function all() : Collection<T>
 }
 

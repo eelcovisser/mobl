@@ -8,11 +8,10 @@ exports
 
   context-free syntax
   
-    "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturnType")}
-    "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
+    MetaAnno* "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturnType")}
+    MetaAnno* "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
 
-    "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
-    %%"template" QId "(" {FArg ","}* ")" "requires" {TemplateSig ","}* "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
+    MetaAnno* "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
     
     ID "(" {FArg ","}* ")" -> TemplateSig {cons("TemplateSig")}
     

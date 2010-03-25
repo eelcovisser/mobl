@@ -216,14 +216,14 @@ strategies
 
   is-sync =
     ?Call(qid, e*)
-    ; ExternalSyncFunction(_, _, _) := <lookup-function> qid
+    ; ExternalSyncFunction(_, _, _, _) := <lookup-function> qid
     ; <map(is-sync)> e*
 
   is-sync =
     ?MethodCall(e, x, e*)
     ; where(<map(is-sync)> e*)
     ; <lookup-method> (<type-of> e, x)
-    ; ?ExternalSyncMethod(_, _, _)
+    ; ?ExternalSyncMethod(_, _, _, _)
 
   is-sync =
     ?CollectionCons(_, _, e*)

@@ -157,7 +157,7 @@ rules
 
   cps-exp(|stat*) :
     Call(qid, e*) -> <concat-strings> [<qid-to-js> qid, "(", args, ");"]
-    where ExternalFunction(_, _, _) := <lookup-function> qid
+    where ExternalFunction(_, _, _, _) := <lookup-function> qid
         ; not(<GetScreen> qid)
     with args := <arguments-to-js; <concat> [<id>, [
 $[function(result) {
@@ -174,7 +174,7 @@ $[function(result) {
   cps-exp(|stat*) :
     e@Call(qid, e*) -> $[var result = [<expression-to-js> e];
                          [<cps-statements> stat*]]
-    where ExternalSyncFunction(_, _, _) := <lookup-function> qid
+    where ExternalSyncFunction(_, _, _, _) := <lookup-function> qid
 
   cps-exp(|stat*) :
     MethodCall(e, x, e*) -> <concat-strings> [<expression-to-js> e, ".", x, "(", args, ");"]

@@ -52,7 +52,7 @@ rules
   constraint-error = normalize; constraint-error
    
   constraint-warning:
-    Entity(qid, _, _) -> (x, $[Entity names must start with a capital])
+    Entity(_, qid, _, _) -> (x, $[Entity names must start with a capital])
     where
       if <is-string> qid then
         x := qid

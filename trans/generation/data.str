@@ -17,7 +17,7 @@ strategies
      |}
      
   entity-to-js :
-    Entity(qid, super, prop*) -> <emit> $[
+    Entity(_, qid, super, prop*) -> <emit> $[
     [varname] = persistence.define('[<qid-to-html> qid]', {
       [props]
     });
@@ -30,12 +30,12 @@ strategies
          end
 
   property-to-js(|ent) :
-    Property(x, t@SimpleType(_), anno*) -> $['[x]': '[sqlType]']
+    Property(_, x, t@SimpleType(_), anno*) -> $['[x]': '[sqlType]']
     where not(<is-entity-type> t)
     with sqlType := <sql-type <+ debug(!"Could not conver to SQL: "); fail> t
 
   property-to-js(|ent) :
-    Property(x, GenericType(coll, [t]), anno*) -> <fail>
+    Property(_, x, GenericType(coll, [t]), anno*) -> <fail>
     where <filter(?InverseAnno(inv))> anno*
         ; rules ( OneToMany :+= (SimpleType(ent), x, t, inv) )
 

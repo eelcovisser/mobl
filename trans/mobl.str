@@ -71,8 +71,22 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; rules ( CompilingModule := mod-name )
       ; <compile> ast
 
-  // Returns "hover help" information for a particular node in the editor.
-  // For references, this rule is invoked using the resolved term.
+  editor-hover:
+    (t@SimpleType(_), position, ast, path, project-path) -> <get-doc> <lookup-type> t2
+    where t2 := <lookup-node> position
+
+  editor-hover:
+    (t@GenericType(_, _), position, ast, path, project-path) -> <get-doc> <lookup-type> t2
+    where t2 := <lookup-node> position
+
+  editor-hover:
+    (c@Call(_, _), position, ast, path, project-path) -> <get-doc> <lookup-function> qid
+    where Call(qid, _) := <lookup-node> position
+
+  editor-hover:
+    (c@MethodCall(_, _, _), position, ast, path, project-path) -> <get-doc> <lookup-method> (<type-of> e, x)
+    where MethodCall(e, x, _) := <lookup-node> position
+
   editor-hover:
     (target, position, ast, path, project-path) -> $[Hover help: [<write-to-string> t2]]
     where t2 := <lookup-node> position
@@ -90,23 +104,27 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> [prop*, method*]
     where FieldAccess(e, _) := <lookup-node> position
         ; t := <type-of> e
-        ; prop* := <get-all-properties; map(\ Property(x, _, _) -> ([x], "") \)> t
-        ; method* := <get-all-methods; map(\ c#([x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], "") \)> t
+        ; prop* := <get-all-properties; map(\ Property(_, x, _, _) -> ([x], "") \)> t
+        ; method* := <get-all-methods; map(\ c#([_, x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], "") \)> t
 
   editor-complete:
     (MethodCall(_, COMPLETION(prefix), _), position, ast, path, project-path) -> method*
     where MethodCall(e, _, _) := <lookup-node> position
         ; t := <type-of> e
-        ; method* := <get-all-methods; map(\ c#([x|_]) -> ([x], "") \)> t
+        ; method* := <get-all-methods; map(\ c#([_, x|_]) -> ([x], "") \)> t
 
   editor-complete =
     debug(!"Editor complete: "); fail
-    
 
   type-name-to-proposal:
     x -> ([x], "")
 
 strategies
+
+  get-doc =
+    one(?manno*)
+    ; <one(?DocAnno(doc))> manno*
+    ; <un-double-quote> doc
 
   store-result =
     ?t

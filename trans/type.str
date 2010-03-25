@@ -32,11 +32,11 @@ strategies
 
   eq-type-of :
     Call(qid, e*) -> rt
-    where c#([_, _, rt]) := <lookup-function> qid
+    where c#([_, _, _, rt]) := <lookup-function> qid
 
   eq-type-of :
     Call(qid, e*) -> rt
-    where ExternalScreen(_, _, rt) := <lookup-screen> qid
+    where ExternalScreen(_, _, _, rt) := <lookup-screen> qid
 
   eq-type-of :
     EntityCons(t, _) -> t
@@ -48,8 +48,8 @@ strategies
   eq-type-of :
     MethodCall(e, x, e*) -> rt
     where m := <lookup-method> (<type-of> e, x)
-        ; (   ExternalMethod(_, _, rt) := m
-           <+ ExternalSyncMethod(_, _, rt) := m)
+        ; (   ExternalMethod(_, _, _, rt) := m
+           <+ ExternalSyncMethod(_, _, _, rt) := m)
   
   eq-type-of :
     FieldAccess(e, x) -> <lookup-property> (<type-of> e, x)

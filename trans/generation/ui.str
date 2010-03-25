@@ -17,7 +17,7 @@ imports
 rules
 
   definition-to-js :
-    Template(qid, farg*, elems) -> <emit> $[
+    Template(_, qid, farg*, elems) -> <emit> $[
       [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<span>");
@@ -33,7 +33,7 @@ rules
 		      |}
 
   definition-to-js :
-    Screen(qid, farg*, rt, elems) -> <emit> $[
+    Screen(_, qid, farg*, rt, elems) -> <emit> $[
       [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<div>");
@@ -52,7 +52,7 @@ rules
     <concat; elems-to-js(|root)> [<id>, [$[callback([root]); return;]]]
 
   elems-to-js(|root) :
-    [Template(qid, farg*, elems)|rest*] -> $[
+    [Template(_, qid, farg*, elems)|rest*] -> $[
       var [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root2] = $("<span>");
@@ -121,12 +121,12 @@ rules
            [<elems-to-js(|root)> rest*]]]]
 
   elems-to-js(|root) :
-    [f@Function(_, _, _, _)|rest*] -> $[
+    [f@Function(_, _, _, _, _)|rest*] -> $[
       [<function-to-js> f]
       [<elems-to-js(|root)> rest*]]
 
   elems-to-js(|root) :
-    [f@SyncFunction(_, _, _, _)|rest*] -> $[
+    [f@SyncFunction(_, _, _, _, _)|rest*] -> $[
       [<function-to-js> f]
       [<elems-to-js(|root)> rest*]]
 

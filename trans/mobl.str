@@ -87,8 +87,17 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       proposals    := <map(type-name-to-proposal)> all-types
 
   editor-complete:
-    (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> <type-of; get-all-properties; map(\ (x, t) -> ([x], "") \)> e
+    (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> [prop*, method*]
     where FieldAccess(e, _) := <lookup-node> position
+        ; t := <type-of> e
+        ; prop* := <get-all-properties; map(\ Property(x, _, _) -> ([x], "") \)> t
+        ; method* := <get-all-methods; map(\ c#([x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], "") \)> t
+
+  editor-complete:
+    (MethodCall(_, COMPLETION(prefix), _), position, ast, path, project-path) -> method*
+    where MethodCall(e, _, _) := <lookup-node> position
+        ; t := <type-of> e
+        ; method* := <get-all-methods; map(\ c#([x|_]) -> ([x], "") \)> t
 
   editor-complete =
     debug(!"Editor complete: "); fail

@@ -45,15 +45,16 @@ strategies
               t := <lookup-property> (super, prop)
             end
   
-  // returns (name, type) tuples
   get-all-properties :
-    type -> <filter(?Property(_, _, _))> member*
-    where ExternalType(_, super, member*) := <lookup-type> type
+    type -> props
+    where c#([_, super, members]) := <lookup-type> type
+        ; own-props := <filter(?Property(_, _, _))> members
+        ; if not(SimpleType(QId("mobl", "Object")) := super) then
+            props := <concat> [own-props, <get-all-properties> super]
+          else
+            props := own-props
+          end
 
-  get-all-properties :
-    type -> <filter(?Property(_, _, _))> member*
-    where ExternalEntity(_, super, member*) := <lookup-type> type
-  
   lookup-template =
       lookup-template-aux
      <+ import-and-retry(lookup-template-aux|<id>)
@@ -133,7 +134,25 @@ strategies
           end
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-  
+
+
+  get-all-methods :
+    type -> methods
+    where not(GenericType("Type", [t@SimpleType(qid)]) := type) // for static methods
+    where c#([_, super, members]) := <lookup-type> type
+        ; own-methods := <filter(?ExternalMethod(_, _, _) <+ ?ExternalSyncMethod(_, _, _))> members
+        ; if not(SimpleType(QId("mobl", "Object")) := super) then
+            methods := <concat> [own-methods, <get-all-methods> super]
+          else
+            methods := own-methods
+          end
+
+  get-all-methods :
+    type -> own-methods
+    where GenericType("Type", [t@SimpleType(qid)]) := type // for static methods
+    where c#([_, super, member*]) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
+        ; own-methods := <filter(?ExternalStaticMethod(_, _, _) <+ ?ExternalStaticSyncMethod(_, _, _))> member*
+
   is-entity-type =
     lookup-type
     ; ?ExternalEntity(_, _, _)

@@ -28,7 +28,6 @@ external function postReply(username : String, password : String, replyToId : In
 <script>
 
 twitter.getUpdates = function(username, password, optionalArgs) {
-  console.log("Now going to do it!")
   return {
     addEventListener: function() {},
     list: function(_, callback) {

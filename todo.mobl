@@ -34,7 +34,7 @@ screen editTask(t : Task) {
   }
 }  
 
-screen root() { 
+screen root() {
   topRightButton("Add", onclick={ addTask(); }) 
   basicView("Tasks") {
     ul {

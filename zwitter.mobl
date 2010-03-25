@@ -25,7 +25,6 @@ entity TwitterUpdate {
 
 function updateStream(account : Account) {
    var updates : Collection<twitter::Update> = twitter::getUpdates(account.username, account.password);
-   log(updates);
    for(twupdate : twitter::Update in updates) {
      if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {  
        account.updates.add(TwitterUpdate{

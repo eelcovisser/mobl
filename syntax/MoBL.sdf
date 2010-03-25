@@ -27,10 +27,12 @@ exports
     "load" STRING                  -> Definition {cons("Load")}
 
     ID ":" Type                    -> FArg {cons("FArg")}
-    ID ":" Type "=" Exp           -> FArg {cons("FArgOptional")}
+    ID ":" Type "=" Exp            -> FArg {cons("FArgOptional")}
     
     QId                            -> Type {cons("SimpleType")}
     QId "<" {Type ","}* ">"        -> Type {cons("GenericType")}
+    
+    "@doc" STRING                  -> MetaAnnotation {cons("DocAnno")}
     
   context-free syntax %% native javascript
     

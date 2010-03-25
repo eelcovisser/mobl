@@ -10,10 +10,10 @@ exports
     "external" "type" QId "<" {ID ","}* ">" "{" ExternalMemberDecl* "}"        -> Definition {cons("ExternalGenericType")}
     
     "static" "function" ID "(" {FArg ","}* ")" ":" Type          -> ExternalMemberDecl {cons("ExternalStaticMethod")}
-    "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMemberDecl {cons("ExternalMethod")}
+    "function" ID "(" {FArg ","}* ")" ":" Type                   -> ExternalMemberDecl {cons("ExternalMethod")}
     "static" "sync" "function" ID "(" {FArg ","}* ")" ":" Type   -> ExternalMemberDecl {cons("ExternalStaticSyncMethod")}
     "sync" "function" ID "(" {FArg ","}* ")" ":" Type            -> ExternalMemberDecl {cons("ExternalSyncMethod")}
-    ID ":" Type                                                  -> ExternalMemberDecl {cons("ExternalField")}
+    Property                                                     -> ExternalMemberDecl
     
     "external" "template" QId "(" {FArg ","}* ")"                               -> Definition {cons("ExternalTemplate")}
     "external" "screen" QId ":" Type "(" {FArg ","}* ")"                        -> Definition {cons("ExternalScreen")}

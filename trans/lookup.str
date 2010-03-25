@@ -27,134 +27,116 @@ strategies
   
   lookup-type-aux :
     SimpleType(qid) -> <GetType> qid
-    
+   
   lookup-type-aux :
     GenericType(qid, t*) -> ExternalType(<newname> "Generic", SimpleType(QId("mobl", "Object")), method2*)
-    where ExternalGenericType(_, x*, method*) := <GetGenericType> (qid, <length> t*)
+    where ExternalGenericType(_, x*, method*) := <GetGenericType> qid
         ; {| RenameGenericType
            : <zip(\ (x, t) -> <id> where rules ( RenameGenericType : SimpleType(x) -> t ) \)> (x*, t*)
            ; method2* := <alltd(RenameGenericType)> method*
            |}
   
   lookup-property :
-    (entityType, prop) -> t
-    where ExternalEntity(_, super, prop*) := <lookup-type> entityType
-          ; <filter(?Property(prop, t, _))> prop*
-
-  // TODO: Take inheritance into account
-  lookup-property :
-    (type, field) -> t
-    where ExternalType(_, super, member*) := <lookup-type> type
-          ; <filter(?ExternalField(field, t))> member*
-          //; (!t <+ <lookup-property> )
+    (type, prop) -> t
+    where decl := <lookup-type> type
+          ; (ExternalType(_, super, member*) := decl <+ ExternalEntity(_, super, member*) := decl)
+          ; <filter(?Property(prop, t, _))> member*
+          ; if not(!t); not(SimpleType(QId("mobl", "Object")) := super) then
+              t := <lookup-property> (super, prop)
+            end
   
   // returns (name, type) tuples
   get-all-properties :
-    type -> <debug(!"All members: "); filter(\ ExternalField(x, t) -> (x, t) \)> member*
+    type -> <filter(?Property(_, _, _))> member*
     where ExternalType(_, super, member*) := <lookup-type> type
 
   get-all-properties :
-    type -> <filter(\ Property(prop, t, _) -> (prop, t) \)> prop*
-    where ExternalEntity(_, super, prop*) := <lookup-type> type
+    type -> <filter(?Property(_, _, _))> member*
+    where ExternalEntity(_, super, member*) := <lookup-type> type
   
   lookup-template =
       lookup-template-aux
-     <+ ?(qid, _); import-and-retry(lookup-template-aux|qid)
+     <+ import-and-retry(lookup-template-aux|<id>)
 
   lookup-template-aux :
-    (qid, arg*) -> ExternalTemplate(qid, farg2*)
+    qid -> ExternalTemplate(qid, farg2*)
     where <GetTemplate> qid
         ; ?ExternalTemplate(_, farg*)
         ; farg2* := <alltd(add-namespace)> farg*
-        /*; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)*/
 
   lookup-screen = 
       lookup-screen-aux
-   <+ ?(qid, _); import-and-retry(lookup-screen-aux|qid)
+   <+ import-and-retry(lookup-screen-aux|<id>)
 
   lookup-screen-aux :
-    (qid, arg-type*) -> ExternalScreen(qid, farg2*, rt)
+    qid -> ExternalScreen(qid, farg2*, rt)
     where <GetScreen> qid
         ; ?ExternalScreen(_, farg*, rt)
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-function =
       lookup-function-aux
-   <+ ?(qid, _); import-and-retry(lookup-function-aux|qid)
+   <+ import-and-retry(lookup-function-aux|<id>)
 
   lookup-function-aux :
-    (qid, arg-type*) -> ExternalFunction(qid, farg2*, rt2)
-    where <GetFunction> qid
-        ; (?ExternalFunction(_, farg*, rt) <+ ?ExternalSyncFunction(_, farg*, rt))
+    qid -> ExternalFunction(qid, farg2*, rt2)
+    where ExternalFunction(_, farg*, rt) := <GetFunction> qid
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
+
+  lookup-function-aux :
+    qid -> ExternalSyncFunction(qid, farg2*, rt2)
+    where ExternalSyncFunction(_, farg*, rt) := <GetFunction> qid
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
    
   lookup-method :
-    (t, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
+    (t, x) -> ExternalSyncMethod(x, farg2*, rt2)
+    where not(GenericType("Type", _) := t)
+    where ExternalType(_, super, method*) := <lookup-type> t
+        ; <filter(?ExternalSyncMethod(x, farg*, rt))> method*
+        ; if not(!farg*); not(super := t) then // could not find a method
+            <lookup-method> (super, x)
+          end
+        ; rt2 := <alltd(add-namespace)> rt
+        ; farg2* := <alltd(add-namespace)> farg*
+
+  lookup-method :
+    (t, x) -> ExternalMethod(x, farg2*, rt2)
     where not(GenericType("Type", _) := t)
     where ExternalType(_, super, method*) := <lookup-type> t
         ; <filter(?ExternalMethod(x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
-            <lookup-method> (super, x, arg-type*)
+            <lookup-method> (super, x)
           end
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-method :
-    (t, x, arg-type*) -> ExternalSyncMethod(x, farg2*, rt2)
-    where ExternalType(_, super, method*) := <lookup-type> t
-        ; <filter(?ExternalSyncMethod(x, farg*, rt))> method*
-        ; if not(!farg*); not(super := t) then // could not find a method
-            <lookup-method> (super, x, arg-type*)
-          end
-        ; rt2 := <alltd(add-namespace)> rt
-        ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
-
-  lookup-method :
-    (t2, x, arg-type*) -> ExternalMethod(x, farg2*, rt2)
+    (t2, x) -> ExternalMethod(x, farg2*, rt2)
     where GenericType("Type", [t@SimpleType(qid)]) := t2 // for static methods
     where ExternalType(_, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
         ; <filter(?ExternalStaticMethod(x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
-            <lookup-method> (super, x, arg-type*)
+            <lookup-method> (super, x)
           end
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
 
   lookup-method :
-    (t2, x, arg-type*) -> ExternalSyncMethod(x, farg2*, rt2)
+    (t2, x) -> ExternalSyncMethod(x, farg2*, rt2)
     where GenericType("Type", [t@SimpleType(qid)]) := t2 // for static methods
     where ExternalType(_, super, method*) := <GetType <+ GetEntity; <lookup-type> GenericType(QId("mobl", "Entity"), [t])> qid
         ; <filter(?ExternalStaticSyncMethod(x, farg*, rt))> method*
         ; if not(!farg*); not(super := t) then // could not find a method
-            <lookup-method> (super, x, arg-type*)
+            <lookup-method> (super, x)
           end
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-        ; arg-types1* := <alltd(add-namespace)> arg-type*
-        ; arg-types2* := <map(?FArg(_, <id>))> farg2*
-        ; <zip; map(type-compatible)> (arg-types1*, arg-types2*)
   
   is-entity-type =
     lookup-type
     ; ?ExternalEntity(_, _, _)
 
   get-all-types =
-    <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <map(Fst)> <all-keys-GetGenericType>]
+    <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <all-keys-GetGenericType>]

@@ -10,12 +10,12 @@ imports
 rules
     
   constraint-error :
-    t@SimpleType(_) -> (t, $[Type is not defined])
+    t@SimpleType(_) -> (t, $[Type is not defined: [<write-to-string> t]])
     where not(<lookup-type> t) // no entity for this type
         ; not(_{"TemplateType"} := t)
 
   constraint-error :
-    t@GenericType(_, _) -> (t, $[Type is not defined])
+    t@GenericType(_, _) -> (t, $[Type is not defined: [<write-to-string> t]])
     where not(<lookup-type> t) // no entity for this type
     
   constraint-error :
@@ -24,9 +24,10 @@ rules
     
   constraint-error :
     TemplateCall(qid, arg*, body) -> (qid, $[No such template defined with these arguments])
+    where <map(type-of)> arg*
     where not("elements" := qid; [] := arg*)
     where not(<IsTemplateArgument> qid)
-    where not(<lookup-template> (qid, arg*))
+    where not(<lookup-template> qid)
     
   constraint-error :
     t@Var(qid) -> (t, $[Variable not defined])
@@ -34,14 +35,18 @@ rules
 
   constraint-error :
     t@FieldAccess(e, x) -> (t, $[Field [x] not defined])
+    where <type-of> e
     where not(type-of)
 
   constraint-error :
-    t@Call(_, _) -> (t, $[Function with this signature not defined])
+    t@Call(qid, arg*) -> (t, $[Function not defined])
+    where <map(type-of)> arg*
     where not(type-of)
 
   constraint-error :
-    t@MethodCall(_, _, _) -> (t, $[Method with this signature not defined])
+    t@MethodCall(e, x, arg*) -> (t, $[No such method '[x]' defined])
+    where <type-of> e
+    where <map(type-of)> arg*
     where not(type-of)
   
   constraint-error = normalize; constraint-error

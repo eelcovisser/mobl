@@ -25,16 +25,17 @@ entity TwitterUpdate {
 
 function updateStream(account : Account) {
    var updates : Collection<twitter::Update> = twitter::getUpdates(account.username, account.password);
+   log(updates);
    for(twupdate : twitter::Update in updates) {
-     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {  
        account.updates.add(TwitterUpdate{
          updateId = twupdate.id,
          screenName = twupdate.user.screen_name,
          iconUrl = twupdate.user.profile_image_url,
          text = twupdate.text,
-         date = twupdate.created_at,
+         date = twupdate.created_at, 
          favorite = twupdate.favorited
-       });
+       }); 
      }
    }
 }

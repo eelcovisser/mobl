@@ -3,24 +3,20 @@ module mobl
 load "lib/iphone.css"
 
 external type void {}
-external type String { }
-external type Int { 
-  sync function toString() : String
-}
-external type Bool {
-  sync function toString() : String
-}
-external type Text {
-  sync function toString() : String
-}
-external type Uri { }
+external type String : Object { }
+external type Int : Object { }
+external type Bool : Object { }
+external type Text : Object { }
 
 external type Callback {}
 external type Template {}
 
 external type DateTime {}
 external type Array<T> {}
-external type Object {}
+
+external type Object {
+  sync function toString() : String
+}
 
 external type Collection<T> {
   //function get() : Array<T>

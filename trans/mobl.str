@@ -90,6 +90,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> <type-of; get-all-properties; map(\ (x, t) -> ([x], "") \)> e
     where FieldAccess(e, _) := <lookup-node> position
 
+  editor-complete =
+    debug(!"Editor complete: "); fail
+    
+
   type-name-to-proposal:
     x -> ([x], "")
 

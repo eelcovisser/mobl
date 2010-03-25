@@ -32,11 +32,11 @@ strategies
 
   eq-type-of :
     Call(qid, e*) -> rt
-    where ExternalFunction(_, _, rt) := <lookup-function> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+    where c#([_, _, rt]) := <lookup-function> qid
 
   eq-type-of :
     Call(qid, e*) -> rt
-    where ExternalScreen(_, _, rt) := <lookup-screen> (qid, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+    where ExternalScreen(_, _, rt) := <lookup-screen> qid
 
   eq-type-of :
     EntityCons(t, _) -> t
@@ -47,7 +47,7 @@ strategies
 
   eq-type-of :
     MethodCall(e, x, e*) -> rt
-    where m := <lookup-method> (<type-of> e, x, <map(type-of <+ debug(!"Could not determine type of: "); fail)> e*)
+    where m := <lookup-method> (<type-of> e, x)
         ; (   ExternalMethod(_, _, rt) := m
            <+ ExternalSyncMethod(_, _, rt) := m)
   

@@ -235,15 +235,15 @@ div#optionpanel {
 div#tabbar {
     background: url(img/tabbg.png) top left repeat-x;
     text-align: center;
-    position: absolute;
     height: 48px;
+    /*position: absolute;
     left: 0;
     right: 0;
-    bottom: 0;
-	z-index: 3;
+    bottom: 0;*/
+		z-index: 3;
 }
 
-div#tabbar div div {
+div#tabbar div {
     float: left;
     margin-right: 5px;
     margin-left: 5px;
@@ -252,7 +252,7 @@ div#tabbar div div {
     color: #c0c0c0;
     -webkit-border-image: url(img/empty.png) 0 5 0 5;
     -moz-border-image: url(img/empty.png) 0 5 0 5;
-    width: 70px;
+    width: 50px;
 }
 
 div#tabbar div.selected {
@@ -286,4 +286,8 @@ li a.button {
     -moz-border-image: url(img/redButton.png) 0 12 0 12;
     color: #fff;
     text-shadow: #7a0001 0 -1px 0;
+}
+
+div.tabActivefalse {
+	display: none;
 }

@@ -24,6 +24,7 @@ rules
        ; import-all
        ; alltd(add-tl-namespace)
        ; declare-all
+       ; rename-all
        ; alltd(add-namespace)
        ; declare-all
        ; rename-all

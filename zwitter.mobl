@@ -111,7 +111,30 @@ screen showUpdates(account : Account) {
   backButton("Accounts", onclick={ screen return; })
   <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
 
-  basicView(account.username, toolBar=template {
+  template showTweets(coll : Collection<TwitterUpdate>) {
+    <div id="tweets">
+    list(update : TwitterUpdate in coll) {
+      <div class="tweet" onclick={ showUpdate(update); }>
+        <span class="icon"><img src=update.iconUrl width="48" height="48"/></span>
+        <span class="text">
+          <strong>outputString(update.screenName) ": "</strong>
+          outputString(update.text)
+          <span class="meta">"Posted " outputDate(update.date)</span>
+        </span>
+      </div>
+    }
+    </div>
+  }
+  template myTweets() {
+    showTweets(account.updates.order("date", false).limit(10))
+  }
+  template myTweets2() {
+    showTweets(account.updates.order("date", true).limit(10))
+  }
+  
+  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2)])
+
+  /*basicView(account.username, toolBar=template {
 		                              toolbarButton("circle_arrow_right", onclick={ updateStream(account); })
 		                            }) {
     <div id="tweets">
@@ -126,7 +149,7 @@ screen showUpdates(account : Account) {
 	    </div>
 	  }
 	  </div>
-  }
+  }*/
 }
 
 screen showUpdate(update : TwitterUpdate) {

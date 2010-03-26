@@ -37,12 +37,14 @@ exports
     "true"                        -> Exp {cons("True")}
     "false"                       -> Exp {cons("False")}
     "null"                        -> Exp {cons("Null")}
-    QId                           -> Exp {cons("Var")}
-    QId "(" {NamedExp ","}* ")"   -> Exp {cons("Call")}
-    Exp "." ID "(" {Exp ","}* ")" -> Exp {cons("MethodCall")}
-    Exp "." ID                    -> Exp {cons("FieldAccess")}
-    "uri" "(" Exp ")"             -> Exp {cons("Uri")}
-    Exp "[" Exp "]"               -> Exp {left, cons("Indexer")}
+
+    QId                           -> LimitedExp {cons("Var")}
+    QId "(" {NamedExp ","}* ")"   -> LimitedExp {cons("Call")}
+    Exp "." ID "(" {Exp ","}* ")" -> LimitedExp {cons("MethodCall")}
+    Exp "." ID                    -> LimitedExp {cons("FieldAccess")}
+    Exp "[" Exp "]"               -> LimitedExp {left, cons("Indexer")}
+    
+    LimitedExp                    -> Exp
     
     Exp                           -> NamedExp
     ID "=" Exp                    -> NamedExp {cons("NamedExp")}
@@ -56,6 +58,10 @@ exports
     ID "<" Type ">" "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
     Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
     "(" Exp ")"                  -> Exp {cons("Brackets")}
+    
+    "[" {Exp ","}* "]"           -> Exp {cons("List")}
+    
+    "(" Exp "," {Exp ","}* ")"   -> Exp {cons("Tuple")}         
     
     "{" Statement* "}"             -> Exp {cons("Callback")}
     "template" "{" ScreenElem* "}" -> Exp {cons("AnonymousTemplate")}
@@ -89,7 +95,7 @@ exports
     
     
   context-free priorities
-    Exp "." ID -> Exp
+    Exp "." ID -> LimitedExp
   > Exp TermOperatorMethodId Exp -> Exp
   > Exp OperatorMethodId Exp -> Exp
   > Exp CompareMethodId Exp -> Exp

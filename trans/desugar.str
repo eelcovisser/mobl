@@ -47,13 +47,13 @@ strategies
   desugar = normalize
   
   normalize :
-    TemplateCallNoArgs(qid, body) -> TemplateCall(qid, [], body)
+    TemplateCallNoArgs(e, body) -> TemplateCall(e, [], body)
+    
+//  normalize :
+//    TemplateCallNoArgsNoBody(e) -> TemplateCall(e, [], [])
     
   normalize :
-    TemplateCallNoArgsNoBody(qid) -> TemplateCall(qid, [], [])
-    
-  normalize :
-    TemplateCallNoBody(qid, arg*) -> TemplateCall(qid, arg*, [])
+    TemplateCallNoBody(e, arg*) -> TemplateCall(e, arg*, [])
   
   normalize :
     EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)

@@ -39,9 +39,9 @@ exports
     
     "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
     
-    QId "(" {NamedExp ","}* ")" "{" ScreenElem* "}"   -> ScreenElem {cons("TemplateCall")}
-    QId "(" {NamedExp ","}* ")"                       -> ScreenElem {cons("TemplateCallNoBody")}
-    QId "{" ScreenElem* "}"                           -> ScreenElem {cons("TemplateCallNoArgs")}
-    QId                                               -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
+    LimitedExp "(" {NamedExp ","}* ")" "{" ScreenElem* "}"   -> ScreenElem {prefer, cons("TemplateCall")}
+    LimitedExp "(" {NamedExp ","}* ")"                       -> ScreenElem {cons("TemplateCallNoBody")}
+    LimitedExp "{" ScreenElem* "}"                           -> ScreenElem {cons("TemplateCallNoArgs")}
+    %%QId                                               -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
 
   

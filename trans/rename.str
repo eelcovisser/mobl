@@ -10,7 +10,7 @@ strategies
   
   rename-var : 
    (x, t) -> y
-   with y := x{<newname> x}
+   with y := x{<newname> x}//; <debug(!"New name: ")> Var(y)
       ; rules(
            RenameId : x -> y
            TypeOf   : y -> t
@@ -35,10 +35,10 @@ strategies
       ; rules(
            IsRefVar : y
         )
-      ; if SimpleType(QId("mobl", "Template")) := t then
+      /*; if SimpleType(QId("mobl", "Template")) := t then
           rules ( IsTemplateArgument : y
                   RenameTemplate     : x -> y )
-        end   
+        end*/   
   
   is-ref :
     y -> <IsRefVar> y
@@ -55,12 +55,12 @@ strategies
   rename :
     Call(x, e*) -> Call(<RenameFunction> x, <rename-all> e*)
 
-  rename :
-    c#([qid|rest]) -> c#([<RenameTemplate> qid|<rename-all> rest])
-    where <string-starts-with(|"TemplateCall")> c
+  /*rename :
+    c#([Var(qid)|rest]) -> c#([Var(<RenameTemplate> qid)|<rename-all> rest])
+    where <string-starts-with(|"TemplateCall")> c*/
     
   rename-scope(s) =
-    {| RenameId, RenameFunction, RenameTemplate
+    {| RenameId, RenameFunction//, RenameTemplate
      : s
      |}
 
@@ -86,10 +86,11 @@ strategies
   rename = RenameType
 
   rename :
-    Template(manno*, name, farg*, body) -> Template(manno*, name, farg2*, body2)
+    Template(manno*, qid, farg*, body) -> Template(manno*, qid, farg2*, body2)
     where not("template" := <RenameScope>)
-    with template-scope( 
+    with template-scope(
            farg2* := <map(rename-ref-farg)> farg*
+           //; <rename-var> ("elements", SimpleType(QId("mobl", "Template")))
            ; body2 := <rename-all> body
          )
 

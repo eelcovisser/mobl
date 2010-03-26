@@ -23,14 +23,8 @@ rules
     where not(tag := closeTag)
     
   constraint-error :
-    t@TemplateCall(qid, arg*, body) -> (qid, $[No such template defined: [<write-to-string> t]])
-    where <map(type-of)> arg*
-    where not("elements" := qid; [] := arg*)
-    where not(<IsTemplateArgument> qid)
-    where not(<lookup-template> qid)
-    
-  constraint-error :
-    t@Var(qid) -> (t, $[Variable not defined])
+    t@Var(qid) -> (t, $[Variable not defined: [<write-to-string> t]])
+    where not("elements" := qid)
     where not(type-of)
 
   constraint-error :

@@ -8,6 +8,7 @@ function updateScrollers () {
         var height = window.innerHeight;
         height -= $("#header:visible").height();
         height -= $("#footer:visible").height();
+        height -= $("#tabbar:visible").height();
         scrollwrappers.height(height);
     }
     var scrollers = $("#scrollwrapper div#content:visible");

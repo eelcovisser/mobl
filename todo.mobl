@@ -38,7 +38,7 @@ screen root() {
   topRightButton("Add", onclick={ addTask(); }) 
   basicView("Tasks") {
     ul {
-	    list(t : Task in Task.all().order("done", false).order("name", true).limit(10)) {  
+	    list(t : Task in Task.all().order("done", true).order("name", true).limit(10)) {  
 	      listitem(onclick={ editTask(t); }) {
 	        inputCheckbox(t.done, onclick={}) " "
 	        outputString(t.name)

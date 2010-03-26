@@ -34,7 +34,39 @@ function log(s) {
     console.log(s);
 }
 
+
 (function () {
+    function Tuple() {
+        for(var i = 0; i < arguments.length; i++) {
+            this['_' + (i+1)] = arguments[i];
+        }
+        this.subscribers = {}; // Observable
+    }
+    
+    Tuple.prototype = new persistence.Observable();
+
+    function List() {
+        this.values = [];
+        for(var i = 0; i < arguments.length; i++) {
+            this.values.push(arguments[i]);
+        }
+        this.subscribers = {}; // Observable
+    }
+    
+    List.prototype = new persistence.Observable();
+    
+    List.prototype.get = function(idx) {
+        return this.values[idx];
+    };
+    
+    List.prototype.list = function(tx, callback) {
+        var valueCopy = [];
+        for(var i = 0; i < this.values.length; i++) {
+            valueCopy[i] = this.values[i];
+        }
+        callback(valueCopy);
+    };
+    
     function LinkedMap (parent, values) {
         this.values = values || {};
         this.parent = parent;
@@ -130,6 +162,7 @@ function log(s) {
                 });
             } else {
                 console.log("Could not rebind for: " + this.prop);
+                console.log(this.ref.get());
             }
         }
         for(var i = 0; i < this.childRefs.length; i++) {
@@ -148,6 +181,8 @@ function log(s) {
         }
     };
 
+    mobl.Tuple = Tuple;
+    mobl.List = List;
     mobl.LinkedMap = LinkedMap;
     mobl.Reference = Reference;
 }());

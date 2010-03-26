@@ -31,6 +31,11 @@ strategies
     AnonymousTemplate(_) -> SimpleType(QId("mobl", "Template"))
 
   eq-type-of :
+    Tuple(fst, rest*) -> GenericType(QId("mobl", $[Tuple[n]]), t*)
+    where n := <add> (1, <length> rest*)
+        ; t* := <map(type-of)> [fst|rest*]
+
+  eq-type-of :
     Call(qid, e*) -> rt
     where c#([_, _, _, rt]) := <lookup-function> qid
 
@@ -44,6 +49,15 @@ strategies
   eq-type-of :
     Var(qid) -> GenericType("Type", [SimpleType(qid)])
     where <lookup-type-aux> SimpleType(qid)
+
+  eq-type-of :
+    Var(qid) -> <fargs-to-template-type> farg*
+    where ExternalTemplate(_, _, farg*) := <lookup-template-aux> qid
+
+  fargs-to-template-type :
+    farg* -> GenericType(QId("mobl", $[Template[n]]), t*)
+    where t* := <filter(?FArg(_, <id>))> farg*
+        ; n := <length> t*
 
   eq-type-of :
     MethodCall(e, x, e*) -> rt

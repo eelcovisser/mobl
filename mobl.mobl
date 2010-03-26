@@ -10,13 +10,50 @@ external type String : Object { }
 
 external type Int : Object { }
 external type Bool : Object { }
+external type List<T> {
+  sync function get(n : Int) : T
+}
+external type Callback {}
+
+external type Tuple1<T1> {
+  _1 : T1
+}
+
+external type Tuple2<T1, T2> {
+  _1 : T1
+  _2 : T2
+}
+
+external type Tuple3<T1, T2, T3> {
+  _1 : T1
+  _2 : T2
+  _3 : T3
+}
+
+external type Tuple4<T1, T2, T3, T4> {
+  _1 : T1
+  _2 : T2
+  _3 : T3
+  _4 : T4
+}
+
+external type Template {}
+external type Template1<T1> { }
+external type Template2<T1, T2> { }
+external type Template3<T1, T2, T3> { }
+external type Template4<T1, T2, T3, T4> { }
+external type Template5<T1, T2, T3, T4, T5> { }
 
 external type Callback {}
-external type Template {}
+external type Function<RT> { }
+external type Function1<RT, T1> { }
+external type Function2<RT, T1, T2> { }
+external type Function3<RT, T1, T2, T3> { }
+external type Function4<RT, T1, T2, T3, T4> { }
+external type Function5<RT, T1, T2, T3, T4, T5> { }
 
 external type Text : Object { }
 external type DateTime {}
-external type Array<T> {}
 
 external type Object {
   sync function toString() : String
@@ -68,9 +105,16 @@ template outputDate(d : DateTime) {
   <span databind=formatDate(d)/>
 }
 
+template header(title : String) {
+  <div id="header">
+    <h1 databind=title></h1>
+  </div>
+}
+
+
 screen promptString(question : String) : String {
   var answer : String = ""
-  header(question)
+  header(question) 
   inputs {
     inputString(answer)
   }
@@ -103,18 +147,12 @@ template inputInt(i : Int, placeholder : String = null, onchange : Callback = nu
 
 template inputs() {
   <ul>
-    elements()
+    elements() 
   </ul>
 }
 
 template inputCheckbox(b : Bool, onchange : Callback = null, onclick : Callback = null) {
   <input type="checkbox" databind=b onclick=onclick onchange=onchange />
-}
-
-template header(title : String) {
-  <div id="header">
-    <h1 databind=title></h1>
-  </div>
 }
 
 template basicView(title : String, toolBar : Template = template{}) {
@@ -170,6 +208,35 @@ template backButton(text : String, onclick : Callback = null) {
 
 template toolbarButton(type : String, onclick : Callback = null) {
   <img src="lib/toolbar/icon_" + type + ".png" width="30" height="30" class="toolbarButton" onclick=onclick/>
+}
+
+@doc "A tabset, takes a list of tuples as argument, e.g. [(\"Tab 1\", \"icon url\", tab1), (\"Tab 2\", \"icon uri\", tab2)] where tab1 and tab2 are templates with no arguments"
+template tabset(tabs : List<Tuple3<String, String, Template>>) {
+  var activeTabName : String = tabs.get(0)._1
+  
+  template tab(active : Bool, name : String, body : Template) {
+    <div class="tabActive"+active>
+      body()
+    </div>
+  }
+  
+  header(activeTabName)
+  <div id="scrollwrapper">
+    <div id="content">
+      list(tabTuple : Tuple3<String, String, Template> in tabs) {
+        tab(activeTabName == tabTuple._1, tabTuple._1, tabTuple._3)
+      }
+    </div>
+  </div>
+
+  <div id="tabbar">
+    list(tabTuple : Tuple3<String, String, Template> in tabs) {
+      <div onclick={ activeTabName = tabTuple._1; }>
+        <img src=tabTuple._2 width="20" height="20"/><br/>
+        outputString(tabTuple._1)
+      </div>
+    }
+  </div>
 }
 
 <script>

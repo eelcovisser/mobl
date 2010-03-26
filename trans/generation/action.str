@@ -190,6 +190,16 @@ rules // Expressions
   exp-to-js :
     Null() -> $[null]
 
+  exp-to-js :
+    Tuple(e, []) -> <concat-strings> ["new mobl.Tuple(", <expression-to-js> e, ")"]
+
+  exp-to-js :
+    Tuple(e, e*) -> <concat-strings> ["new mobl.Tuple(", <expression-to-js> e, ", ", <map(expression-to-js); separate-by(!", "); concat-strings> e*, ")"]
+    where not([] := e*)
+  
+  exp-to-js :
+    List(e*) -> <concat-strings> ["new mobl.List(", <map(expression-to-js); separate-by(!", "); concat-strings> e*, ")"]
+
   /*ref-exp-to-js :
     Var(qid) -> $[ref(scope, '[<qid-to-js> qid]')]
     where not(<is-ref> qid)*/

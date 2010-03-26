@@ -140,7 +140,6 @@ rules
           |}
        ; rules ( Exp :+= Var(v) )
 
-
   cps-lift-expression :
     e@EntityCons(qid, propval*) -> <concat> [stats, [VarDeclInferred(v, EntityCons(qid, propval2*))]]
     with v := <newname> "tmp"
@@ -157,6 +156,28 @@ rules
           : stats2 := <cps-lift-expression> e
           ; e2 := <Exp>
           |}
+       ; {| Exp
+          : stats := <map(cps-lift-expression); concat> e*
+          ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
+          |}
+       ; rules ( Exp :+= Var(v) )
+
+  cps-lift-expression :
+    Tuple(e, e*) -> <concat> [stats2, stats, [VarDeclInferred(v, Tuple(e2, e2*))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats2 := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+       ; {| Exp
+          : stats := <map(cps-lift-expression); concat> e*
+          ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
+          |}
+       ; rules ( Exp :+= Var(v) )
+
+  cps-lift-expression :
+    List(e*) -> <concat> [stats, [VarDeclInferred(v, List(e2*))]]
+    with v := <newname> "tmp"
        ; {| Exp
           : stats := <map(cps-lift-expression); concat> e*
           ; e2* := <bagof-Exp; reverse> // taking advantage of Exp ordering here, risky
@@ -217,6 +238,15 @@ strategies
   is-sync =
     ?Call(qid, e*)
     ; ExternalSyncFunction(_, _, _, _) := <lookup-function> qid
+    ; <map(is-sync)> e*
+
+  is-sync =
+    ?Tuple(e, e*)
+    ; <is-sync> e
+    ; <map(is-sync)> e*
+
+  is-sync =
+    ?List(e*)
     ; <map(is-sync)> e*
 
   is-sync =

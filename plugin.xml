@@ -3,7 +3,7 @@
 
 <plugin>
        <extension point="org.eclipse.imp.runtime.languageDescription">
-          <language extensions="mob" description="MoBL" language="MoBL" derivedFrom="DynamicRoot" validator="mobl.MoBLValidator" validatorClass="mobl.MoBLValidator"></language>
+          <language extensions="mobl" description="MoBL" language="MoBL" derivedFrom="DynamicRoot" validator="mobl.MoBLValidator" validatorClass="mobl.MoBLValidator"></language>
        </extension>
        <extension id="mobl.parser" name="MoBL Parser" point="org.eclipse.imp.runtime.parser">
           <parser class="mobl.MoBLParseController" language="MoBL">

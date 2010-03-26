@@ -13,5 +13,6 @@ screen root() {
 	  inputInt(n1)
 	  inputInt(n2)
 	  listitem { outputInt(n1 * n2) }
+	  <input value=n1*n2/>
   }
 }

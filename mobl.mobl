@@ -214,25 +214,21 @@ template toolbarButton(type : String, onclick : Callback = null) {
 template tabset(tabs : List<Tuple3<String, String, Template>>) {
   var activeTabName : String = tabs.get(0)._1
   
-  template tab(active : Bool, name : String, body : Template) {
-    <div class="tabActive"+active>
-      body()
-    </div>
-  }
-  
   header(activeTabName)
   <div id="scrollwrapper">
     <div id="content">
       list(tabTuple : Tuple3<String, String, Template> in tabs) {
-        tab(activeTabName == tabTuple._1, tabTuple._1, tabTuple._3)
+		    <div class="tabActive"+(activeTabName == tabTuple._1)>
+		      tabTuple._3()
+		    </div>
       }
     </div>
   </div>
 
   <div id="tabbar">
     list(tabTuple : Tuple3<String, String, Template> in tabs) {
-      <div onclick={ activeTabName = tabTuple._1; }>
-        <img src=tabTuple._2 width="20" height="20"/><br/>
+      <div onclick={ activeTabName = tabTuple._1; } class="tabButtonActive"+(activeTabName == tabTuple._1)>
+        <img src=tabTuple._2 width="25" height="25"/><br/>
         outputString(tabTuple._1)
       </div>
     }

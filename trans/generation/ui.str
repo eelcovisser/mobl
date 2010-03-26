@@ -120,6 +120,7 @@ rules
            $[[root].append([node]);
            [<elems-to-js(|root)> rest*]]]]
 
+
   elems-to-js(|root) :
     [f@Function(_, _, _, _, _)|rest*] -> $[
       [<function-to-js> f]
@@ -155,6 +156,7 @@ rules
 	          console.log("Garbage!");
 	        }
 	      });
+	      [subscriptions]
       }
       [r].rebind();
     ]
@@ -162,6 +164,15 @@ rules
         ; not(SimpleType(QId("mobl", "Callback")) := <type-of> e)
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
+       ; watch-expr* := <find-watchable-expressions> e
+       ; subscriptions := <map(exp-to-html-watcher-js(|node, name, <expression-to-js> e)); concat-strings> watch-expr*
+
+  exp-to-html-watcher-js(|node, attr, es) :
+    e -> $[[<ref-expression-to-js> e].addEventListener('set', function() {
+             [node].attr('[attr]', [es]);
+           });
+]
+
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlArg(name, e) -> $[

@@ -33,7 +33,10 @@ external type Collection<T> {
   
   @doc "Filter the collection on a property based on an operator `op` (options: '=', '<', '>', '<=', '>=' or '!=') and a value"
   sync function filter(property : String, op : String, value : Object) : Collection<T>
+  
+  @doc "Order the collection based on a property in ascending (ascending = true) or dedescending (ascending = false) order"
   sync function order(property : String, ascending : Bool) : Collection<T>
+  
   sync function limit(n : Int) : Collection<T>
   sync function offset(n : Int) : Collection<T>
   sync function add(item : T) : void
@@ -76,25 +79,25 @@ screen promptString(question : String) : String {
 
 template inputString(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
-    <input type="text" placeholder=placeholder databind=s/>
+    <input type="text" placeholder=placeholder databind=s onchange=onchange />
   </li>
 }
 
 template inputText(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
-    <textarea placeholder=placeholder databind=s/>
+    <textarea placeholder=placeholder databind=s onchange=onchange/>
   </li>
 }
 
 template inputSecret(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
-    <input type="password" placeholder=placeholder databind=s/>
+    <input type="password" placeholder=placeholder databind=s onchange=onchange/>
   </li>
 }
 
 template inputInt(i : Int, placeholder : String = null, onchange : Callback = null) {
   <li>
-    <input type="text" placeholder=placeholder databind=i/>
+    <input type="text" placeholder=placeholder databind=i onchange=onchange/>
   </li>
 }
 
@@ -105,7 +108,7 @@ template inputs() {
 }
 
 template inputCheckbox(b : Bool, onchange : Callback = null, onclick : Callback = null) {
-  <input type="checkbox" databind=b onchange=onchange onclick=onclick/>
+  <input type="checkbox" databind=b onclick=onclick onchange=onchange />
 }
 
 template header(title : String) {

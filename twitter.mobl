@@ -3,7 +3,9 @@ module twitter
 import mobl
 
 external type Update {
+  @doc "The internal twitter ID"
   id                    : Int
+  
   created_at            : DateTime
   text                  : String
   source                : String

@@ -37,12 +37,12 @@ strategies
            |}
   
   lookup-property :
-    (type, prop) -> t
+    (type, prop) -> p
     where decl := <lookup-type> type
           ; (ExternalType(_, _, super, member*) := decl <+ ExternalEntity(_, _, super, member*) := decl)
-          ; <filter(?Property(_, prop, t, _))> member*
+          ; <filter(?p@Property(_, prop, t, _))> member*
           ; if not(!t); not(SimpleType(QId("mobl", "Object")) := super) then
-              t := <lookup-property> (super, prop)
+              p := <lookup-property> (super, prop)
             end
   
   get-all-properties :

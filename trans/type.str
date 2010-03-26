@@ -52,7 +52,8 @@ strategies
            <+ ExternalSyncMethod(_, _, _, rt) := m)
   
   eq-type-of :
-    FieldAccess(e, x) -> <lookup-property> (<type-of> e, x)
+    FieldAccess(e, x) -> t
+    where Property(_, _, t, _) := <lookup-property> (<type-of> e, x)
 
   eq-type-of :
     BinMethodCall(e1, op, e2) -> <type-of> e1 // @TODO: Fix this

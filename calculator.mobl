@@ -4,14 +4,30 @@ title "Calculator"
 
 import mobl
 
+template someTemplate(t : Template) {
+  <hr/>
+  t()
+  <hr/>
+}
+
 screen root() {
   header("Calculator")
   var n1 : Int = 2
   var n2 : Int = 2
   
+  function sayIt() {
+    alert(n1);
+  }
+  
   inputs {
-    inputInt(n1)
+    inputInt(n1, onchange=sayIt)
     inputInt(n2)
     listitem { outputInt(n1 * n2) }
   }
+  
+  template myTemplate() {
+    "Hallo!"
+  }
+  
+  someTemplate(myTemplate)
 }

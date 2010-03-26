@@ -1,5 +1,5 @@
 www/*.js
 www/*.html
-*.generated.*
+*.generated.esv
 .DS_Store
 .cache

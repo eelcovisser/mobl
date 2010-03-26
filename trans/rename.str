@@ -19,7 +19,7 @@ strategies
   rename-local-function : 
    c#([mannos, name|rest]) -> name2
    where "template" := <RenameScope>
-   with name2 := name{<newname> name}
+   with name2 := <rename-var> (name, SimpleType(QId("mobl", "Callback")))
       ; rules(
            RenameFunction : name -> name2
         )
@@ -87,10 +87,21 @@ strategies
 
   rename :
     Template(manno*, name, farg*, body) -> Template(manno*, name, farg2*, body2)
+    where not("template" := <RenameScope>)
     with template-scope( 
            farg2* := <map(rename-ref-farg)> farg*
            ; body2 := <rename-all> body
          )
+
+  // Local template definitions
+  rename :
+    Template(manno*, name, farg*, body) -> <try(declare)> Template(manno*, name2, farg2*, body2)
+    where "template" := <RenameScope>
+    with template-scope( 
+           farg2* := <map(rename-ref-farg)> farg*
+           ; body2 := <rename-all> body
+         )
+       ; name2 := <rename-var> (name, SimpleType(QId("mobl", "Template")))
 
   rename-ref-farg :
     FArg(x, t) -> FArg(<rename-ref-var> (x, t), t)    

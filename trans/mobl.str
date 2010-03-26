@@ -84,6 +84,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     where Call(qid, _) := <lookup-node> position
 
   editor-hover:
+    (f@FieldAccess(_, _), position, ast, path, project-path) -> <get-doc> <lookup-property; debug> (<type-of> e, x)
+    where FieldAccess(e, x) := <lookup-node> position
+
+  editor-hover:
     (c@MethodCall(_, _, _), position, ast, path, project-path) -> <get-doc> <lookup-method> (<type-of> e, x)
     where MethodCall(e, x, _) := <lookup-node> position
 
@@ -104,14 +108,14 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> [prop*, method*]
     where FieldAccess(e, _) := <lookup-node> position
         ; t := <type-of> e
-        ; prop* := <get-all-properties; map(\ Property(_, x, _, _) -> ([x], "") \)> t
-        ; method* := <get-all-methods; map(\ c#([_, x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], "") \)> t
+        ; prop* := <get-all-properties; map(\ prop@Property(_, x, _, _) -> ([x], <get-doc> prop) \)> t
+        ; method* := <get-all-methods; map(\ meth@c#([_, x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], <get-doc> meth) \)> t
 
   editor-complete:
     (MethodCall(_, COMPLETION(prefix), _), position, ast, path, project-path) -> method*
     where MethodCall(e, _, _) := <lookup-node> position
         ; t := <type-of> e
-        ; method* := <get-all-methods; map(\ c#([_, x|_]) -> ([x], "") \)> t
+        ; method* := <get-all-methods; map(\ meth@c#([_, x|_]) -> ([x], <get-doc> meth) \)> t
 
   editor-complete =
     debug(!"Editor complete: "); fail
@@ -122,9 +126,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 strategies
 
   get-doc =
-    one(?manno*)
-    ; <one(?DocAnno(doc))> manno*
-    ; <un-double-quote> doc
+       one(?manno*)
+       ; <one(?DocAnno(doc))> manno*
+       ; <un-double-quote> doc
+    <+ !""
 
   store-result =
     ?t

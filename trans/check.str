@@ -23,7 +23,7 @@ rules
     where not(tag := closeTag)
     
   constraint-error :
-    TemplateCall(qid, arg*, body) -> (qid, $[No such template defined with these arguments])
+    t@TemplateCall(qid, arg*, body) -> (qid, $[No such template defined: [<write-to-string> t]])
     where <map(type-of)> arg*
     where not("elements" := qid; [] := arg*)
     where not(<IsTemplateArgument> qid)

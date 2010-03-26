@@ -57,7 +57,7 @@ rules
         [init-stats]
         var [root2] = $("<span>");
         [body] 
-      });
+      };
       [<elems-to-js(|root)> rest*]
       ]
     with root2 := <newname> "root"

@@ -34,7 +34,7 @@ function updateStream(account : Account) {
          text = twupdate.text,
          date = twupdate.created_at, 
          favorite = twupdate.favorited
-       }); 
+       });
      }
    }
 }

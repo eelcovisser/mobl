@@ -182,8 +182,21 @@ rules
       }
     ]
     where SimpleType(QId("mobl", "Callback")) := <type-of> e
+        ; not("onclick" := name)
     with es := <expression-to-js> e
        ; val  := <newname> "val"
+
+  databind-tag-arg-to-js(|tg, node) :
+    HtmlArg("onclick", e) -> $[
+      var [val] = [es];
+      if([val] !== null) {
+        [node].tap([val]);
+      }
+    ]
+    where SimpleType(QId("mobl", "Callback")) := <type-of> e
+    with es := <expression-to-js> e
+       ; val  := <newname> "val"
+
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[

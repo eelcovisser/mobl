@@ -16,7 +16,7 @@ div.screen {
     margin: 0 auto;
     position: absolute;
     padding-bottom: 6px;
-    width: 100%;
+		width: 100px;
     height: 100%
 }
 

@@ -13,7 +13,7 @@ entity Task {
 
 screen addTask() {
   var newTask : Task = Task{}
-    
+  
   backButton("Back", onclick={ screen return; })
   basicView("Add") {
     inputs {
@@ -37,9 +37,9 @@ screen editTask(t : Task) {
 screen root() {
   topRightButton("Add", onclick={ addTask(); }) 
   basicView("Tasks") {
-    ul {
+    group {
 	    list(t : Task in Task.all().order("done", true).order("name", true).limit(10)) {  
-	      listitem(onclick={ editTask(t); }) {
+	      item(onclick={ editTask(t); }) {
 	        inputCheckbox(t.done, onclick={}) " "
 	        outputString(t.name)
 	        deleteButton("Delete", onclick={ remove(t); })

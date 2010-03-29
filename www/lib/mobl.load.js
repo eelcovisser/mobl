@@ -41,9 +41,6 @@ $(function() {
     setInterval(function() { persistence.flush(); }, 2500);
 });
 
-// document.addEventListener('touchmove', function(e){ e.preventDefault(); },
-// false);
-
 mobl.loadedFiles = {};
 
 mobl.load = function(url) {
@@ -96,7 +93,7 @@ mobl.call = function (screenName, args, callback) {
     var screenTemplate = current;
     screenTemplate.apply(null, args.concat( [ function (node) {
         node.attr('id', screenFrame.div);
-        node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
+        node.attr('style', "position: absolute; left: 0; top: 0; width: "+ window.innerWidth + "px;");
         var body = $("body");
         
         if (mobl.screenStack.length > 1) {

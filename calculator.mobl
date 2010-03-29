@@ -9,10 +9,10 @@ screen root() {
   var n2 : Int = 2
   
   header("Calculator")
-  inputs {
+  group {
 	  inputInt(n1)
 	  inputInt(n2)
-	  listitem { outputInt(n1 * n2) }
-	  <input value=n1*n2/>
+	  item { outputInt(n1 * n2) }
   }
+  button("Say hello", onclick={ alert("Yello!"); })
 }

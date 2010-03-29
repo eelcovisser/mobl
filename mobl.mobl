@@ -167,17 +167,17 @@ template basicView(title : String, toolBar : Template = template{}) {
   </div>
 }
 
-template ul() {
+template group() {
   <ul>
     elements()
   </ul>
 }
  
-template listitem(onclick : Callback = null) {
+template item(onclick : Callback = null) {
   <li onclick=onclick>elements()</li>
 }
 
-template listitemArrow(onclick : Callback = null) {
+template itemArrow(onclick : Callback = null) {
   <li onclick=onclick class="arrow">elements()</li>
 }
 

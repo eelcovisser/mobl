@@ -8,8 +8,8 @@ import mobl
 screen root() {
   header("Questions")
   var message : String = "<message will appear here>"
-  ul {
-    listitem { outputString(message) }
+  group {
+    item { outputString(message) }
   }
   button("Ask for name", onclick={
     message = "Hello, " + promptString("What is your name?");

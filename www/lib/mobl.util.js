@@ -16,6 +16,11 @@ function fromScope(that, prop) {
     }
 }
 
+mobl.isIphone = false;
+if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
+    mobl.isIphone = true;
+}
+
 mobl.stringTomobl__Int = function (s) {
     return parseInt(s, 10);
 }

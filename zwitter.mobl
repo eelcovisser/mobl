@@ -59,9 +59,9 @@ screen root() {
   }
   header("Accounts")
   topRightButton("Add", onclick={ addAccount(); })
-  ul {
+  group {
 	  list(account : Account in Account.all().order("username", true)) {
-	    listitemArrow(onclick={ showUpdates(account); }) { 
+	    itemArrow(onclick={ showUpdates(account); }) { 
 	      outputString(account.username)
 	    }
 	  }

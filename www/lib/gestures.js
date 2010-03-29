@@ -65,3 +65,57 @@ jQuery.fn.swipe = function(callback) {
         addSwipeListener(node, callback);
     });
 }
+
+function NoClickDelay(el, callback) {
+    this.element = el;
+    if( window.Touch ) this.element.addEventListener('touchstart', this, false);
+    this.callback = callback;
+}
+
+NoClickDelay.prototype = {
+    handleEvent: function(e) {
+        switch(e.type) {
+            case 'touchstart': this.onTouchStart(e); break;
+            case 'touchmove': this.onTouchMove(e); break;
+            case 'touchend': this.onTouchEnd(e); break;
+        }
+    },
+
+    onTouchStart: function(e) {
+        e.preventDefault();
+        this.moved = false;
+
+        this.element.addEventListener('touchmove', this, false);
+        this.element.addEventListener('touchend', this, false);
+    },
+
+    onTouchMove: function(e) {
+        this.moved = true;
+    },
+
+    onTouchEnd: function(e) {
+        this.element.removeEventListener('touchmove', this, false);
+        this.element.removeEventListener('touchend', this, false);
+
+        if( !this.moved ) {
+            // Place your code here or use the click simulation below
+            this.callback(e);
+            /*
+            var theTarget = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            if(theTarget.nodeType == 3) theTarget = theTarget.parentNode;
+
+            var theEvent = document.createEvent('MouseEvents');
+            theEvent.initEvent('click', true, true);
+            theTarget.dispatchEvent(theEvent);
+            e.preventDefault();*/
+        }
+    }
+};
+
+jQuery.fn.tap = function(callback) {
+    if(mobl.isIphone) {
+        new NoClickDelay(this[0], callback);
+    } else {
+        this.click(callback);
+    }
+};

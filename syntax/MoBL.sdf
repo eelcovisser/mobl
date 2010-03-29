@@ -61,7 +61,6 @@ exports
     "screen" -> ID {reject}
     "entity" -> ID {reject}
     "uri" -> ID {reject}
-    "list" -> ID {reject}
     %%"placeholder" -> ID {reject}
     "function" -> ID {reject}
     "callback" -> ID {reject}

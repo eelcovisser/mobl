@@ -13,7 +13,8 @@ function updateScrollers () {
     }
     var scrollers = $("#scrollwrapper div#content:visible");
     for ( var i = 0; i < scrollers.length; i++) {
-        scrollers.eq(i).data("scroller").refresh();
+        var scroller = scrollers.eq(i).data("scroller");
+        if(scroller) scroller.refresh();
     }
 }
 
@@ -72,14 +73,23 @@ mobl.call = function (screenName, args, callback) {
             var previousScreen = mobl.screenStack[mobl.screenStack.length - 1];
             $("body > #" + screenFrame.div).hide('slide', {
                 direction: "right"
-            }, 150, function () {
+            }, 100, function () {
                 var n = $("body > #" + screenFrame.div);
                 n.remove();
                 n.disableExtraEvents();
             });
             $("body > #" + previousScreen.div).show('slide', {
                 direction: "left"
-            }, 150);
+            }, 100);
+            /*
+            var old = $("body > #" + screenFrame.div);
+            old.addClass('righthidden');
+            setTimeout(function() {
+                old.remove();
+            }, 350);
+            //$("body > #" + previousScreen.div).removeClass('righthidden');
+            $("body > #" + previousScreen.div).removeClass('hidden');*/
+            
         }
         if (callback) {
             callback.apply(null, arguments);
@@ -93,17 +103,25 @@ mobl.call = function (screenName, args, callback) {
     var screenTemplate = current;
     screenTemplate.apply(null, args.concat( [ function (node) {
         node.attr('id', screenFrame.div);
-        node.attr('style', "position: absolute; left: 0; top: 0; width: "+ window.innerWidth + "px;");
+        //node.addClass('screen');
+        node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
         var body = $("body");
         
         if (mobl.screenStack.length > 1) {
             var previousScreen = mobl.screenStack[mobl.screenStack.length - 2];
+            //node.addClass('righthidden');
             $("body > #" + previousScreen.div).hide('slide', {
                 direction: "left"
-            }, 150);
+            }, 100);
             node.hide().prependTo(body).show('slide', {
                 direction: "right"
-            }, 150);
+            }, 100);
+            /*
+            $("body > #" + previousScreen.div).addClass('hidden');
+            node.prependTo(body);
+            setTimeout(function() {
+                node.removeClass('righthidden');
+            }, 150);*/
         } else {
             node.prependTo(body);
         }

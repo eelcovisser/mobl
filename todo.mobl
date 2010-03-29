@@ -19,7 +19,10 @@ screen addTask() {
     inputs {
       inputString(newTask.name, placeholder="Task name")
     }
-    button("Add", onclick={ add(newTask); screen return; })
+    button("Add", onclick={
+      add(newTask);
+      screen return;
+    })
   }
 }
 

@@ -12,14 +12,6 @@ body {
     /*height: 500px;*/
 }
 
-div.screen {
-    margin: 0 auto;
-    position: absolute;
-    padding-bottom: 6px;
-		width: 100px;
-    height: 100%
-}
-
 div#scrollwrapper {
     position: relative; /* needed */
     z-index: 1; /* needed and important */
@@ -54,12 +46,12 @@ div#scroller {
     margin: 0;
     text-overflow: ellipsis;
     color: #FFFFFF;
-		/*height: 40px;*/
+    /*height: 40px;*/
     background: url(img/iPhoneToolbar.png) #6d84a2 repeat-x;
 }
 
 img.toolbarButton {
-	padding: 5px 0 5px 10px;
+    padding: 5px 0 5px 10px;
 }
 
 .topRightButton {
@@ -178,7 +170,7 @@ ul li:last-child {
     -moz-border-radius-bottomright: 8px;
 }
 
-input[type=text] {
+input[type = text] {
     -webkit-text-size-adjust: 140%;
     -moz-text-size-adjust: 140%;
     color: #555;
@@ -203,11 +195,11 @@ textarea {
     display: inline-block;
     margin-left: 0px;
     width: 100%;
-		height: 5em;
+    height: 5em;
     -webkit-appearance: textarea;
 }
 
-input[type=password] {
+input[type = password] {
     -webkit-text-size-adjust: 140%;
     -moz-text-size-adjust: 140%;
     color: #555;
@@ -237,17 +229,16 @@ div#tabbar {
     text-align: center;
     height: 48px;
     /*position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;*/
-		z-index: 3;
+     left: 0;
+     right: 0;
+     bottom: 0;*/
+    z-index: 3;
 }
 
 div#tabbar div {
     float: left;
     margin-right: 5px;
     margin-left: 5px;
-	
     font-size: 10px;
     color: #c0c0c0;
     -webkit-border-image: url(img/empty.png) 0 5 0 5;
@@ -256,7 +247,7 @@ div#tabbar div {
 }
 
 div.tabActivefalse {
-  display: none;
+    display: none;
 }
 
 div#tabbar div.tabButtonActivetrue {
@@ -292,3 +283,22 @@ li a.button {
     text-shadow: #7a0001 0 -1px 0;
 }
 
+div.screen {
+    margin: 0;
+    position: absolute;
+		top: 0;
+    left: 0;
+    width: 100%;
+    /*height: 100%;*/
+    -webkit-transition-property: left;
+    -webkit-transition-duration:  0.3s;
+    -webkit-transition-timing-function: linear;
+}
+
+div.screen.hidden {
+    left: -100%;
+}
+
+div.screen.righthidden {
+    left: 100%;
+}

@@ -3,7 +3,7 @@ mobl.screenStack = [];
 mobl.rootScope = new mobl.LinkedMap();
 
 function updateScrollers () {
-    console.log("Updating scrollers");
+    //console.log("Updating scrollers");
     var scrollwrappers = $("div#scrollwrapper");
     if (scrollwrappers.length > 0) {
         var height = window.innerHeight;
@@ -13,7 +13,7 @@ function updateScrollers () {
         scrollwrappers.height(height);
     }
     var scrollers = $("div#scrollwrapper div#content");
-    console.log(scrollers.length);
+    //console.log(scrollers.length);
     for ( var i = 0; i < scrollers.length; i++) {
         var scroller = scrollers.eq(i).data("scroller");
         if(scroller) {

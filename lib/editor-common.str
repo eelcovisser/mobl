@@ -7,10 +7,7 @@ imports
 strategies
 
   parse-file =
-    debug(!"Parsing: ");
     parse-file(strsglr-perror, strsglr-report-parse-error| <memo-open-parse-table> <import-term(include/MoBL.tbl)>)
-    ; debug(!"Result: ")
-    <+ debug(!"Could not parse")
 
   /*parse-string =
     parse-string(|<import-term(include/MoBL.tbl)>)*/
@@ -34,24 +31,19 @@ strategies
       if not(!import => COMPLETION(_)) then
         path       := <resolve-path> import;
         cache-path := <import-cache-path> path;
-        debug(!"Got here 1");
         if not(<IsImported> path) then
           rules(
             IsImported: path
           );
           if <is-newer> (cache-path, path) then
-        debug(!"Got here 2a");
             file := <ReadFromFile> cache-path
           else
-        debug(!"Got here 2b");
             file := <parse-file; externalize <+ debug(!"Could not parse/compile: "); fail> path;
-        debug(!"Got here 3b");
             if <file-exists> path then
               // Only cache if on filesystem (e.g., ignore libstratego-lib)
               <WriteToBinaryFile> (cache-path, file)
             end
           end;
-        debug(!"Got here 3");
           {| CurrentFile:
             rules(CurrentFile := path);
             defs := file

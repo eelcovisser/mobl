@@ -112,8 +112,9 @@ screen showUpdates(account : Account) {
   <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
 
   template showTweets(coll : Collection<TwitterUpdate>) {
+    var limit : Int = 10
     <div id="tweets">
-    list(update : TwitterUpdate in coll) {
+    list(update : TwitterUpdate in coll.limit(limit)) {
       <div class="tweet" onclick={ showUpdate(update); }>
         <span class="icon"><img src=update.iconUrl width="48" height="48"/></span>
         <span class="text">
@@ -123,33 +124,17 @@ screen showUpdates(account : Account) {
         </span>
       </div>
     }
+    altButton("Load more", onclick={ limit = limit + 10; })
     </div>
   }
   template myTweets() {
-    showTweets(account.updates.order("date", false).limit(10))
+    showTweets(account.updates.order("date", false))
   }
   template myTweets2() {
-    showTweets(account.updates.order("date", true).limit(10))
+    showTweets(account.updates.order("date", true))
   }
   
   tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2)])
-
-  /*basicView(account.username, toolBar=template {
-		                              toolbarButton("circle_arrow_right", onclick={ updateStream(account); })
-		                            }) {
-    <div id="tweets">
-	  list(update : TwitterUpdate in account.updates.order("date", false).limit(10)) {
-	    <div class="tweet" onclick={ showUpdate(update); }>
-	      <span class="icon"><img src=update.iconUrl width="48" height="48"/></span>
-	      <span class="text">
-	        <strong>outputString(update.screenName) ": "</strong>
-	        outputString(update.text)
-	        <span class="meta">"Posted " outputDate(update.date)</span>
-	      </span>
-	    </div>
-	  }
-	  </div>
-  }*/
 }
 
 screen showUpdate(update : TwitterUpdate) {

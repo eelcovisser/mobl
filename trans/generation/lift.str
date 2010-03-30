@@ -107,30 +107,6 @@ rules
     where is-sync
     with rules ( Exp :+= e)
   
-  /*cps-lift-expression :
-    e@Var(_) -> []
-    with rules ( Exp :+= e )
-
-  cps-lift-expression :
-    e@Int(_) -> []
-    with rules ( Exp :+= e )
-
-  cps-lift-expression :
-    e@Callback(_) -> []
-    with rules ( Exp :+= e )
-
-  cps-lift-expression :
-    e@True() -> []
-    with rules ( Exp :+= e )
-
-  cps-lift-expression :
-    e@False() -> []
-    with rules ( Exp :+= e )
-
-  cps-lift-expression :
-    e@String(_) -> []
-    with rules ( Exp :+= e )*/
-
   cps-lift-expression :
     e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
     with v := <newname> "tmp"
@@ -208,6 +184,23 @@ rules
        ; rules ( Exp :+= Var(v) )
 
   cps-lift-expression :
+    Choice(e1, e-true1, e-false1) -> <concat> [stats1, stats2, stats3, [VarDeclInferred(v, Choice(e2, e-true2, e-false2))]]
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats1 := <cps-lift-expression> e1
+          ; e2 := <Exp>
+         |}
+       ; {| Exp
+          : stats2 := <cps-lift-expression> e-true1
+          ; e-true2 := <Exp>
+         |}
+       ; {| Exp
+          : stats3 := <cps-lift-expression> e-false1
+          ; e-false2 := <Exp>
+         |}
+       ; rules ( Exp :+= Var(v) )
+
+  cps-lift-expression :
     FieldAccess(e1, x) -> <concat> [stats1, [VarDeclInferred(v, FieldAccess(e2, x))]]
     with v := <newname> "tmp"
        ; {| Exp
@@ -244,6 +237,12 @@ strategies
     ?Tuple(e, e*)
     ; <is-sync> e
     ; <map(is-sync)> e*
+
+  is-sync =
+    ?Choice(e, e-true, e-false)
+    ; <is-sync> e
+    ; <is-sync> e-true
+    ; <is-sync> e-false
 
   is-sync =
     ?List(e*)

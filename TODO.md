@@ -3,6 +3,8 @@ Things to do
 * Respond to changes in expressions in `list`s
 * `cond` construct for conditionally showing content
 * `?:` operator
+* Fix/implement type inference in more places
+* implement `type-of` for methods, like `bla.toString` (= `Function<String>`) etc.
 * replace templates from actions
 * Check if named arguments for functions work
 * Fix typechecker, check arguments types and named arguments

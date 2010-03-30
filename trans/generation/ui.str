@@ -98,7 +98,9 @@ rules
        ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
   
    find-watchable-expressions =
-        (?BinMethodCall(_, _, _) <+ ?Call(_, _))
+        not(?Var(_))
+        ; not(?FieldAccess(_, _))
+        ; not(?Indexer(_, _))
         ; collect(?Var(_) <+ ?FieldAccess(_, _))
      <+ ![]
   
@@ -248,12 +250,13 @@ rules
   elems-to-js(|root) :
     [List(x, t, e, elems)|rest*] -> $[
       var [node] = $("<span>");
-      var [list] = [<expression-to-js> e];
       [root].append([node]);
       var [rest] = function() {
         [<elems-to-js(|root)> rest*]
       };
+      var [list];
       var [renderList] = function(isRerender) {
+        [list] = [<expression-to-js> e];
 	      [list].list(null, function(results) {
           [node].empty();
 	        results = results.reverse();
@@ -280,8 +283,9 @@ rules
           }
 	      });
       };
-      [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });
       [renderList](false);
+      [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });
+      [subscriptions]
     ]
     with node := <newname> "node"
        ; rest := <newname> "rest"
@@ -289,7 +293,8 @@ rules
        ; renderList := <newname> "renderList"
        ; list := <newname> "list"
        ; oldScope := <newname> "oldScope"
-    
+       ; subscriptions := <collect(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
+
   elems-to-js(|root) :
     [ScreenString(s)|rest*] -> $[
       [root].append([s]);

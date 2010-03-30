@@ -33,7 +33,10 @@ screen editTask(t : Task) {
       inputString(t.name, placeholder="Task name")
       inputString(t.description, placeholder="Task description")
     }
-    button("Delete", onclick={ remove(t); screen return; })
+    button("Delete", onclick={
+      remove(t);
+      screen return;
+    })
   }
 }  
 

@@ -95,6 +95,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (target, position, ast, path, project-path) -> $[Hover help: [<write-to-string> t2]]
     where t2 := <lookup-node> position
 
+
+  editor-complete =
+    debug(!"Editor complete: "); fail
+
   // Completes an identifier when the user presses control-space
   // (the completion identifier in the AST provides additional context information)
   editor-complete:
@@ -116,9 +120,6 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     where MethodCall(e, _, _) := <lookup-node> position
         ; t := <type-of> e
         ; method* := <get-all-methods; map(\ meth@c#([_, x|_]) -> ([x], <get-doc> meth) \)> t
-
-  editor-complete =
-    debug(!"Editor complete: "); fail
 
   type-name-to-proposal:
     x -> ([x], "")

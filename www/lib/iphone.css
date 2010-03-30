@@ -246,11 +246,11 @@ div#tabbar div {
     width: 50px;
 }
 
-div.tabActivefalse {
+div.inActiveTab {
     display: none;
 }
 
-div#tabbar div.tabButtonActivetrue {
+div#tabbar div.activeTabButton {
     -webkit-border-image: url(img/selectedtabbg.png) 0 5 0 5;
     -moz-border-image: url(img/selectedtabbg.png) 0 5 0 5;
 }

@@ -3,6 +3,7 @@ module rename
 imports
   include/MoBL
   declare
+  type
 
 strategies
   
@@ -184,6 +185,14 @@ strategies
 
   rename :
     VarDecl(name, t, e) -> VarDecl(<rename-ref-var> (name, t), t, <rename-all> e)
+    where "template" := <RenameScope>
+
+  rename :
+    VarDeclInferred(name, e) -> VarDeclInferred(<rename-var> (name, <type-of> e), <rename-all> e)
+    where "action" := <RenameScope>
+
+  rename :
+    VarDeclInferred(name, e) -> VarDeclInferred(<rename-ref-var> (name, <type-of> e), <rename-all> e)
     where "template" := <RenameScope>
    
   rename :

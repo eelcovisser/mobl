@@ -21,18 +21,18 @@ entity TwitterUpdate {
   text       : String
   favorite   : Bool
   date       : DateTime
-} 
+}
 
 function updateStream(account : Account) {
-   var updates : Collection<twitter::Update> = twitter::getUpdates(account.username, account.password);
+   var updates = twitter::getUpdates(account.username, account.password);
    for(twupdate : twitter::Update in updates) {
-     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {  
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
        account.updates.add(TwitterUpdate{
          updateId = twupdate.id,
          screenName = twupdate.user.screen_name,
          iconUrl = twupdate.user.profile_image_url,
          text = twupdate.text,
-         date = twupdate.created_at, 
+         date = twupdate.created_at,
          favorite = twupdate.favorited
        });
      }
@@ -41,7 +41,7 @@ function updateStream(account : Account) {
 
 screen addAccount() {
   header("Add account")
-  var account : Account = Account{}
+  var account = Account{}
   inputs {
     inputString(account.username, placeholder="Twitter username")
     inputSecret(account.password, placeholder="Twitter password")
@@ -52,7 +52,7 @@ screen addAccount() {
 screen root() {
   init {
     //resetDatabase();
-    var account : Account = Account.all().one();
+    var account = Account.all().one();
     if(account != null) {
       showUpdates(account);
     }
@@ -60,20 +60,20 @@ screen root() {
   header("Accounts")
   topRightButton("Add", onclick={ addAccount(); })
   group {
-	  list(account : Account in Account.all().order("username", true)) {
-	    itemArrow(onclick={ showUpdates(account); }) { 
-	      outputString(account.username)
-	    }
-	  }
+    list(account : Account in Account.all().order("username", true)) {
+      itemArrow(onclick={ showUpdates(account); }) {
+        outputString(account.username)
+      }
+    }
   }
 }
 
 screen newTweet(account : Account) {
-  var text : String = ""
+  var text = ""
   topRightButton("Tweet", onclick={
     async {
-	    twitter::postUpdate(account.username, account.password, text);
-	    growl::notify("Tweet posted!");
+      twitter::postUpdate(account.username, account.password, text);
+      growl::notify("Tweet posted!");
     }
     screen return;
   })
@@ -86,11 +86,11 @@ screen newTweet(account : Account) {
 }
 
 screen replyTweet(update : TwitterUpdate) {
-  var text : String = "@" + update.screenName + " "
+  var text = "@" + update.screenName + " "
   topRightButton("Reply", onclick={
     async {
-	    twitter::postReply(update.account.username, update.account.password, update.updateId, text);
-	    growl::notify("Tweet posted!");
+      twitter::postReply(update.account.username, update.account.password, update.updateId, text);
+      growl::notify("Tweet posted!");
     }
     screen return;
   })
@@ -106,13 +106,13 @@ screen showUpdates(account : Account) {
   init {
     async {
       updateStream(account);
-    }   
+    }
   }
   backButton("Accounts", onclick={ screen return; })
   <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
 
   template showTweets(coll : Collection<TwitterUpdate>) {
-    var limit : Int = 10
+    var limit = 10
     <div id="tweets">
     list(update : TwitterUpdate in coll.limit(limit)) {
       <div class="tweet" onclick={ showUpdate(update); }>
@@ -133,7 +133,7 @@ screen showUpdates(account : Account) {
   template myTweets2() {
     showTweets(account.updates.order("date", true))
   }
-  
+
   tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2)])
 }
 

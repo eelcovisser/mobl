@@ -64,16 +64,16 @@ external type Collection<T> {
   //function get() : Array<T>
   @doc "Return one item in the collection, or null if the collection is empty"
   function one() : T
-  
+
   @doc "Prefetch a reference property"
   sync function prefetch(property : String) : Collection<T>
-  
+
   @doc "Filter the collection on a property based on an operator `op` (options: '=', '<', '>', '<=', '>=' or '!=') and a value"
   sync function filter(property : String, op : String, value : Object) : Collection<T>
-  
+
   @doc "Order the collection based on a property in ascending (ascending = true) or dedescending (ascending = false) order"
   sync function order(property : String, ascending : Bool) : Collection<T>
-  
+
   sync function limit(n : Int) : Collection<T>
   sync function offset(n : Int) : Collection<T>
   sync function add(item : T) : void
@@ -92,6 +92,9 @@ external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
 external function resetDatabase() : void
 external sync function formatDate(d : DateTime) : String
+
+@doc "Internal use only"
+external sync function updateScrollers() : void
 
 template outputString(s : String) {
   <span databind=s></span>
@@ -114,11 +117,11 @@ template header(title : String) {
 
 screen promptString(question : String) : String {
   var answer : String = ""
-  header(question) 
+  header(question)
   inputs {
     inputString(answer)
   }
-  button("Ok", onclick={ screen return answer; })  
+  button("Ok", onclick={ screen return answer; })
 }
 
 template inputString(s : String, placeholder : String = null, onchange : Callback = null) {
@@ -147,7 +150,7 @@ template inputInt(i : Int, placeholder : String = null, onchange : Callback = nu
 
 template inputs() {
   <ul>
-    elements() 
+    elements()
   </ul>
 }
 
@@ -172,7 +175,7 @@ template group() {
     elements()
   </ul>
 }
- 
+
 template item(onclick : Callback = null) {
   <li onclick=onclick>elements()</li>
 }
@@ -213,21 +216,21 @@ template toolbarButton(type : String, onclick : Callback = null) {
 @doc "A tabset, takes a list of tuples as argument, e.g. [(\"Tab 1\", \"icon url\", tab1), (\"Tab 2\", \"icon uri\", tab2)] where tab1 and tab2 are templates with no arguments"
 template tabset(tabs : List<Tuple3<String, String, Template>>) {
   var activeTabName : String = tabs.get(0)._1
-  
+
   header(activeTabName)
-  <div id="scrollwrapper">
-    <div id="content">
-      list(tabTuple : Tuple3<String, String, Template> in tabs) {
-		    <div class=activeTabName == tabTuple._1 ? "activeTab" : "inActiveTab">
-		      tabTuple._3()
-		    </div>
-      }
+  list(tabTuple : Tuple3<String, String, Template> in tabs) {
+    <div class=activeTabName == tabTuple._1 ? "activeTab" : "inActiveTab">
+      <div id="scrollwrapper">
+        <div id="content">
+          tabTuple._3()
+        </div>
+      </div>
     </div>
-  </div>
+  }
 
   <div id="tabbar">
     list(tabTuple : Tuple3<String, String, Template> in tabs) {
-      <div onclick={ activeTabName = tabTuple._1; } class=activeTabName == tabTuple._1 ? "activeTabButton" : "inActiveTabButton">
+      <div onclick={ activeTabName = tabTuple._1; updateScrollers(); } class=activeTabName == tabTuple._1 ? "activeTabButton" : "inActiveTabButton">
         <img src=tabTuple._2 width="25" height="25"/><br/>
         outputString(tabTuple._1)
       </div>
@@ -258,6 +261,9 @@ mobl.remove = function(e, _, callback) {
 };
 mobl.resetDatabase = function(_, callback) {
     persistence.reset(null, callback);
+};
+mobl.updateScrollers = function() {
+    mobl.delayedUpdateScrollers();
 };
 
 mobl.formatDate = function(timestamp) {

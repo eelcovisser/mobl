@@ -3,23 +3,28 @@ mobl.screenStack = [];
 mobl.rootScope = new mobl.LinkedMap();
 
 function updateScrollers () {
-    var scrollwrappers = $("#scrollwrapper:visible");
+    console.log("Updating scrollers");
+    var scrollwrappers = $("div#scrollwrapper");
     if (scrollwrappers.length > 0) {
         var height = window.innerHeight;
-        height -= $("#header:visible").height();
-        height -= $("#footer:visible").height();
-        height -= $("#tabbar:visible").height();
+        height -= $("#header").height();
+        height -= $("#footer").height();
+        height -= $("#tabbar").height();
         scrollwrappers.height(height);
     }
-    var scrollers = $("#scrollwrapper div#content:visible");
+    var scrollers = $("div#scrollwrapper div#content");
+    console.log(scrollers.length);
     for ( var i = 0; i < scrollers.length; i++) {
         var scroller = scrollers.eq(i).data("scroller");
-        if(scroller) scroller.refresh();
+        if(scroller) {
+            scroller.refresh();
+        } else {
+            console.log("what's up here?");
+        }
     }
 }
 
 mobl.delayedUpdateScrollers = function() {
-    console.log("Updating scrollers");
     setTimeout(updateScrollers, 200);
 }
 
@@ -89,7 +94,7 @@ mobl.call = function (screenName, args, callback) {
             }, 350);
             //$("body > #" + previousScreen.div).removeClass('righthidden');
             $("body > #" + previousScreen.div).removeClass('hidden');*/
-            
+
         }
         if (callback) {
             callback.apply(null, arguments);
@@ -106,7 +111,7 @@ mobl.call = function (screenName, args, callback) {
         //node.addClass('screen');
         node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
         var body = $("body");
-        
+
         if (mobl.screenStack.length > 1) {
             var previousScreen = mobl.screenStack[mobl.screenStack.length - 2];
             //node.addClass('righthidden');
@@ -127,13 +132,17 @@ mobl.call = function (screenName, args, callback) {
         }
 
         $(function () {
-            var scrollers = $("div#" + screenFrame.div + " div#scrollwrapper div#content"), i = 0;
+        //setTimeout(function() {
+            var scrollers = $("div#scrollwrapper div#content"), i = 0;
             if (scrollers.length > 0) {
                 for (i = 0; i < scrollers.length; i++) {
-                    scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
+                    if(!scrollers.eq(i).data("scroller")) {
+                        scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
+                    }
                 }
                 updateScrollers();
             }
         });
+        //}, 200);
     }, callbackFn ]));
 }

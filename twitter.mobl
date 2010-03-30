@@ -5,7 +5,7 @@ import mobl
 external type Update {
   @doc "The internal twitter ID"
   id                    : Int
-  
+
   created_at            : DateTime
   text                  : String
   source                : String
@@ -34,24 +34,24 @@ twitter.getUpdates = function(username, password, optionalArgs) {
     addEventListener: function() {},
     list: function(_, callback) {
       $.ajax({
-			   url: mobl.proxyUrl('http://api.twitter.com/1/statuses/home_timeline.json', username, password),
-			   datatype: "json",
-			   error: function(_, message, error) {
-			     console.log(message);
-			     console.log(error);
+         url: mobl.proxyUrl('http://api.twitter.com/1/statuses/home_timeline.json', username, password),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
            callback([]);
-			   },
-			   success: function(data) {
-		        var results = [];
-		        var update;
-		        for(var i = 0; i < data.length; i++) {
-		          update = data[i];
-		          update.created_at = Date.parse(update.created_at);
-		          results.push(update);
-		        }
-		        callback(results);
-			   }
-			});
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
     }
   };
 };

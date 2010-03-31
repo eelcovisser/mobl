@@ -8,9 +8,6 @@ imports
   type
 
 strategies
-  strategies // expression lifting
-
-  //cps-lift-expressions = debug(!"lift: "); fail
 
   cps-lift-expressions =
        cps-lift-exprs
@@ -106,6 +103,15 @@ rules
     e -> []
     where is-sync
     with rules ( Exp :+= e)
+
+  cps-lift-expression :
+    NamedExp(x, e) -> stats
+    with v := <newname> "tmp"
+       ; {| Exp
+          : stats := <cps-lift-expression> e
+          ; e2 := <Exp>
+          |}
+       ; rules ( Exp := NamedExp(x, e2) )
 
   cps-lift-expression :
     e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
@@ -224,6 +230,10 @@ strategies
     ?BinMethodCall(e1, _, e2)
     ; <is-sync> e1
     ; <is-sync> e2
+
+  is-sync =
+    ?NamedExp(_, e)
+    ; <is-sync> e
 
   is-sync =
     ?FieldAccess(e, x)

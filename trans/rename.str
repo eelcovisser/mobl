@@ -126,7 +126,7 @@ strategies
     FArg(x, t) -> FArg(<rename-var> (x, t), t)
 
   rename-farg :
-    FArgOptional(x, t, e) -> FArg(<rename-var> (x, t), t)
+    FArgOptional(x, t, e) -> FArgOptional(<rename-var> (x, t), t, <rename-all> e)
 
   rename :
     Screen(manno*, name, arg*, rt, body) -> Screen(manno*, name, arg2*, rt, body2)

@@ -300,7 +300,7 @@ strategies
     arg* -> <concat> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
     with
       {| Arg
-       : normal-args := <map(not(?NamedExp(_,_)); expression-to-js <+ rules ( Arg :+= <id>) )> arg*
+       : normal-args := <filter(not(?NamedExp(_,_)); expression-to-js <+ rules ( Arg :+= <id>); fail )> arg*
        ; named := <bagof-Arg>
        |}
        ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<expression-to-js> e]] \)> named

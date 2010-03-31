@@ -27,6 +27,26 @@ rules
     where not(type-of)
 
   constraint-error :
+    Call(qid, e*) -> (qid, $[Wrong number of arguments, expected [length2] but got [length1].
+                             Expected arguments are: [<separate-by(!", "); concat-strings> regular-fargs]])
+    where def := <lookup-function> qid
+        ; (ExternalFunction(_, _, farg*, _) := def <+ ExternalSyncFunction(_, _, farg*, rt) := def)
+        ; regular-args := <filter(not(?NamedExp(_, _)))> e*
+        ; regular-fargs := <filter(?FArg(<id>, _))> farg*
+        ; length1 := <length> regular-args
+        ; length2 := <length> regular-fargs
+        ; not(length1 := length2)
+
+  constraint-error :
+    Call(qid, e*) -> (t, $[Invalid named arguments: [<separate-by(!", "); concat-strings> invalid-args].
+                           Valid named arguments: [<separate-by(!", "); concat-strings> named-fargs]])
+    where def := <lookup-function> qid
+        ; (ExternalFunction(_, _, farg*, _) := def <+ ExternalSyncFunction(_, _, farg*, rt) := def)
+        ; named-fargs := <filter(?FArgOptional(<id>, _, _)); strip-annos> farg*
+        ; invalid-args := <filter(\ NamedExp(x, _) -> x where not(<fetch(?x)> named-fargs) \)> e*
+        ; [t|_] := invalid-args
+
+  constraint-error :
     t@Choice(_, _, _) -> (t, $[Could not determine type of: [<write-to-string> t]])
     where not(type-of)
 
@@ -38,6 +58,24 @@ rules
     TemplateCall(e, e*, elem*) -> (e, $[Expression does not return a template type])
     where t := <type-of> e
     where not(<is-template-type> t)
+
+  constraint-error :
+    TemplateCall(e@Var(qid@QId(_, _)), e*, _) -> (e, $[Wrong number of arguments, expected [length2] but got [length1].
+                                                       Expected arguments are: [<separate-by(!", "); concat-strings> regular-fargs]])
+    where ExternalTemplate(_, _, farg*) := <lookup-template> qid
+        ; regular-args := <filter(not(?NamedExp(_, _)))> e*
+        ; regular-fargs := <filter(?FArg(<id>, _))> farg*
+        ; length1 := <length> regular-args
+        ; length2 := <length> regular-fargs
+        ; not(length1 := length2)
+
+  constraint-error :
+    TemplateCall(e@Var(qid@QId(_, _)), e*, _) -> (t, $[Invalid named arguments: [<separate-by(!", "); concat-strings> invalid-args].
+                                                       Valid named arguments: [<separate-by(!", "); concat-strings> named-fargs]])
+    where ExternalTemplate(_, _, farg*) := <lookup-template> qid
+        ; named-fargs := <filter(?FArgOptional(<id>, _, _)); strip-annos> farg*
+        ; invalid-args := <filter(\ NamedExp(x, _) -> x where not(<fetch(?x)> named-fargs) \)> e*
+        ; [t|_] := invalid-args
 
   constraint-error :
     t@FieldAccess(e, x) -> (t, $[Field [x] not defined])

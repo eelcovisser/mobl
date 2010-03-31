@@ -40,6 +40,9 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; (Module(mod-name, _) := ast2 <+ Application(mod-name, _, _) := ast2)
       ; rules ( CompilingModule := mod-name )
       ; errors   := <collect-all(constraint-error, conc)> ast2
+      ; if not([] := errors) then
+          rules ( HasErrors := True() )
+        end
       ; warnings := <collect-all(constraint-warning, conc)> ast2
       ; notes    := <collect-all(constraint-note, conc)> ast2
 
@@ -60,6 +63,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   generate-artifacts:
     (selected, position, ast, path, project-path) -> None() //(filename-html, result-html)
+    where not(HasErrors)
     with
       // Ensure all dynamic rules are properly scoped
       try(dr-scope-all-end)
@@ -71,6 +75,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; (Module(mod-name, _) := ast <+ Application(mod-name, _, _) := ast)
       ; rules ( CompilingModule := mod-name )
       ; <compile> ast
+
+  generate-artifacts:
+    _ -> None() //(filename-html, result-html)
+    where HasErrors
 
   editor-hover:
     (t@SimpleType(_), position, ast, path, project-path) -> <get-doc> <lookup-type> t2

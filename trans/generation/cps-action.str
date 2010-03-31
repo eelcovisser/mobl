@@ -9,10 +9,12 @@ imports
   type
   rename
   lookup
+  desugar
+  util
 
   //cps-statements = debug(!"statements: "); fail
 strategies
-  
+
   cps-statements :
     [Return(e)|stat*] -> <cps-expression(|[$[if(callback) callback(result);
                                              return;
@@ -78,16 +80,16 @@ strategies
     where <is-ref> qid
 
   cps-statements :
-    [Async(stats)|stat*] -> 
+    [Async(stats)|stat*] ->
       $[[<cps-statements> stats]
         [<cps-statements> stat*]
 ]
 
   cps-statements :
     [ExpStat(e)|stat*] -> <cps-expression(|stat*)> e
-  
+
   cps-statements :
-    [If(e, true-stat*, false-stat*)|stat*] -> 
+    [If(e, true-stat*, false-stat*)|stat*] ->
       <cps-expression(|[
         $[if(result) {
             [<cps-statements> [true-stat*, stat*]]
@@ -97,12 +99,13 @@ strategies
 ]])> e
 
   cps-statements :
-    [For(x, _, e, stats)|stat*] -> 
+    [For(lvalue, _, e, stats)|stat*] ->
       <cps-expression(|[
         $[[<expression-to-js> e].list(null, function([coll]) {
             [coll] = [coll].reverse();
             function [processOne]() {
-              var [x] = [coll].pop();
+              [vardecls]
+              [assigns]
               [<concat; cps-statements> [stats, [$[
                 if([coll].length > 0) [processOne](); else [rest]();
               ]]]]
@@ -116,17 +119,19 @@ strategies
     with coll := <newname> "coll"
        ; processOne := <newname> "processOne"
        ; rest := <newname> "rest"
+       ; vardecls := <map(!$[var [<id>]; ]); concat-strings> <lvalue-vars> lvalue
+       ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, MethodCall(Var(coll), "pop", []))
 
- 
+
   cps-statements :
     [s|stat*] -> <concat-strings> [s, <cps-statements> stat*]
     where <is-string> s
-  
+
   cps-statements :
     [] -> ""
 
 rules
-  
+
   cps-expression(|stat*) =
     ?e
     ; if is-sync then
@@ -135,9 +140,9 @@ rules
       else
         cps-exp(|stat*)
       end
-  
+
   cps-exp(|stat*) :
-    BinMethodCall(e1, op, e2) -> 
+    BinMethodCall(e1, op, e2) ->
       <cps-expression(|[$[var [result] = result;
 ], <cps-expression(|[
         $[op('[op]', [result], result, function(result) {
@@ -182,4 +187,3 @@ $[function(result) {
 $[function(result) {
     [<cps-statements> stat*]
   }]]]; separate-by(!", "); concat-strings> e*
-  

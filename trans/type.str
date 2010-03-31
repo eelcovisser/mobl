@@ -4,20 +4,20 @@ imports
   include/MoBL
   rename
   lookup
-  
+
 strategies
 
   type-of = eq-type-of <+ ?Var(<id>); TypeOf
-  
+
   eq-type-of :
     Int(_) -> SimpleType(QId("mobl", "Int"))
-    
+
   eq-type-of :
     String(_) -> SimpleType(QId("mobl", "String"))
 
   eq-type-of :
     True() -> SimpleType(QId("mobl", "Bool"))
-  
+
   eq-type-of :
     False() -> SimpleType(QId("mobl", "Bool"))
 
@@ -36,6 +36,13 @@ strategies
         ; t* := <map(type-of)> [fst|rest*]
 
   eq-type-of :
+    List([e|_]) -> GenericType(QId("mobl", "List"), [t])
+    where t := <type-of> e
+
+  eq-type-of :
+    CollectionCons(qid, t*, e*) -> GenericType(qid, t*)
+
+  eq-type-of :
     Call(qid, e*) -> rt
     where c#([_, _, _, rt]) := <lookup-function> qid
 
@@ -48,7 +55,7 @@ strategies
 
   eq-type-of :
     Var(qid) -> GenericType("Type", [SimpleType(qid)])
-    where <lookup-type-aux> SimpleType(qid)
+    where <lookup-type> SimpleType(qid)
 
   eq-type-of :
     Var(qid) -> <fargs-to-template-type> farg*
@@ -64,18 +71,18 @@ strategies
     where m := <lookup-method> (<type-of> e, x)
         ; (   ExternalMethod(_, _, _, rt) := m
            <+ ExternalSyncMethod(_, _, _, rt) := m)
-  
+
   eq-type-of :
     FieldAccess(e, x) -> t
     where Property(_, _, t, _) := <lookup-property> (<type-of> e, x)
 
   eq-type-of :
     BinMethodCall(e1, op, e2) -> <type-of> e1 // @TODO: Fix this
-  
+
 strategies
-  
+
   type-compatible =
     ?(t, t)
-  
+
   type-compatible =
     ?(t1, t2)

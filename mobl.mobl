@@ -12,6 +12,7 @@ external type Int : Object { }
 external type Bool : Object { }
 external type List<T> {
   sync function get(n : Int) : T
+  sync function add(item : T) : void
 }
 external type Callback {}
 
@@ -219,21 +220,21 @@ template tabset(tabs : List<Tuple3<String, String, Template>>) {
   var activeTabName : String = tabs.get(0)._1
 
   header(activeTabName, onclick={ scrollTop(); })
-  list(tabTuple : Tuple3<String, String, Template> in tabs) {
-    <div class=activeTabName == tabTuple._1 ? "activeTab" : "inActiveTab">
+  list((tabName, tabIcon, tabTemplate) in tabs) {
+    <div class=activeTabName == tabName ? "activeTab" : "inActiveTab">
       <div id="scrollwrapper">
         <div id="content">
-          tabTuple._3()
+          tabTemplate()
         </div>
       </div>
     </div>
   }
 
   <div id="tabbar">
-    list(tabTuple : Tuple3<String, String, Template> in tabs) {
-      <div onclick={ activeTabName = tabTuple._1; updateScrollers(); } class=activeTabName == tabTuple._1 ? "activeTabButton" : "inActiveTabButton">
-        <img src=tabTuple._2 width="25" height="25"/><br/>
-        outputString(tabTuple._1)
+    list((tabName, tabIcon, tabTemplate) in tabs) {
+      <div onclick={ activeTabName = tabName; updateScrollers(); } class=activeTabName == tabName ? "activeTabButton" : "inActiveTabButton">
+        <img src=tabIcon width="25" height="25"/><br/>
+        outputString(tabName)
       </div>
     }
   </div>

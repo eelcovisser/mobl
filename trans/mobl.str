@@ -20,6 +20,7 @@ imports
   resolve
   analyze
   type
+  desugar
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
 
@@ -80,6 +81,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     where t2 := <lookup-node> (position, ast)
 
   editor-hover:
+    (e@Var(x), position, ast, path, project-path) -> $[Variable '[x]' has type [<type-of; write-to-string> e2]]
+    where e2 := <lookup-node> (position, ast)
+
+  editor-hover:
     (c@Call(_, _), position, ast, path, project-path) -> <get-doc> <lookup-function> qid
     where Call(qid, _) := <lookup-node> (position, ast)
 
@@ -123,6 +128,11 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   type-name-to-proposal:
     x -> ([x], "")
+
+  editor-desugar :
+    (selected, position, ast, path, project-path) -> (filename, <normalize-all; desugar-all> selected)
+    with
+      filename := <guarantee-extension(|"aterm")> "desugar"
 
 strategies
 

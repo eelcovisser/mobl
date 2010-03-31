@@ -47,6 +47,9 @@ strategies
 
 rules
 
+  add-namespace-all =
+    alltd(add-namespace)
+
   add-namespace :
     SimpleType(qid) -> SimpleType(qid2)
     where not(lookup-type-aux)

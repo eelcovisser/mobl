@@ -4,13 +4,14 @@ module MoBL-Builders
 imports MoBL-Builders.generated
 
 builders
-                                                                      
-  // This file can be used for custom analysis and builder rules.     
-  // See the imported file for a brief introduction and examples.     
+
+  // This file can be used for custom analysis and builder rules.
+  // See the imported file for a brief introduction and examples.
 
 builders
-                                                                                   
-  provider : include/mobl.ctree                                                    
-  observer : editor-analyze                                                        
+
+  provider : include/mobl.ctree
+  observer : editor-analyze
   on save  : generate-artifacts
-  builder  : "Show ATerm"  = generate-aterm (openeditor) (realtime) (meta)  
+  builder  : "Show ATerm"  = generate-aterm (openeditor) (realtime) (meta)
+  builder  : "Desugar"     = editor-desugar (openeditor) (realtime) (meta)

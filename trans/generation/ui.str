@@ -9,6 +9,7 @@ imports
   desugar
   type
   rename
+  util
   generation/emit
   generation/action
   generation/lift
@@ -21,23 +22,23 @@ rules
       [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<span>");
-        [body] 
+        [body]
       };
       ]
     with {| InTemplate
-		      : rules ( InTemplate := 1 )
-		      ; root := <newname> "root"
+          : rules ( InTemplate := 1 )
+          ; root := <newname> "root"
           ; fargs :=  <filter(farg-to-js); <concat> [<id>, ["namedArgs", "elements", "callback"]]; separate-by(!", "); concat-strings> farg*
-		      ; body := <elems-to-js-callback(|root)> elems
-		      ; init-stats := <fargs-to-ref-init-js> farg*
-		      |}
+          ; body := <elems-to-js-callback(|root)> elems
+          ; init-stats := <fargs-to-ref-init-js> farg*
+          |}
 
   definition-to-js :
     Screen(_, qid, farg*, rt, elems) -> <emit> $[
       [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root] = $("<div>");
-        [body] 
+        [body]
       };
       ]
     with {| InTemplate
@@ -56,7 +57,7 @@ rules
       var [<qid-to-js> qid] = function([fargs]) {
         [init-stats]
         var [root2] = $("<span>");
-        [body] 
+        [body]
       };
       [<elems-to-js(|root)> rest*]
       ]
@@ -66,7 +67,7 @@ rules
        ; init-stats := <fargs-to-ref-init-js> farg*
 
   elems-to-js(|root) :
-    [TemplateCall(e, arg*, elems)|rest*] -> 
+    [TemplateCall(e, arg*, elems)|rest*] ->
     $[var [nodes] = $("<span>");
       [root].append([nodes]);
       [subscriptions]
@@ -85,7 +86,7 @@ rules
                         }]
        ; watch-expr* := <map(find-watchable-expressions); concat> arg*
        ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> watch-expr*
-       ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun, 
+       ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun,
            $[function(node) {
                var oldNodes = [nodes];
                [nodes] = node.contents();
@@ -96,14 +97,14 @@ rules
              }]
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
-  
+
    find-watchable-expressions =
         not(?Var(_))
         ; not(?FieldAccess(_, _))
         ; not(?Indexer(_, _))
         ; collect(?Var(_) <+ ?FieldAccess(_, _))
      <+ ![]
-  
+
   exp-to-watcher-js(|renderTemplate) :
     e -> $[[<ref-expression-to-js> e].addEventListener('set', function() {
              [renderTemplate](true);
@@ -136,13 +137,13 @@ rules
   elems-to-js(|root) :
     [s|rest*] -> $[[s][<elems-to-js(|root)> rest*]]
     where <is-string> s
-    
+
   elems-to-js(|root) :
     [Init(init-stats)|rest*] -> <concat; cps-statements> [<cps-lift-expressions> init-stats, [<elems-to-js(|root)> rest*]]
-  
+
   elems-to-js(|root) :
     [] -> ""
-  
+
   tag-arg-to-html :
     HtmlArg(name, String(s)) -> $[[name]=[s]]
 
@@ -150,15 +151,15 @@ rules
     HtmlArg(name, e) -> $[
       var [r] = [es];
       if([r].get() !== null) {
-	      [node].attr('[name]', [r].get());
-	      [r].addEventListener('set', function(_, ref, val) {
-	        if(ref === [r]) { 
-	          [node].attr('[name]', val);
-	        } else {
-	          console.log("Garbage!");
-	        }
-	      });
-	      [subscriptions]
+        [node].attr('[name]', [r].get());
+        [r].addEventListener('set', function(_, ref, val) {
+          if(ref === [r]) {
+            [node].attr('[name]', val);
+          } else {
+            console.log("Garbage!");
+          }
+        });
+        [subscriptions]
       }
       [r].rebind();
     ]
@@ -205,7 +206,7 @@ rules
       var [r] = [es];
       [node].[method]([r].get());
       [r].addEventListener('set', function(_, ref, val) {
-        if(ref === [r]) { 
+        if(ref === [r]) {
           [node].[method]([typeconverter](val));
         } else {
           console.log("Garbage!");
@@ -246,9 +247,9 @@ rules
         ; not([] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*)
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
-    
+
   elems-to-js(|root) :
-    [List(x, t, e, elems)|rest*] -> $[
+    [List(lvalue, t, e, elems)|rest*] -> $[
       var [node] = $("<span>");
       [root].append([node]);
       var [rest] = function() {
@@ -257,31 +258,32 @@ rules
       var [list];
       var [renderList] = function(isRerender) {
         [list] = [<expression-to-js> e];
-	      [list].list(null, function(results) {
+        [list].list(null, function(results) {
           [node].empty();
-	        results = results.reverse();
-	        function renderOne() {
-	            var [x] = results.pop();
-	            [<concat; elems-to-js(|node)> [elems, [$[
-	              if(results.length > 0) {
-	                renderOne();
-	              } else if(!isRerender) {
-	                mobl.delayedUpdateScrollers();
-	                [rest]();
-	              } else {
+          results = results.reverse();
+          function renderOne() {
+              [vardecls]
+              [assigns]
+              [<concat; elems-to-js(|node)> [elems, [$[
+                if(results.length > 0) {
+                  renderOne();
+                } else if(!isRerender) {
                   mobl.delayedUpdateScrollers();
-	              }
-	            ]]]]          
-	        }
-	        if(results.length > 0) {
-	          renderOne();
-	        } else if(!isRerender) {
+                  [rest]();
+                } else {
+                  mobl.delayedUpdateScrollers();
+                }
+              ]]]]
+          }
+          if(results.length > 0) {
+            renderOne();
+          } else if(!isRerender) {
             mobl.delayedUpdateScrollers();
-	          [rest]();
-	        } else {
+            [rest]();
+          } else {
             mobl.delayedUpdateScrollers();
           }
-	      });
+        });
       };
       [renderList](false);
       [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });
@@ -293,6 +295,8 @@ rules
        ; renderList := <newname> "renderList"
        ; list := <newname> "list"
        ; oldScope := <newname> "oldScope"
+       ; vardecls := <map(!$[var [<id>]; ]); concat-strings> <lvalue-vars> lvalue
+       ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, MethodCall(Var("results"), "pop", []))
        ; subscriptions := <collect(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
 
   elems-to-js(|root) :
@@ -321,11 +325,11 @@ rules
     where <is-sync> e
 
 rules // utils
-	
+
   qid-to-html :
     s -> s
     where is-string
 
   qid-to-html :
     QId(qid, x) -> $[[qids]__[x]]
-    with qids := <qid-to-html> qid	
+    with qids := <qid-to-html> qid

@@ -17,11 +17,12 @@ imports
   rename
   declare
   lookup
+  util
 
 strategies
 
   module-to-js =
-  	(?Module(qid, def*) <+ ?Application(qid, _, def*))
+    (?Module(qid, def*) <+ ?Application(qid, _, def*))
     ; entities := <filter(?Entity(_, _, _, _))> def*
     ; rest := <filter(not(?Entity(_, _, _, _) <+ ?Import(_)))> def*
     ; to-import := <collect(?QId(<id>, _); not(?qid))> def*
@@ -31,19 +32,19 @@ strategies
     ; <emit> $[[<qid-to-js> qid].isLoaded = true;]
 
 strategies
-  
+
   import-to-js :
     qid -> <emit> $[mobl.load('[<qid-to-path> qid].js');
 ]
-  
+
   definition-to-js :
     Load(url) -> <emit> $[mobl.load('[<un-double-quote> url]');
 ]
-  
+
   definition-to-js =
     function-to-js
     ; emit
-	
+
   function-to-js :
     SyncFunction(_, qid, farg*, rt, stat*) -> $[
     [varname] = function([args]) {
@@ -56,27 +57,27 @@ strategies
        ; init-stats := <fargs-to-init-js> farg*
        ; stats := <statements-to-js> stat*
        ; if <is-string> qid then
-			     varname := $[var [qid]]
-			   else
-			     varname := <qid-to-js> qid
-			   end
+           varname := $[var [qid]]
+         else
+           varname := <qid-to-js> qid
+         end
 
   fargs-to-js =
     filter(farg-to-js)
     ; <concat> [<id>, ["namedArgs"]]
     ; separate-by(!", ")
     ; concat-strings
-      
+
   farg-to-js :
     FArg(x, _) -> x
 
   fargs-to-init-js =
     map(farg-to-init-js)
     ; concat-strings
-  
+
   farg-to-init-js :
     FArg(_, _) -> ""
-  
+
   // TODO: This assumens that the expressions are all synchronous, needs to be checked!
   farg-to-init-js :
     FArgOptional(x, t, e) -> $[var [x] = '[x]' in namedArgs ? namedArgs.[x] : [<expression-to-js> e];
@@ -85,10 +86,10 @@ strategies
   fargs-to-ref-init-js =
     map(farg-to-ref-init-js)
     ; concat-strings
-  
+
   farg-to-ref-init-js :
     FArg(_, _) -> ""
-  
+
   farg-to-ref-init-js :
     FArgOptional(x, t, e) -> $[var [x] = '[x]' in namedArgs ? namedArgs.[x] : [<ref-expression-to-js> e];
 ]
@@ -109,15 +110,15 @@ strategies
          else
            varname := <qid-to-js> qid
          end
-			  
+
 rules // Statements
 
   statements-to-js =
     map(statement-to-js); separate-by(!"\n"); concat-strings
-  
+
   statement-to-js =
     stat-to-js <+ debug(!"Could not translate statement: "); fail
-  
+
   stat-to-js :
     ExpStat(e) -> $[[es];]
     with es := <expression-to-js> e
@@ -138,7 +139,7 @@ rules // Statements
     VarDeclInferred(x, e) -> $[var [x] = [<expression-to-js> e];]
 
   stat-to-js :
-    If(e, true-stat*, false-stat*) -> 
+    If(e, true-stat*, false-stat*) ->
       $[if([<expression-to-js> e]) {
           [<statements-to-js> true-stat*]
         } else {
@@ -147,18 +148,22 @@ rules // Statements
 
   // Never used, currently
   stat-to-js :
-    For(x, _, e, stat*) -> 
+    For(lvalue, _, e, stat*) ->
       $[var [coll] = [<expression-to-js> e];
         var [length] = [coll].length;
         for(var [i] = 0; [i] < [length]; [i]++) {
           (function() {
-            var [x] = [coll]$[$[i]$]$;
+            [vardecls]
+            [assigns]
             [<statements-to-js> stat*]
           }());
         }]
     with coll := <newname> "coll"
        ; length := <newname> "length"
        ; i := <newname> "i"
+       ; vardecls := <map(!$[var [<id>]; ]); concat-strings> <lvalue-vars> lvalue
+       ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, MethodCall(Var(coll), "get", [Var("i")]))
+
 
   stat-to-js :
     Assignment(qid, e) -> $[[<qid-to-js> qid].set([<expression-to-js> e]);]
@@ -167,14 +172,14 @@ rules // Statements
   stat-to-js :
     Assignment(qid, e) -> $[[<qid-to-js> qid] = [<expression-to-js> e];]
     where not(<is-ref> qid)
-    
+
 rules // Expressions
   expression-to-js =
     exp-to-js <+ debug(!"Could not translate: "); fail
-    
+
   ref-expression-to-js =
     ref-exp-to-js <+ !$[ref([<expression-to-js>])]
-  
+
   exp-to-js :
     String(s) -> s
 
@@ -186,7 +191,7 @@ rules // Expressions
 
   exp-to-js :
     False() -> $[false]
-  
+
   exp-to-js :
     Null() -> $[null]
 
@@ -196,7 +201,7 @@ rules // Expressions
   exp-to-js :
     Tuple(e, e*) -> <concat-strings> ["new mobl.Tuple(", <expression-to-js> e, ", ", <map(expression-to-js); separate-by(!", "); concat-strings> e*, ")"]
     where not([] := e*)
-  
+
   exp-to-js :
     List(e*) -> <concat-strings> ["new mobl.List(", <map(expression-to-js); separate-by(!", "); concat-strings> e*, ")"]
 
@@ -215,7 +220,7 @@ rules // Expressions
   ref-exp-to-js :
     Var(qid) -> qid
     where <is-ref> qid
-          
+
   exp-to-js :
     Var(qid) -> $[[<qid-to-js> qid].get()]
     where <is-ref> qid
@@ -228,7 +233,7 @@ rules // Expressions
     MethodCall(e, x, e*) -> $[[es].[x]([args])]
     with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
        ; es := <expression-to-js> e
-    
+
   ref-exp-to-js :
     Indexer(e, idxe) -> $[ref([es], [idxes])]
     with es := <ref-expression-to-js> e
@@ -238,15 +243,15 @@ rules // Expressions
     Indexer(e, idxe) -> ${{es}[{idxes}]}
     with es := <expression-to-js> e
        ; idxes := <expression-to-js> idxe
-         
+
   exp-to-js :
     CollectionCons(_, _, e*) -> $[new persistence.LocalQueryCollection([args])]
     with args := <map(expression-to-js); separate-by(!", "); concat-strings> e*
-  
+
   exp-to-js :
     EntityCons(SimpleType(qid), propval*) -> $[new [<qid-to-js> qid]({[propvals]})]
     with propvals := <map(\ PropVal(x, e) -> $['[x]': [<expression-to-js> e]] \); separate-by(!", "); concat-strings> propval*
-      
+
   ref-exp-to-js :
     FieldAccess(e, x) -> $[ref([es], '[x]')]
     with es := <ref-expression-to-js> e
@@ -262,7 +267,7 @@ rules // Expressions
   exp-to-js :
     Brackets(e) -> $[([es])]
     with es := <expression-to-js> e
-    
+
   exp-to-js :
     BinMethodCall(e1, op, e2) -> $[[e1s] [op] [e2s]]
     with e1s := <expression-to-js> e1
@@ -281,7 +286,7 @@ rules // Expressions
   exp-to-js :
     AnonymousTemplate(elems) -> $[function(namedArgs, elements, callback) {
                                     var [root] = $("<span>");
-                                    [body] 
+                                    [body]
                                   }]
     with {| InTemplate
           : rules ( InTemplate := 1 )
@@ -290,7 +295,7 @@ rules // Expressions
           |}
 
 strategies
-  
+
   arguments-to-js :
     arg* -> <concat> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
     with
@@ -298,7 +303,7 @@ strategies
        : normal-args := <map(not(?NamedExp(_,_)); expression-to-js <+ rules ( Arg :+= <id>) )> arg*
        ; named := <bagof-Arg>
        |}
-       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<expression-to-js> e]] \)> named  
+       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<expression-to-js> e]] \)> named
 
   ref-arguments-to-js :
     arg* -> <concat> [normal-args, [$[{[<separate-by(!", "); concat-strings> named-args]}]]]
@@ -307,13 +312,13 @@ strategies
        : normal-args := <filter(not(?NamedExp(_,_)); ref-expression-to-js <+ rules ( Arg :+= <id>); fail )> arg*
        ; named := <bagof-Arg>
        |}
-       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<ref-expression-to-js> e]] \)> named 
+       ; named-args := <map(\ NamedExp(x, e) -> $['[x]': [<ref-expression-to-js> e]] \)> named
 
 rules // util
   qid-to-js :
     s -> s
     where is-string
-  
+
   qid-to-js :
     QId(qid, x) -> $[[qids].[x]]
     with qids := <qid-to-js> qid

@@ -46,8 +46,9 @@ function log(s) {
             this['_' + (i+1)] = arguments[i];
         }
         this.subscribers = {}; // Observable
+        this.length = arguments.length;
     }
-    
+
     Tuple.prototype = new persistence.Observable();
 
     function List() {
@@ -55,15 +56,21 @@ function log(s) {
         for(var i = 0; i < arguments.length; i++) {
             this.values.push(arguments[i]);
         }
+        this.length = this.values.length;
         this.subscribers = {}; // Observable
     }
-    
+
     List.prototype = new persistence.Observable();
-    
+
     List.prototype.get = function(idx) {
         return this.values[idx];
     };
-    
+
+    List.prototype.add = function(item) {
+        this.values.push(item);
+        this.length = this.values.length;
+    };
+
     List.prototype.list = function(tx, callback) {
         var valueCopy = [];
         for(var i = 0; i < this.values.length; i++) {
@@ -71,7 +78,7 @@ function log(s) {
         }
         callback(valueCopy);
     };
-    
+
     function LinkedMap (parent, values) {
         this.values = values || {};
         this.parent = parent;
@@ -102,14 +109,14 @@ function log(s) {
     LinkedMap.prototype.setLocal = function (key, value) {
         this.values[key] = value;
     };
-    
+
     LinkedMap.prototype.getRoot = function () {
         return !this.parent ? this : this.parent.getRoot();
     };
-        
+
     /**
      * Represents a reference to a property
-     * 
+     *
      * @param ref
      *            parent ref to reference
      * @param prop
@@ -126,9 +133,9 @@ function log(s) {
         }
         this.subscribers = {}; // Observable
     }
-    
+
     Reference.prototype = new persistence.Observable();
-    
+
     Reference.prototype.get = function() {
         if(!this.prop) {
             return this.ref;
@@ -137,7 +144,7 @@ function log(s) {
             return this.ref.get()[this.prop];
         }
     };
-    
+
     Reference.prototype.set = function(value) {
         // trigger rebinding on all child refs
         if(!this.prop) {
@@ -153,7 +160,7 @@ function log(s) {
             childRef.triggerEvent('set', childRef, childRef.get());
         }
     };
-    
+
     Reference.prototype.rebind = function() {
         var that = this;
         if(this.prop) {
@@ -174,7 +181,7 @@ function log(s) {
             this.childRefs[i].rebind(value[this.childRefs[i].prop]);
         }
     };
-        
+
     Reference.prototype.addSetListener = function(callback) {
         var that = this;
         if(this.ref.addEventListener) {

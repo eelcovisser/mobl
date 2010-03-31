@@ -1,0 +1,12 @@
+module util
+
+imports include/MoBL
+
+rules
+
+  lvalue-vars :
+    s -> [s]
+    where is-string
+
+  lvalue-vars :
+    LTuple(fst, rest*) -> [<lvalue-vars> fst|<map(lvalue-vars); concat> rest*]

@@ -27,10 +27,10 @@ rules
        ; alltd(add-tl-namespace)
        ; declare-all
        ; rename-all
-       ; alltd(add-namespace)
+       ; add-namespace-all
        ; declare-all
        ; rename-all
-       ; alltd(add-namespace)
+       ; add-namespace-all
        //; declare-all
        //; rename-all
          //; debug
@@ -67,3 +67,4 @@ rules
   externalize-module :
     Application(qid, _, def*) -> def2*
     with def2* := <analyze; desugar-all; ?Application(_, _, <id>); filter(definition-to-external)>
+

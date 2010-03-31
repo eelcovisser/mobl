@@ -3,22 +3,27 @@ module desugar
 imports
   include/MoBL
   libstratego-lib
+  rename
+  type
 
 strategies
 
   desugar-all =
     innermost(desugar)
-    /*Module(qid, def*) -> Module(qid, def2*)
-    with {| ModuleName
-          : rules ( ModuleName := qid )
-          ; def2* := <innermost(desugar)> def*
-          |}*/
+    ; topdown(try(flatten-list))
 
-  /*desugar-all :
-    Application(qid, set*, def*) -> Application(qid, set*, def2*)
-    with {| ModuleName
-          : rules ( ModuleName := qid )
-          ; def2* := <innermost(desugar)> def*
-          |}*/
+  desugar :
+    Assignment(LTuple(fst, rest*), e) -> result
+    with tmp := <newname> "tmp"
+       ; assign* := <map-with-index(\ (idx, lv) -> Assignment(lv, FieldAccess(Var(tmp), <concat-strings> ["_", <inc; int-to-string> idx])) \)> rest*
+       ; action-scope(
+           result := <rename-all> [VarDeclInferred(tmp, e), Assignment(fst, FieldAccess(Var(tmp), "_1")), assign*]
+         )
 
-  desugar = fail
+  desugar :
+    ListInferred(lvalue, e, elem*) -> List(lvalue, t, e, elem*)
+    where GenericType(_, [t]) := <type-of> e
+
+  desugar :
+    ForInferred(lvalue, e, elem*) -> For(lvalue, t, e, elem*)
+    where GenericType(_, [t]) := <type-of> e

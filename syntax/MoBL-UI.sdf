@@ -7,41 +7,41 @@ imports
 exports
 
   context-free syntax
-  
+
     MetaAnno* "screen" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> Definition {cons("ScreenNoReturnType")}
     MetaAnno* "screen" QId "(" {FArg ","}* ")" ":" Type "{" ScreenElem* "}" -> Definition {cons("Screen")}
 
     MetaAnno* "template" QId "(" {FArg ","}* ")" "{" ScreenElem* "}" -> TemplateDefinition {cons("Template")}
-    
+
     ID "(" {FArg ","}* ")" -> TemplateSig {cons("TemplateSig")}
-    
+
     TemplateDefinition      -> Definition
-    
+
     "<" ID HtmlArg* ">" ScreenElem* "</" ID ">"   -> ScreenElem {cons("Html")}
     "<" ID HtmlArg* "/"">" -> ScreenElem {cons("HtmlShort")}
     ID "=" Exp                     -> HtmlArg    {cons("HtmlArg")}
     "databind" "=" Exp             -> HtmlArg    {cons("HtmlDatabindArg")}
-    
+
     TemplateDefinition                                                -> ScreenElem
-    
+
     "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("VarDecl")}
     "var" ID "=" Exp                                                 -> ScreenElem {cons("VarDeclInferred")}
 
     FunctionDef                                                       -> ScreenElem
-    
+
     "init" "{" Statement* "}"                                         -> ScreenElem {cons("Init")}
-    
+
     STRING                                                            -> ScreenElem {cons("ScreenString")}
-    
-    "list" "(" ID ":" Type "in" Exp ")" "{" ScreenElem* "}"           -> ScreenElem {cons("List")}
+
+    "list" "(" LValue ":" Type "in" Exp ")" "{" ScreenElem* "}"       -> ScreenElem {cons("List")}
+    "list" "(" LValue "in" Exp ")" "{" ScreenElem* "}"                -> ScreenElem {cons("ListInferred")}
     "placeholder"  ID "{" ScreenElem* "}"                             -> ScreenElem {cons("PlaceHolder")}
     "cond" "(" Exp ")" "{" ScreenElem* "}"                            -> ScreenElem {cons("ConditionalDisplay")}
-    
-    "var" ID ":" Type "=" Exp                                        -> ScreenElem {cons("ScreenVarDecl")}
-    
+
+    "var" ID ":" Type "=" Exp                                         -> ScreenElem {cons("ScreenVarDecl")}
+
     LimitedExp "(" {NamedExp ","}* ")" "{" ScreenElem* "}"   -> ScreenElem {prefer, cons("TemplateCall")}
     LimitedExp "(" {NamedExp ","}* ")"                       -> ScreenElem {cons("TemplateCallNoBody")}
     LimitedExp "{" ScreenElem* "}"                           -> ScreenElem {cons("TemplateCallNoArgs")}
     %%QId                                               -> ScreenElem {cons("TemplateCallNoArgsNoBody")}
 
-  

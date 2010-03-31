@@ -60,7 +60,7 @@ screen root() {
   header("Accounts")
   topRightButton("Add", onclick={ addAccount(); })
   group {
-    list(account : Account in Account.all().order("username", true)) {
+    list(account in Account.all().order("username", true)) {
       itemArrow(onclick={ showUpdates(account); }) {
         outputString(account.username)
       }
@@ -114,7 +114,7 @@ screen showUpdates(account : Account) {
   template showTweets(coll : Collection<TwitterUpdate>) {
     var limit = 10
     <div id="tweets">
-    list(update : TwitterUpdate in coll.limit(limit)) {
+    list(update in coll.limit(limit)) {
       <div class="tweet" onclick={ showUpdate(update); }>
         <span class="icon"><img src=update.iconUrl width="48" height="48"/></span>
         <span class="text">

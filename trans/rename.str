@@ -4,6 +4,8 @@ imports
   include/MoBL
   declare
   type
+  util
+  resolve
 
 strategies
 
@@ -28,6 +30,19 @@ strategies
 
   rename-local-function :
     Function(mannos, name, farg*, rt, body) -> name
+    where not("template" := <RenameScope>)
+
+  rename-local-function :
+   SyncFunction(mannos, name, farg*, rt, body) -> name2
+   where "template" := <RenameScope>
+   with name2 := <rename-var> (name, SimpleType(QId("mobl", "Callback")))
+      ; rules(
+           RenameFunction : name -> name2
+        )
+      ; <try(declare)> Function(mannos, name2, farg*, rt, body)
+
+  rename-local-function :
+    SyncFunction(mannos, name, farg*, rt, body) -> name
     where not("template" := <RenameScope>)
 
   rename-ref-var :
@@ -170,6 +185,7 @@ strategies
 
   rename :
     List(x, t, e, body) -> List(x2, t, e2, body2)
+    where <is-string> x
     with rename-scope(
            x2 := <rename-var> (x, t)
            ; e2 := <rename-all> e
@@ -177,9 +193,68 @@ strategies
          )
 
   rename :
+    List(LTuple(fst, rst*), type@GenericType(_, [t|t*]), e, body) -> List(LTuple(fst2, rst2*), type, e2, body2)
+    with rename-scope(
+           fst2 := <rename-var> (fst, t)
+           ; rst2* := <zip; map(rename-var)> (rst*, t*)
+           ; e2 := <rename-all> e
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    ListInferred(x, e, body) -> ListInferred(x2, e2, body2)
+    where <is-string> x
+    where rename-scope(
+            e2 := <rename-all> e
+            ; GenericType(_, [t]) := <add-namespace-all; type-of> e2
+            ; x2 := <rename-var> (x, t)
+            ; body2 := <rename-all> body
+          )
+
+  rename :
+    ListInferred(LTuple(fst, rst*), e, body) -> ListInferred(LTuple(fst2, rst2*), e2, body2)
+    where rename-scope(
+            e2 := <rename-all> e
+            ; GenericType(_, [GenericType(_, [t|t*])]) := <add-namespace-all; type-of> e2
+            ; fst2 := <rename-var> (fst, t)
+            ; rst2* := <zip; map(rename-var)> (rst*, t*)
+            ; body2 := <rename-all> body
+          )
+
+  rename :
     For(x, t, e, stat*) -> For(x2, t, e2, stat2*)
+    where <is-string> x
     with rename-scope(
            x2 := <rename-var> (x, t)
            ; e2 := <rename-all> e
            ; stat2* := <rename-all> stat*
          )
+
+  rename :
+    For(LTuple(fst, rst*), type@GenericType(_, [t|t*]), e, body) -> For(LTuple(fst2, rst2*), type, e2, body2)
+    with rename-scope(
+           fst2 := <rename-var> (fst, t)
+           ; rst2* := <zip; map(rename-var)> (rst*, t*)
+           ; e2 := <rename-all> e
+           ; body2 := <rename-all> body
+         )
+
+  rename :
+    ForInferred(x, e, body) -> ForInferred(x2, e2, body2)
+    where <is-string> x
+    where rename-scope(
+            e2 := <rename-all> e
+            ; GenericType(_, [t]) := <add-namespace-all; type-of> e2
+            ; x2 := <rename-var> (x, t)
+            ; body2 := <rename-all> body
+          )
+
+  rename :
+    ForInferred(LTuple(fst, rst*), e, body) -> ForInferred(LTuple(fst2, rst2*), e2, body2)
+    where rename-scope(
+            e2 := <rename-all> e
+            ; GenericType(_, [GenericType(_, [t|t*])]) := <add-namespace-all; type-of> e2
+            ; fst2 := <rename-var> (fst, t)
+            ; rst2* := <zip; map(rename-var)> (rst*, t*)
+            ; body2 := <rename-all> body
+          )

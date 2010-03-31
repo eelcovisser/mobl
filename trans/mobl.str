@@ -83,6 +83,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
   editor-hover:
     (e@Var(x), position, ast, path, project-path) -> $[Variable '[x]' has type [<type-of; write-to-string> e2]]
     where e2 := <lookup-node> (position, ast)
+        ; debug
 
   editor-hover:
     (c@Call(_, _), position, ast, path, project-path) -> <get-doc> <lookup-function> qid

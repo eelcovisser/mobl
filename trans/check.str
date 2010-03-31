@@ -5,10 +5,9 @@ imports
   lookup
   type
   rename
-  desugar
-  
+
 rules
-    
+
   constraint-error :
     t@SimpleType(_) -> (t, $[Type is not defined: [<write-to-string> t]])
     where not(<lookup-type> t) // no entity for this type
@@ -17,15 +16,28 @@ rules
   constraint-error :
     t@GenericType(_, _) -> (t, $[Type is not defined: [<write-to-string> t]])
     where not(<lookup-type> t) // no entity for this type
-    
+
   constraint-error :
     Html(tag, _, _, closeTag) -> (closeTag, $[Wrong closing tag])
     where not(tag := closeTag)
-    
+
   constraint-error :
     t@Var(qid) -> (t, $[Variable not defined: [<write-to-string> t]])
     where not("elements" := qid)
     where not(type-of)
+
+  constraint-error :
+    t@Choice(_, _, _) -> (t, $[Could not determine type of: [<write-to-string> t]])
+    where not(type-of)
+
+  constraint-error :
+    t@Brackets(_) -> (t, $[Could not determine type of: [<write-to-string> t]])
+    where not(type-of)
+
+  constraint-error :
+    TemplateCall(e, e*, elem*) -> (e, $[Expression does not return a template type])
+    where t := <type-of> e
+    where not(<is-template-type> t)
 
   constraint-error :
     t@FieldAccess(e, x) -> (t, $[Field [x] not defined])
@@ -42,9 +54,12 @@ rules
     where <type-of> e
     where <map(type-of)> arg*
     where not(type-of)
-  
-  constraint-error = normalize; constraint-error
-   
+
+  constraint-error :
+    Assignment(lhs, e) -> (lhs, $[No such variable '[lhs]' defined])
+    where <is-string> lhs
+    where not(<type-of> Var(lhs))
+
   constraint-warning:
     Entity(_, qid, _, _) -> (x, $[Entity names must start with a capital])
     where
@@ -54,7 +69,7 @@ rules
         QId(_, x) := qid
       end
       ; not(<explode-string; Hd; is-upper> x)
-  
+
 /*  constraint-note:
     Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
                                       (this note is defined in trans/check.str) ])

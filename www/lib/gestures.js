@@ -70,8 +70,6 @@ $.event.special.swipe = {
     add: function (callback) {
         addSwipeListener(this, callback);
         $(this).bind('dblclick', callback);
-        // console.log(this);
-        console.log(callback);
     }
 };
 

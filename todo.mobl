@@ -41,25 +41,25 @@ screen editTask(t : Task) {
 }
 
 screen root() {
+  template defaultView(t : Task, editing : Bool) {
+    item(onswipe={ editing = true; }) {
+      inputCheckbox(t.done, onclick={}) " "
+      outputString(t.name)
+    }
+  }
+  template editView(t : Task, editing : Bool) {
+    item(onswipe={ editing = false; }) {
+      inputCheckbox(t.done, onclick={}) " "
+      outputString(t.name)
+      deleteButton("Delete", onclick={ remove(t); })
+    }
+  }
   topRightButton("Add", onclick={ addTask(); })
   basicView("Tasks") {
     group {
       list(t in Task.all().order("done", true).order("name", true).limit(10)) {
         var editing = false
-        template defaultView() {
-          item(onswipe={ editing = true; }) {
-            inputCheckbox(t.done, onclick={}) " "
-            outputString(t.name)
-          }
-        }
-        template swipedView() {
-          item(onswipe={ editing = false; }) {
-            inputCheckbox(t.done, onclick={}) " "
-            outputString(t.name)
-            deleteButton("Delete", onclick={ remove(t); })
-          }
-        }
-        (editing ? swipedView : defaultView)()
+        (editing ? editView : defaultView)(t, editing)
       }
     }
   }

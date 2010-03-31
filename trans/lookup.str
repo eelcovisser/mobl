@@ -9,7 +9,7 @@ imports
   mobl
 
 strategies
-  
+
   import-and-retry(s|qid2) =
     where(
       QId(qid, _) := qid2
@@ -21,13 +21,13 @@ strategies
        lookup-type-aux
      <+ ?SimpleType(qid)
         ; import-and-retry(lookup-type-aux|qid)
-    
+
   lookup-type-aux :
     SimpleType(qid) -> <GetEntity> qid
-  
+
   lookup-type-aux :
     SimpleType(qid) -> <GetType> qid
-   
+
   lookup-type-aux :
     GenericType(qid, t*) -> ExternalType(manno*, <newname> "Generic", SimpleType(QId("mobl", "Object")), method2*)
     where ExternalGenericType(manno*, _, x*, method*) := <GetGenericType> qid
@@ -35,7 +35,7 @@ strategies
            : <zip(\ (x, t) -> <id> where rules ( RenameGenericType : SimpleType(x) -> t ) \)> (x*, t*)
            ; method2* := <alltd(RenameGenericType)> method*
            |}
-  
+
   lookup-property :
     (type, prop) -> p
     where decl := <lookup-type> type
@@ -44,7 +44,7 @@ strategies
           ; if not(!t); not(SimpleType(QId("mobl", "Object")) := super) then
               p := <lookup-property> (super, prop)
             end
-  
+
   get-all-properties :
     type -> props
     where c#([_, _, super, members]) := <lookup-type> type
@@ -65,7 +65,7 @@ strategies
         ; ?ExternalTemplate(manno*, _, farg*)
         ; farg2* := <alltd(add-namespace)> farg*
 
-  lookup-screen = 
+  lookup-screen =
       lookup-screen-aux
    <+ import-and-retry(lookup-screen-aux|<id>)
 
@@ -90,7 +90,7 @@ strategies
     where ExternalSyncFunction(manno*, _, farg*, rt) := <GetFunction> qid
         ; rt2 := <alltd(add-namespace)> rt
         ; farg2* := <alltd(add-namespace)> farg*
-   
+
   lookup-method :
     (t, x) -> ExternalSyncMethod(manno*, x, farg2*, rt2)
     where not(GenericType("Type", _) := t)
@@ -156,6 +156,13 @@ strategies
   is-entity-type =
     lookup-type
     ; ?ExternalEntity(_, _, _, _)
+
+  is-template-type =
+    ?GenericType(QId("mobl", s), _)
+    ; where(<string-starts-with(|"Template")> s)
+
+  is-template-type =
+    ?SimpleType(QId("mobl", "Template"))
 
   get-all-types =
     <concat> [<all-keys-GetEntity>, <all-keys-GetType>, <all-keys-GetGenericType>]

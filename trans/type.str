@@ -27,6 +27,12 @@ strategies
   eq-type-of :
     Callback(_) -> SimpleType(QId("mobl", "Callback"))
 
+  eq-type-of : // TODO: what about null?
+    Choice(e, e1, e2) -> <type-of> e1
+
+  eq-type-of :
+    Brackets(e) -> <type-of> e
+
   eq-type-of :
     AnonymousTemplate(_) -> SimpleType(QId("mobl", "Template"))
 

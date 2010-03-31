@@ -84,8 +84,13 @@ rules
                           var [elem-root] = $("<span>");
                           [<elems-to-js-callback(|elem-root)> elems]
                         }]
+       ; if not(Var(QId(_, _)) := e) then
+           watch-e-expr* := <collect(?Var(_) <+ ?FieldAccess(_, _))> e
+         else
+           watch-e-expr* := []
+         end
        ; watch-expr* := <map(find-watchable-expressions); concat> arg*
-       ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> watch-expr*
+       ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> [watch-e-expr*, watch-expr*]
        ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun,
            $[function(node) {
                var oldNodes = [nodes];

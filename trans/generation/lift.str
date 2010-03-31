@@ -9,13 +9,13 @@ imports
 
 strategies
   strategies // expression lifting
-  
+
   //cps-lift-expressions = debug(!"lift: "); fail
-  
+
   cps-lift-expressions =
        cps-lift-exprs
     <+ ?[a|k]
-       ; ![a|<cps-lift-expressions> k] 
+       ; ![a|<cps-lift-expressions> k]
 
   cps-lift-expressions :
     [] -> []
@@ -69,11 +69,11 @@ strategies
           |}
 
   cps-lift-exprs :
-    [Async(stat*)|stats] -> 
+    [Async(stat*)|stats] ->
     [Async(<cps-lift-expressions> stat*)|<cps-lift-expressions> stats]
 
   cps-lift-exprs :
-    [If(e, true-stat*, false-stat*)|stats] -> 
+    [If(e, true-stat*, false-stat*)|stats] ->
     <concat> [stats2, [If(e2, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
@@ -91,7 +91,7 @@ strategies
           |}
 
   cps-lift-exprs :
-    [If(e, true-stat*, false-stat*)|stats] -> 
+    [If(e, true-stat*, false-stat*)|stats] ->
     [If(e, <cps-lift-expressions> true-stat*, <cps-lift-expressions> false-stat*)|<cps-lift-expressions> stats]
     where <is-sync> e
 
@@ -101,12 +101,12 @@ strategies
     where <is-sync> e
 
 rules
-  
+
   cps-lift-expression :
     e -> []
     where is-sync
     with rules ( Exp :+= e)
-  
+
   cps-lift-expression :
     e@Call(qid, e*) -> <concat> [stats, [VarDeclInferred(v, Call(qid, e2*))]]
     with v := <newname> "tmp"
@@ -124,7 +124,7 @@ rules
           ; propval2* := <bagof-Exp; reverse; <zip(\ (prop, val) -> PropVal(prop, val) \)> (<map(?PropVal(<id>, _))> propval*, <id>)> // taking advantage of Exp ordering here, risky
           |}
        ; rules ( Exp :+= Var(v) )
-          
+
   cps-lift-expression :
     MethodCall(e, x, e*) -> <concat> [stats2, stats, [VarDeclInferred(v, MethodCall(e2, x, e2*))]]
     with v := <newname> "tmp"
@@ -210,7 +210,7 @@ rules
        ; rules ( Exp :+= Var(v) )
 
 strategies
-  
+
   is-sync = ?Int(_)
   is-sync = ?True()
   is-sync = ?Null()
@@ -218,12 +218,13 @@ strategies
   is-sync = ?String(_)
   is-sync = ?Var(_)
   is-sync = ?Callback(_)
-  
+  is-sync = ?AnonymousTemplate(_)
+
   is-sync =
     ?BinMethodCall(e1, _, e2)
     ; <is-sync> e1
     ; <is-sync> e2
-  
+
   is-sync =
     ?FieldAccess(e, x)
     ; <is-sync> e
@@ -257,7 +258,7 @@ strategies
   is-sync =
     ?CollectionCons(_, _, e*)
     ; <map(is-sync)> e*
-        
+
   is-sync =
     ?EntityCons(t, propval*)
     ; <map(?PropVal(_, <id>); is-sync)> propval*

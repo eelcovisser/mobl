@@ -50,6 +50,7 @@ exports
     Exp "." ID "(" {Exp ","}* ")" -> LimitedExp {cons("MethodCall")}
     Exp "." ID                    -> LimitedExp {cons("FieldAccess")}
     Exp "[" Exp "]"               -> LimitedExp {left, cons("Indexer")}
+    "(" Exp ")"                   -> LimitedExp {cons("Brackets")}
 
     LimitedExp                    -> Exp
 
@@ -64,7 +65,6 @@ exports
     Exp "?" Exp ":" Exp          -> Exp {left, cons("Choice")}
     QId "<" Type ">" "(" {Exp ","}* ")"      -> Exp {cons("CollectionCons")}
     Type "{" {PropVal ","}* "}"  -> Exp {cons("EntityCons")}
-    "(" Exp ")"                  -> Exp {cons("Brackets")}
 
     "[" {Exp ","}* "]"           -> Exp {cons("List")}
 

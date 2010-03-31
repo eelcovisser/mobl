@@ -45,11 +45,21 @@ screen root() {
   basicView("Tasks") {
     group {
       list(t in Task.all().order("done", true).order("name", true).limit(10)) {
-        item(onclick={ editTask(t); }) {
-          inputCheckbox(t.done, onclick={}) " "
-          outputString(t.name)
-          deleteButton("Delete", onclick={ remove(t); })
+        var editing = false
+        template defaultView() {
+          item(onswipe={ editing = true; }) {
+            inputCheckbox(t.done, onclick={}) " "
+            outputString(t.name)
+          }
         }
+        template swipedView() {
+          item(onswipe={ editing = false; }) {
+            inputCheckbox(t.done, onclick={}) " "
+            outputString(t.name)
+            deleteButton("Delete", onclick={ remove(t); })
+          }
+        }
+        (editing ? swipedView : defaultView)()
       }
     }
   }

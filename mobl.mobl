@@ -117,7 +117,6 @@ template header(title : String, onclick : Callback = null) {
   </div>
 }
 
-
 screen promptString(question : String) : String {
   var answer : String = ""
   header(question)
@@ -179,8 +178,8 @@ template group() {
   </ul>
 }
 
-template item(onclick : Callback = null) {
-  <li onclick=onclick>elements()</li>
+template item(onclick : Callback = null, onswipe : Callback = null) {
+  <li onclick=onclick onswipe=onswipe>elements()</li>
 }
 
 template itemArrow(onclick : Callback = null) {

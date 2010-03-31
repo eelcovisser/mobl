@@ -2,7 +2,7 @@ module declare
 
 imports
   include/MoBL
-  desugar
+  normalize
 
 strategies
 
@@ -11,7 +11,7 @@ strategies
       (?Module(_, def*) <+ ?Application(_, _, def*))
       ; <filter(declare)> def*
     )
-      
+
   // Records the definition of an entity in a dynamic rule GetEntity.
   declare:
     Entity(_, qid, super, body) -> <fail>
@@ -31,24 +31,21 @@ strategies
 
   declare:
     extern@ExternalType(manno*, qid, super, method*) -> <fail>
-    with method2* := <alltd(desugar)> method*
-        ; rules (
-           GetType : qid -> ExternalType(manno*, qid, super, method2*)
+    with rules (
+           GetType : qid -> ExternalType(manno*, qid, super, method*)
          )
 
   declare:
-    ExternalTypeNoSuper(_, qid, method*) -> <fail>
-    with extern := <innermost(desugar)> 
-       ; rules (
+    extern@ExternalTypeNoSuper(_, qid, method*) -> <fail>
+    with rules (
            GetType : qid -> extern
          )
 
   declare:
     extern@ExternalGenericType(manno*, qid, arg*, method*) -> <fail>
-    with method2* := <alltd(desugar)> method*
-         ; rules (
-             GetGenericType : qid -> ExternalGenericType(manno*, qid, arg*, method2*)
-           )
+    with rules (
+           GetGenericType : qid -> extern
+         )
 
   declare:
     extern@ExternalEntity(manno*, qid, super, prop*) -> <fail>
@@ -59,7 +56,7 @@ strategies
   declare:
     extern@ExternalFunction(manno*, qid, farg*, rt) -> <fail>
     with rules (
-           GetFunction : qid -> extern 
+           GetFunction : qid -> extern
          )
 
   declare:
@@ -73,15 +70,15 @@ strategies
     with
       extern := <definition-to-external>
       ; rules (
-          GetFunction : qid -> extern 
+          GetFunction : qid -> extern
         )
- 
+
   declare:
     FunctionNoReturnType(manno*, qid, farg*, body) -> <fail>
     with
       extern := <definition-to-external>
       ; rules (
-          GetFunction : qid -> extern 
+          GetFunction : qid -> extern
         )
 
   declare:
@@ -97,35 +94,35 @@ strategies
     with
       extern := <definition-to-external>
       ; rules (
-          GetFunction : qid -> extern 
+          GetFunction : qid -> extern
         )
-        
-	declare:
-	  Template(manno*, qid, farg*, body) -> <fail>
-	  with
+
+  declare:
+    Template(manno*, qid, farg*, body) -> <fail>
+    with
       extern := <definition-to-external>
-	    ; rules (
-	        GetTemplate : qid -> extern 
-	      )
+      ; rules (
+          GetTemplate : qid -> extern
+        )
 
   declare:
     extern@ExternalTemplate(manno*, qid, farg*) -> <fail>
     with rules (
-           GetTemplate : qid -> extern 
+           GetTemplate : qid -> extern
          )
-	
-	declare :
-	  Screen(manno*, qid, farg*, rt, body) -> <fail>
-	  with
-	    extern := <definition-to-external>
-	    ; rules (
-	        GetScreen : qid -> extern
-	      )
+
+  declare :
+    Screen(manno*, qid, farg*, rt, body) -> <fail>
+    with
+      extern := <definition-to-external>
+      ; rules (
+          GetScreen : qid -> extern
+        )
 
   declare:
     extern@ExternalScreen(manno*, qid, farg*, rt) -> <fail>
     with rules (
-           GetScreen : qid -> extern 
+           GetScreen : qid -> extern
          )
 
   declare :
@@ -137,25 +134,25 @@ strategies
         )
 
 strategies // convert to externals
-  
-  definition-to-external :
-    Entity(manno*, qid, super, prop*) -> ExternalEntity(manno*, qid, super, <alltd(desugar)> prop*)
 
   definition-to-external :
-    EntityNoSuper(manno*, qid, prop*) -> ExternalEntity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), <alltd(desugar)> prop*)
-  
+    Entity(manno*, qid, super, prop*) -> ExternalEntity(manno*, qid, super, prop*)
+
+  definition-to-external :
+    EntityNoSuper(manno*, qid, prop*) -> ExternalEntity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+
   definition-to-external :
     Function(manno*, qid, farg*, rt, stat*) -> ExternalFunction(manno*, qid, farg*, rt)
-  
+
   definition-to-external :
     FunctionNoReturnType(manno*, qid, farg*, stat*) -> ExternalFunction(manno*, qid, farg*, SimpleType(QId("mobl", "void")))
 
   definition-to-external :
     SyncFunction(manno*, qid, farg*, rt, stat*) -> ExternalSyncFunction(manno*, qid, farg*, rt)
-  
+
   definition-to-external :
     SyncFunctionNoReturnType(manno*, qid, farg*, stat*) -> ExternalSyncFunction(manno*, qid, farg*, SimpleType(QId("mobl", "void")))
-  
+
   definition-to-external :
     Template(manno*, qid, farg*, elem*) -> ExternalTemplate(manno*, qid, farg*)
 
@@ -171,4 +168,3 @@ strategies // convert to externals
   definition-to-external =
     ?c#(_)
     ; where(<string-starts-with(|"External")> c)
-    ; try(desugar)

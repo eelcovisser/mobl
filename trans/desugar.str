@@ -3,58 +3,22 @@ module desugar
 imports
   include/MoBL
   libstratego-lib
-  
+
 strategies
 
-  desugar-all :
-    Module(qid, def*) -> Module(qid, def2*)
+  desugar-all =
+    innermost(desugar)
+    /*Module(qid, def*) -> Module(qid, def2*)
     with {| ModuleName
           : rules ( ModuleName := qid )
           ; def2* := <innermost(desugar)> def*
-          |}
+          |}*/
 
-  desugar-all :
+  /*desugar-all :
     Application(qid, set*, def*) -> Application(qid, set*, def2*)
     with {| ModuleName
           : rules ( ModuleName := qid )
           ; def2* := <innermost(desugar)> def*
-          |}
-  
-  desugar :
-    FunctionNoReturnType(manno*, name, farg*, stat*) -> Function(manno*, name, farg*, SimpleType("void"), stat*)
+          |}*/
 
-  desugar :
-    SyncFunctionNoReturnType(manno*, name, farg*, stat*) -> SyncFunction(manno*, name, farg*, SimpleType("void"), stat*)
-
-  desugar :
-    IfNoElse(e, stat*) -> If(e, stat*, [])
-    
-  desugar :
-    HtmlShort(tag, attr*) -> Html(tag, attr*, [], tag)
-  
-  desugar :
-    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
-
-  desugar :
-    ExternalTypeNoSuper(manno*, qid, method*) -> ExternalType(manno*, qid, SimpleType(QId("mobl", "Object")), method*)
-    
-  desugar :
-    PropertyNoAnnos(manno*, x, t) -> Property(manno*, x, t, [])
-  
-  desugar :
-    ScreenNoReturnType(manno*, name, farg*, body) -> Screen(manno*, name, farg*, SimpleType("void"), body)
-  
-  desugar = normalize
-  
-  normalize :
-    TemplateCallNoArgs(e, body) -> TemplateCall(e, [], body)
-    
-//  normalize :
-//    TemplateCallNoArgsNoBody(e) -> TemplateCall(e, [], [])
-    
-  normalize :
-    TemplateCallNoBody(e, arg*) -> TemplateCall(e, arg*, [])
-  
-  normalize :
-    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
-  
+  desugar = fail

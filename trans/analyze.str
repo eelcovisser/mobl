@@ -8,6 +8,7 @@ imports
   lookup
   type
   rename
+  normalize
   desugar
   mobl
   resolve
@@ -22,6 +23,7 @@ rules
     ; {| ModuleName, Imports
        : rules ( ModuleName := qid )
        ; import-all
+       ; normalize-all
        ; alltd(add-tl-namespace)
        ; declare-all
        ; rename-all
@@ -36,7 +38,7 @@ rules
 
   import-all =
     alltd(import-module)
-  
+
   import-module =
     ?Import(qid)
     ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mobl"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
@@ -47,7 +49,7 @@ rules
     ?Import(qid)
     ; where(<open-import(\ path -> <concat-strings> [<ProjectPath>, "/", path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid
             ; <declare-all> Module(qid, <id>))
-    
+
   compile-and-externalize-module :
     mod@Module(qid, def*) -> def2*
     with compile
@@ -65,4 +67,3 @@ rules
   externalize-module :
     Application(qid, _, def*) -> def2*
     with def2* := <analyze; desugar-all; ?Application(_, _, <id>); filter(definition-to-external)>
-    

@@ -6,8 +6,14 @@ imports
 
 strategies
 
+  /*parse-file =
+    parse-file(strsglr-perror, strsglr-report-parse-error| <memo-open-parse-table> <import-term(include/MoBL.tbl)>)*/
+
   parse-file =
-    parse-file(strsglr-perror, strsglr-report-parse-error| <memo-open-parse-table> <import-term(include/MoBL.tbl)>)
+    parse-file(
+      strsglr-perror, strsglr-report-parse-error
+    | <import-term(include/MoBL.tbl)>
+    )
 
   /*parse-string =
     parse-string(|<import-term(include/MoBL.tbl)>)*/

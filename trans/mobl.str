@@ -15,14 +15,14 @@ imports
   generation/compile
   generation/emit
   generation/compile
-  desugar
+  normalize
   lookup
   resolve
   analyze
   type
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
-  
+
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
   // each a list of (term, message) tuples or simply (message) terms.
   editor-analyze:
@@ -41,20 +41,20 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       ; errors   := <collect-all(constraint-error, conc)> ast2
       ; warnings := <collect-all(constraint-warning, conc)> ast2
       ; notes    := <collect-all(constraint-note, conc)> ast2
-    
+
   // Prints the abstract syntax ATerm of a selection.
   generate-aterm:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"aterm")> path;
       result   := selected // we just return the input term
-  
+
   // Resolves a reference when the user control-clicks or presses F3 in the editor.
   // Only succeeds for nodes of the form Type(_) for which GetEntity is defined.
   editor-resolve:
     (node, position, ast, path, project-path) -> target
     where
-      //<debug(!"Resolve: ")> node; 
+      //<debug(!"Resolve: ")> node;
       target     := <lookup-type> node
 
   generate-artifacts:
@@ -64,7 +64,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       try(dr-scope-all-end)
       ; dr-scope-all-start
     with
-      rules ( ProjectPath := project-path 
+      rules ( ProjectPath := project-path
               IsImported  : path
               OutputPath  := <concat-strings> [project-path, "/www"])
       ; (Module(mod-name, _) := ast <+ Application(mod-name, _, _) := ast)
@@ -73,27 +73,27 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   editor-hover:
     (t@SimpleType(_), position, ast, path, project-path) -> <get-doc> <lookup-type> t2
-    where t2 := <lookup-node> position
+    where t2 := <lookup-node> (position, ast)
 
   editor-hover:
     (t@GenericType(_, _), position, ast, path, project-path) -> <get-doc> <lookup-type> t2
-    where t2 := <lookup-node> position
+    where t2 := <lookup-node> (position, ast)
 
   editor-hover:
     (c@Call(_, _), position, ast, path, project-path) -> <get-doc> <lookup-function> qid
-    where Call(qid, _) := <lookup-node> position
+    where Call(qid, _) := <lookup-node> (position, ast)
 
   editor-hover:
     (f@FieldAccess(_, _), position, ast, path, project-path) -> <get-doc> <lookup-property; debug> (<type-of> e, x)
-    where FieldAccess(e, x) := <lookup-node> position
+    where FieldAccess(e, x) := <lookup-node> (position, ast)
 
   editor-hover:
     (c@MethodCall(_, _, _), position, ast, path, project-path) -> <get-doc> <lookup-method> (<type-of> e, x)
-    where MethodCall(e, x, _) := <lookup-node> position
+    where MethodCall(e, x, _) := <lookup-node> (position, ast)
 
   editor-hover:
     (target, position, ast, path, project-path) -> $[Hover help: [<write-to-string> t2]]
-    where t2 := <lookup-node> position
+    where t2 := <lookup-node> (position, ast)
 
 
   editor-complete =
@@ -136,13 +136,13 @@ strategies
     ?t
     ; rules ( ResultingAST := t )
 
-  
+
   lookup-node :
-    path -> <find-node> (path, <ResultingAST>)
-                
+    (path, ast) -> <find-node; debug> (<desugar-position(normalize|ast)> path, <ResultingAST>)
+
   find-node :
     ([], t) -> t
-  
+
   find-node :
-    ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts)) 
+    ([a|k], c#(ts)) -> <find-node> (k, <at-index(?result); !result> (a, ts))
 

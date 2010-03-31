@@ -1,0 +1,41 @@
+module normalize
+
+imports include/MoBL
+
+rules
+
+  normalize-all =
+    innermost(normalize)
+
+  normalize :
+    FunctionNoReturnType(manno*, name, farg*, stat*) -> Function(manno*, name, farg*, SimpleType("void"), stat*)
+
+  normalize :
+    SyncFunctionNoReturnType(manno*, name, farg*, stat*) -> SyncFunction(manno*, name, farg*, SimpleType("void"), stat*)
+
+  normalize :
+    IfNoElse(e, stat*) -> If(e, stat*, [])
+
+  normalize :
+    HtmlShort(tag, attr*) -> Html(tag, attr*, [], tag)
+
+  normalize :
+    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)
+
+  normalize :
+    ExternalTypeNoSuper(manno*, qid, method*) -> ExternalType(manno*, qid, SimpleType(QId("mobl", "Object")), method*)
+
+  normalize :
+    PropertyNoAnnos(manno*, x, t) -> Property(manno*, x, t, [])
+
+  normalize :
+    ScreenNoReturnType(manno*, name, farg*, body) -> Screen(manno*, name, farg*, SimpleType("void"), body)
+
+  normalize :
+    TemplateCallNoArgs(e, body) -> TemplateCall(e, [], body)
+
+  normalize :
+    TemplateCallNoBody(e, arg*) -> TemplateCall(e, arg*, [])
+
+  normalize :
+    EntityNoSuper(manno*, qid, prop*) -> Entity(manno*, qid, GenericType(QId("mobl", "Entity"), [SimpleType(qid)]), prop*)

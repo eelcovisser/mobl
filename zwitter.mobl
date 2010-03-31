@@ -133,8 +133,11 @@ screen showUpdates(account : Account) {
   template myTweets2() {
     showTweets(account.updates.order("date", true))
   }
+  template myTweets3() {
+    showTweets(account.updates.order("text", true))
+  }
 
-  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2)])
+  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2), ("Another", "lib/toolbar/icon_users.png", myTweets3)])
 }
 
 screen showUpdate(update : TwitterUpdate) {

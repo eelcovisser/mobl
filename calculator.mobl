@@ -7,12 +7,12 @@ import mobl
 screen root() {
   var n1 : Int = 2
   var n2 : Int = 2
-  
+
   header("Calculator")
   group {
-	  inputInt(n1)
-	  inputInt(n2)
-	  item { outputInt(n1 * n2) }
+    inputInt(n1)
+    inputInt(n2)
+    item { outputInt(n1 * n2) }
   }
   button("Say hello", onclick={ alert("Yello!"); })
 }

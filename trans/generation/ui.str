@@ -300,6 +300,28 @@ rules
        ; subscriptions := <collect(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
 
   elems-to-js(|root) :
+    [ConditionalDisplay(e, elems)|rest*] -> $[
+      var [node] = $("<span>");
+      [root].append([node]);
+      var [renderCond] = function(isRerender) {
+        var [value] = [<expression-to-js> e];
+        [node].empty();
+        if([value]) {
+          [<elems-to-js(|node)> elems]
+        }
+        if(!isRerender) {
+          [<elems-to-js(|root)> rest*]
+        }
+      };
+      [renderCond](false);
+      [subscriptions]
+    ]
+    with node := <newname> "node"
+       ; value := <newname> "value"
+       ; renderCond := <newname> "renderCond"
+       ; subscriptions := <collect(?Var(_) <+ ?FieldAccess(_, _)); map(exp-to-watcher-js(|renderCond)); concat-strings> e
+
+  elems-to-js(|root) :
     [ScreenString(s)|rest*] -> $[
       [root].append([s]);
       [<elems-to-js(|root)> rest*]]

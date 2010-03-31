@@ -13,12 +13,12 @@ exports
     Start
 
   context-free syntax %% Main
-  
+
     ID                               -> QId
     QId "::" ID                      -> QId {cons("QId")}
     "module" QId Definition*         -> Start {cons("Module")}
     "application" QId Setting* Definition* -> Start {cons("Application")}
-    
+
     "title" STRING                   -> Setting {cons("TitleSetting")}
     "database" STRING                -> Setting {cons("DatabaseSetting")}
     "database" "version" INT         -> Setting {cons("DatabaseVersionSetting")}
@@ -28,16 +28,16 @@ exports
 
     ID ":" Type                    -> FArg {cons("FArg")}
     ID ":" Type "=" Exp            -> FArg {cons("FArgOptional")}
-    
+
     QId                            -> Type {cons("SimpleType")}
     QId "<" {Type ","}* ">"        -> Type {cons("GenericType")}
-    
+
     "@doc" STRING                  -> MetaAnno {cons("DocAnno")}
-    
+
   context-free syntax %% native javascript
-    
+
     "<script>" JSPart* "</script>"  -> Definition {cons("Javascript"), prefer}
-  
+
     JSString -> JSPart{cons("JSString")}
   %%"~" Exp -> JSPart{cons("JSExp"), prefer}
   %%"\\~" -> JSPart{cons("JSTilde"), prefer}
@@ -61,12 +61,14 @@ exports
     "screen" -> ID {reject}
     "entity" -> ID {reject}
     "uri" -> ID {reject}
-    %%"placeholder" -> ID {reject}
+    "placeholder" -> ID {reject}
     "function" -> ID {reject}
     "callback" -> ID {reject}
     "sync" -> ID {reject}
     "null" -> ID {reject}
+    "true" -> ID {reject}
+    "false" -> ID {reject}
     "if" -> ID {reject}
     "databind" -> ID {reject}
-    
-    
+    "cond" -> ID {reject}
+

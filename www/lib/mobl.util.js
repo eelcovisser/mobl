@@ -149,7 +149,7 @@ function log(s) {
         // trigger rebinding on all child refs
         if(!this.prop) {
             this.ref = value;
-            this.triggerEvent('set', this, value);
+            this.triggerEvent('change', this, value);
         } else  {
             this.ref.get()[this.prop] = value;
         }
@@ -157,7 +157,7 @@ function log(s) {
             //this.childRefs[i].ref = this;
             var childRef = this.childRefs[i];
             childRef.rebind();
-            childRef.triggerEvent('set', childRef, childRef.get());
+            childRef.triggerEvent('change', childRef, childRef.get());
         }
     };
 
@@ -167,9 +167,9 @@ function log(s) {
             if(this.ref.get().addEventListener) {
                 window.newTask2 = this.ref.get();
                 //console.log("Attaching event listener to property: " + this.prop)
-                this.ref.get().addEventListener('set', function(_, _, prop, value) {
+                this.ref.get().addEventListener('change', function(_, _, prop, value) {
                     if(prop === that.prop) {
-                        that.triggerEvent('set', that, value);
+                        that.triggerEvent('change', that, value);
                     }
                 });
             } else {
@@ -185,7 +185,7 @@ function log(s) {
     Reference.prototype.addSetListener = function(callback) {
         var that = this;
         if(this.ref.addEventListener) {
-            this.ref.addEventListener('set', function(_, _, prop, value) {
+            this.ref.addEventListener('change', function(_, _, prop, value) {
                 if(prop === that.prop) {
                     callback(that, value);
                 }

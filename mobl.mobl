@@ -253,12 +253,14 @@ mobl.add = function(e, _, callback) {
     persistence.add(e);
     var allEnt = persistence.define(e._type).all(); // NOTE: define() is a hack!
     allEnt.triggerEvent('add', allEnt, e);
+    allEnt.triggerEvent('change', allEnt, e);
     if(callback) callback();
 };
 mobl.remove = function(e, _, callback) {
     persistence.remove(e);
     var allEnt = persistence.define(e._type).all();
     allEnt.triggerEvent('remove', allEnt, e);
+    allEnt.triggerEvent('change', allEnt, e);
     if(callback) callback();
 };
 mobl.resetDatabase = function(_, callback) {

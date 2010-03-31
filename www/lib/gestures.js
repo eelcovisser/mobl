@@ -5,7 +5,7 @@
  * receive a touchmove event mostly in the x-direction. 4. Abort gesture if you
  * receive a touchmove event mostly the y-direction. 5. End gesture if you
  * receive a touchend event.
- * 
+ *
  * @author Dave Dunkin
  * @copyright public domain
  */

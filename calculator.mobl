@@ -14,5 +14,4 @@ screen root() {
     inputInt(n2)
     item { outputInt(n1 * n2) }
   }
-  button("Say hello", onclick={ alert("Yello!"); })
 }

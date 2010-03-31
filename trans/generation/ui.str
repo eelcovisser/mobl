@@ -106,7 +106,7 @@ rules
      <+ ![]
 
   exp-to-watcher-js(|renderTemplate) :
-    e -> $[[<ref-expression-to-js> e].addEventListener('set', function() {
+    e -> $[[<ref-expression-to-js> e].addEventListener('change', function() {
              [renderTemplate](true);
            });
 ]
@@ -152,7 +152,7 @@ rules
       var [r] = [es];
       if([r].get() !== null) {
         [node].attr('[name]', [r].get());
-        [r].addEventListener('set', function(_, ref, val) {
+        [r].addEventListener('change', function(_, ref, val) {
           if(ref === [r]) {
             [node].attr('[name]', val);
           } else {
@@ -171,7 +171,7 @@ rules
        ; subscriptions := <map(exp-to-html-watcher-js(|node, name, <expression-to-js> e)); concat-strings> watch-expr*
 
   exp-to-html-watcher-js(|node, attr, es) :
-    e -> $[[<ref-expression-to-js> e].addEventListener('set', function() {
+    e -> $[[<ref-expression-to-js> e].addEventListener('change', function() {
              [node].attr('[attr]', [es]);
            });
 ]
@@ -205,7 +205,7 @@ rules
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
       [node].[method]([r].get());
-      [r].addEventListener('set', function(_, ref, val) {
+      [r].addEventListener('change', function(_, ref, val) {
         if(ref === [r]) {
           [node].[method]([typeconverter](val));
         } else {
@@ -286,7 +286,7 @@ rules
         });
       };
       [renderList](false);
-      [list].addEventListener($[$'add', 'remove'$]$, function() { [renderList](true); });
+      [list].addEventListener('change', function() { [renderList](true); });
       [subscriptions]
     ]
     with node := <newname> "node"

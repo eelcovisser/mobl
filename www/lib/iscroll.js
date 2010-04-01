@@ -168,7 +168,7 @@ iScroll.prototype = {
         this.touchStartY = e.touches[0].pageY;
 
         //alert("Left delta: " + leftDelta + " topDelta: " + topDelta);
-        if(Math.abs(topDelta) > 10 || Math.abs(leftDelta) > 10) {
+        if(Math.abs(topDelta) > 5 || Math.abs(leftDelta) > 5) {
             this.moved = true;
         }
 

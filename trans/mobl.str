@@ -124,14 +124,16 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   editor-complete:
     (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> [prop*, method*]
-    where FieldAccess(e, _) := <lookup-node> position
-        ; t := <type-of> e
+    where position' := <desugar-position(normalize|ast); debug(!"New position: ")> position
+    where FieldAccess(e, _) := <term-at-position(|position'); debug(!"Term at position: ")> <ResultingAST>
+       <+ FieldAccess(e, _) := <parent-at-position(|position'); debug(!"Term at parent: ")> <ResultingAST>
+    where t := <debug(!"e: "); type-of; debug(!"Type: ")> e
         ; prop* := <get-all-properties; map(\ prop@Property(_, x, _, _) -> ([x], <get-doc> prop) \)> t
         ; method* := <get-all-methods; map(\ meth@c#([_, x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], <get-doc> meth) \)> t
 
   editor-complete:
     (MethodCall(_, COMPLETION(prefix), _), position, ast, path, project-path) -> method*
-    where MethodCall(e, _, _) := <lookup-node> position
+    where MethodCall(e, _, _) := <lookup-node> (position, ast)
         ; t := <type-of> e
         ; method* := <get-all-methods; map(\ meth@c#([_, x|_]) -> ([x], <get-doc> meth) \)> t
 

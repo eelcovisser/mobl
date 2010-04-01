@@ -44,9 +44,9 @@ exports
     "true"                        -> Exp {cons("True")}
     "false"                       -> Exp {cons("False")}
     "null"                        -> Exp {cons("Null")}
+    QId "(" {NamedExp ","}* ")"   -> Exp {cons("Call")}
 
     QId                           -> LimitedExp {cons("Var")}
-    QId "(" {NamedExp ","}* ")"   -> LimitedExp {cons("Call")}
     Exp "." ID "(" {Exp ","}* ")" -> LimitedExp {cons("MethodCall")}
     Exp "." ID                    -> LimitedExp {cons("FieldAccess")}
     Exp "[" Exp "]"               -> LimitedExp {left, cons("Indexer")}

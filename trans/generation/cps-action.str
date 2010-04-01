@@ -12,7 +12,6 @@ imports
   desugar
   util
 
-  //cps-statements = debug(!"statements: "); fail
 strategies
 
   cps-statements :

@@ -118,9 +118,9 @@ NoClickDelay.prototype = {
 };
 
 jQuery.fn.tap = function (callback) {
-    if (mobl.isIphone) {
+    //if (true) {//(mobl.isIphone) {
         new NoClickDelay(this[0], callback);
-    } else {
-        this.click(callback);
-    }
+    //} else {
+        this.mouseup(callback);
+    //}
 };

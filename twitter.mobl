@@ -24,6 +24,7 @@ external type User {
 }
 
 external sync function getUpdates(username : String, password : String) : Collection<Update>
+external sync function getMentions(username : String, password : String) : Collection<Update>
 external function postUpdate(username : String, password : String, text : String) : Bool
 external function postReply(username : String, password : String, replyToId : Int, text : String) : Bool
 
@@ -35,6 +36,33 @@ twitter.getUpdates = function(username, password, optionalArgs) {
     list: function(_, callback) {
       $.ajax({
          url: mobl.proxyUrl('http://api.twitter.com/1/statuses/home_timeline.json', username, password),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
+    }
+  };
+};
+
+twitter.getMentions = function(username, password, optionalArgs) {
+  return {
+    addEventListener: function() {},
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl('http://api.twitter.com/1/statuses/mentions.json', username, password),
          datatype: "json",
          error: function(_, message, error) {
            console.log(message);

@@ -1,7 +1,7 @@
-application zwitter
+application zwetser
 
-title "Zwitter"
-database "zwitter"
+title "Zwetser"
+database "zwetser"
 
 import mobl
 
@@ -19,6 +19,7 @@ entity TwitterUpdate {
   screenName : String
   iconUrl    : String
   text       : String
+  mention    : Bool
   favorite   : Bool
   date       : DateTime
 }
@@ -33,7 +34,25 @@ function updateStream(account : Account) {
          iconUrl = twupdate.user.profile_image_url,
          text = twupdate.text,
          date = twupdate.created_at,
-         favorite = twupdate.favorited
+         favorite = twupdate.favorited,
+         mention = false
+       });
+     }
+   }
+}
+
+function updateMentions(account : Account) {
+   var updates = twitter::getMentions(account.username, account.password);
+   for(twupdate : twitter::Update in updates) {
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
+       account.updates.add(TwitterUpdate{
+         updateId = twupdate.id,
+         screenName = twupdate.user.screen_name,
+         iconUrl = twupdate.user.profile_image_url,
+         text = twupdate.text,
+         date = twupdate.created_at,
+         favorite = twupdate.favorited,
+         mention = true
        });
      }
    }
@@ -107,6 +126,9 @@ screen showUpdates(account : Account) {
     async {
       updateStream(account);
     }
+    async {
+      updateMentions(account);
+    }
   }
   backButton("Accounts", onclick={ screen return; })
   <img src="lib/img/compose.png" onclick={ newTweet(account); } class="topRight"/>
@@ -128,16 +150,12 @@ screen showUpdates(account : Account) {
     </div>
   }
   template myTweets() {
-    showTweets(account.updates.order("date", false))
+    showTweets(account.updates.filter("mention", "=", false).order("date", false))
   }
   template myTweets2() {
-    showTweets(account.updates.order("date", true))
+    showTweets(account.updates.filter("mention", "=", true).order("date", false))
   }
-  template myTweets3() {
-    showTweets(account.updates.order("text", true))
-  }
-
-  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Reverse", "lib/toolbar/icon_users.png", myTweets2), ("Another", "lib/toolbar/icon_users.png", myTweets3)])
+  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Mentions", "lib/toolbar/icon_users.png", myTweets2)])
 }
 
 screen showUpdate(update : TwitterUpdate) {

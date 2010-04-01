@@ -7,9 +7,9 @@ function updateScrollers () {
     var scrollwrappers = $("div#scrollwrapper");
     if (scrollwrappers.length > 0) {
         var height = window.innerHeight;
-        height -= $("#header").height();
-        height -= $("#footer").height();
-        height -= $("#tabbar").height();
+        height -= $("#header:visible").height();
+        height -= $("#footer:visible").height();
+        height -= $("#tabbar:visible").height();
         scrollwrappers.height(height);
     }
     var scrollers = $("div#scrollwrapper div#content");
@@ -82,6 +82,7 @@ mobl.call = function (screenName, args, callback) {
                 var n = $("body > #" + screenFrame.div);
                 n.remove();
                 n.disableExtraEvents();
+                mobl.delayedUpdateScrollers();
             });
             $("body > #" + previousScreen.div).show('slide', {
                 direction: "left"
@@ -140,7 +141,7 @@ mobl.call = function (screenName, args, callback) {
                         scrollers.eq(i).data("scroller", new iScroll(scrollers.get(i), 'y'));
                     }
                 }
-                updateScrollers();
+                mobl.delayedUpdateScrollers();
             }
         });
         //}, 200);

@@ -17,7 +17,7 @@ screen addTask() {
   backButton("Back", onclick={ screen return; })
   basicView("Add") {
     inputs {
-      inputString(newTask.name, placeholder="Task name")
+      inputString(newTask, placeholder="Task name")
     }
     button("Add", onclick={
       add(newTask);

@@ -23,8 +23,17 @@ external type User {
   profile_image_url : String
 }
 
+external type SearchResult {
+  created_at        : DateTime
+  from_user         : String
+  text              : String
+  source            : String
+  profile_image_url : String
+}
+
 external sync function getUpdates(username : String, password : String) : Collection<Update>
 external sync function getMentions(username : String, password : String) : Collection<Update>
+external sync function search(phrase : String) : Collection<SearchResult>
 external function postUpdate(username : String, password : String, text : String) : Bool
 external function postReply(username : String, password : String, replyToId : Int, text : String) : Bool
 
@@ -72,6 +81,40 @@ twitter.getMentions = function(username, password, optionalArgs) {
          success: function(data) {
             var results = [];
             var update;
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
+    }
+  };
+};
+
+twitter.search = function(phrase, optionalArgs) {
+  return {
+    _limit: 10,
+    addEventListener: function() {},
+    limit: function(n) {
+      this._limit = n;
+      return this;
+    },
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl('http://search.twitter.com/search.json?q='+escape(phrase) + '&rpp=' + this._limit),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            //console.log(data);
+            data = data['results'];
             for(var i = 0; i < data.length; i++) {
               update = data[i];
               update.created_at = Date.parse(update.created_at);

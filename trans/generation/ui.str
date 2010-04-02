@@ -302,7 +302,7 @@ rules
        ; oldScope := <newname> "oldScope"
        ; vardecls := <map(!$[var [<id>]; ]); concat-strings> <lvalue-vars> lvalue
        ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, MethodCall(Var("results"), "pop", []))
-       ; subscriptions := <collect(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
+       ; subscriptions := <collect-all(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
 
   elems-to-js(|root) :
     [ConditionalDisplay(e, elems)|rest*] -> $[

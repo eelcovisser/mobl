@@ -157,7 +157,7 @@ class http {
             return false;
         }
         
-        $this->headers["Host"] = $server.":".$port;
+        $this->headers["Host"] = $server;//.":".$port;
         
         if ($user != "" && $pwd != "") {
             $this->log .= "Authentication will be attempted<br />\n";

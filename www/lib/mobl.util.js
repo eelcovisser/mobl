@@ -30,9 +30,11 @@ mobl.stringTomobl__String =function (s) {
 }
 
 mobl.proxyUrl = function(url, user, password) {
-    var proxyUrl = '/proxy.php?user=' + user + '&pwd=' + password + '&proxy_url=' + url;
-    //console.log(proxyUrl);
-    return proxyUrl;
+    if(user && password) {
+        return '/proxy.php?user=' + user + '&pwd=' + password + '&proxy_url=' + escape(url);
+    } else {
+        return '/proxy.php?proxy_url=' + escape(url);
+    }
 }
 
 function log(s) {
@@ -141,6 +143,7 @@ function log(s) {
             return this.ref;
         }
         if(this.ref.get) {
+            console.log(this.prop, this.ref.get())
             return this.ref.get()[this.prop];
         }
     };

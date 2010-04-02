@@ -149,13 +149,33 @@ screen showUpdates(account : Account) {
     altButton("Load more", onclick={ limit = limit + 10; })
     </div>
   }
-  template myTweets() {
+  template timeline() {
     showTweets(account.updates.filter("mention", "=", false).order("date", false))
   }
-  template myTweets2() {
+  template mentions() {
     showTweets(account.updates.filter("mention", "=", true).order("date", false))
   }
-  tabset([("All", "lib/toolbar/icon_users.png", myTweets), ("Mentions", "lib/toolbar/icon_users.png", myTweets2)])
+  template search() {
+    var phrase = "#mobl"
+    var limit = 10
+    group {
+      inputString(phrase)
+    }
+    <div id="tweets">
+    list(twupdate in twitter::search(phrase).limit(limit)) {
+      <div class="tweet">
+        <span class="icon"><img src=twupdate.profile_image_url width="48" height="48"/></span>
+        <span class="text">
+          <strong>outputString(twupdate.from_user) ": "</strong>
+          outputString(twupdate.text)
+          <span class="meta">"Posted " outputDate(twupdate.created_at)</span>
+        </span>
+      </div>
+    }
+    altButton("Load more", onclick={ limit = limit + 10; })
+    </div>
+  }
+  tabset([("All", "lib/toolbar/icon_users.png", timeline), ("Mentions", "lib/toolbar/icon_users.png", mentions), ("Search", "lib/toolbar/icon_users.png", search)])
 }
 
 screen showUpdate(update : TwitterUpdate) {

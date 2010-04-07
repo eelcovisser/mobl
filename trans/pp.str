@@ -1,0 +1,184 @@
+module pp
+
+imports
+  include/MoBL
+
+strategies
+
+  pp-mobl-qid :
+    QId(qid, x) -> $[[<pp-mobl> qid]::[x]]
+
+  pp-mobl-qid :
+    s -> s
+    where is-string
+
+  pp-mobl :
+    Application(qid, setting*, def*) ->
+    $[application [<pp-mobl-qid> qid]
+      [<map(pp-mobl-setting); separate-by(|"\n"); concat-strings> setting*]
+      [<map(pp-mobl-def); separate-by(|"\n\n"); concat-strings> def*]]
+
+  pp-mobl-setting:
+    DatabaseSetting(s) -> $[database [s]]
+
+  pp-mobl-setting:
+    DatabaseVersionSetting(s) -> $[database version [s]]
+
+  pp-mobl-setting:
+    TitleSetting(s) -> $[title [s]]
+
+  pp-mobl-doc :
+    DocAnno(s) -> $[@doc [s]]
+
+  pp-mobl-def :
+    Import(qid) -> $[import [<pp-mobl-qid> qid]]
+
+  pp-mobl-def :
+    Screen(doc*, qid, farg*, rt, elem*) ->
+    $[[<map(pp-mobl-doc); separate-by(|"\n"); concat-strings> doc*]screen [<pp-mobl-qid> qid]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) : [<pp-mobl-type> rt] {
+        [<map(pp-mobl-elem); separate-by(|"\n"); concat-strings> elem*]
+      }]
+
+  pp-mobl-def :
+    ScreenNoReturnType(doc*, qid, farg*, elem*) ->
+    $[[<map(pp-mobl-doc); separate-by(|"\n"); concat-strings> doc*]screen [<pp-mobl-qid> qid]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) {
+        [<map(pp-mobl-elem); separate-by(|"\n"); concat-strings> elem*]
+      }]
+
+  pp-mobl-def :
+    EntityNoSuper(doc*, qid, prop*) ->
+    $[[<map(pp-mobl-doc); separate-by(|"\n"); concat-strings> doc*]entity [<pp-mobl-qid> qid] {
+        [<map(pp-mobl-prop); separate-by(|"\n"); concat-strings> prop*]
+      }]
+
+  pp-mobl-prop :
+    Property(doc*, x, t, anno*) ->
+    $[[<map(pp-mobl-doc); separate-by(|"\n"); concat-strings> doc*][x] : [<pp-mobl-type> t] ([<map(pp-mobl-anno); separate-by(|", "); concat-strings> anno*]]
+
+  pp-mobl-prop :
+    PropertyNoAnnos(doc*, x, t) ->
+    $[[<map(pp-mobl-doc); separate-by(|"\n"); concat-strings> doc*][x] : [<pp-mobl-type> t]]
+
+  pp-mobl-anno :
+    InverseAnno(inv) -> $[inverse: [inv]]
+
+  pp-mobl-type :
+    SimpleType(qid) -> <pp-mobl-qid> qid
+
+  pp-mobl-type :
+    GenericType(qid, t*) -> $[[<pp-mobl-qid> qid]<[<map(pp-mobl-type); separate-by(|", "); concat-strings> t*]>]
+
+  pp-mobl-farg :
+    FArg(x, t) -> $[[x] : [<pp-mobl-type> t]]
+
+  pp-mobl-farg :
+    FArgOptional(x, t, e) -> $[[x] : [<pp-mobl-type> t] := [<pp-mobl-exp> e]]
+
+strategies // UI
+
+  pp-mobl-elem :
+    ScreenString(s) -> s
+
+  pp-mobl-elem :
+    VarDecl(x, t, e) -> $[var [x] : [<pp-mobl-type> t] = [<pp-mobl-exp> e]]
+
+  pp-mobl-elem :
+    VarDeclInferred(x, e) -> $[var [x] = [<pp-mobl-exp> e]]
+
+  pp-mobl-elem :
+    Html(tag, html-arg*, elem*, closeTag) ->
+    $[<[tag][<map(pp-mobl-tag-arg); concat-strings> html-arg*]>
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      </[closeTag]>]
+
+  pp-mobl-elem :
+    HtmlShort(tag, html-arg*) -> $[<[tag] [<map(pp-mobl-tag-arg); separate-by(|" "); concat-strings> html-arg*] />]
+
+  pp-mobl-tag-arg :
+    HtmlArg(x, e) -> $[ [x]=[<pp-mobl-exp> e]]
+
+  pp-mobl-tag-arg :
+    HtmlDatabindArg(e) -> $[ databind=[<pp-mobl-exp> e]]
+
+  pp-mobl-elem :
+    TemplateCall(e, arg*, elem*) ->
+    $[[<concat-strings> [<pp-mobl-exp> e, "(", <map(pp-mobl-exp); separate-by(|", "); concat-strings> arg*]]) {
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      }]
+
+  pp-mobl-elem :
+    TemplateCallNoBody(e, arg*) -> $[[<pp-mobl-exp> e]([<map(pp-mobl-exp); separate-by(|", "); concat-strings> arg*])]
+
+  pp-mobl-elem :
+    TemplateCallNoArgs(e, elem*) ->
+    $[[<pp-mobl-exp> e] {
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      }]
+
+  pp-mobl-elem :
+    List(x, t, e, elem*) ->
+    $[list([x] : [<pp-mobl-type> t] in [<pp-mobl-exp> e]) {
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      }]
+
+  pp-mobl-elem :
+    ListInferred(x, e, elem*) ->
+    $[list([x] in [<pp-mobl-exp> e]) {
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      }]
+
+  pp-mobl-elem :
+    ConditionalDisplay(e, elem*) ->
+    $[cond([<pp-mobl-exp> e]) {
+        [<map(pp-mobl-elem); separate-by(|", "); concat-strings> elem*]
+      }]
+
+  pp-mobl-elem =
+    debug(!"Could not translate elem: "); fail
+
+strategies // expressions
+
+  pp-mobl-exp :
+    NamedExp(x, e) -> $[[x]=[<pp-mobl-exp> e]]
+
+  pp-mobl-exp :
+    Brackets(e) -> $[([<pp-mobl-exp> e])]
+
+  pp-mobl-exp :
+    Callback(stat*) ->
+    $[{
+        statements;
+      }]
+
+  pp-mobl-exp :
+    Var(qid) -> <pp-mobl-qid> qid
+
+  pp-mobl-exp :
+    FieldAccess(e, x) -> $[[<pp-mobl-exp> e].[x]]
+
+  pp-mobl-exp :
+    MethodCall(e, x, arg*) -> $[[<pp-mobl-exp> e].[x]([<map(pp-mobl-exp); separate-by(|", "); concat-strings> arg*])]
+
+  pp-mobl-exp :
+    BinMethodCall(e1, op, e2) -> $[[<pp-mobl-exp> e1] [op] [<pp-mobl-exp> e2]]
+
+  pp-mobl-exp :
+    Call(qid, arg*) -> $[[<pp-mobl-qid> qid]([<map(pp-mobl-exp); separate-by(|", "); concat-strings> arg*])]
+
+  pp-mobl-exp :
+    String(s) -> s
+
+  pp-mobl-exp :
+    Int(s) -> s
+
+  pp-mobl-exp :
+    True() -> $[true]
+
+  pp-mobl-exp :
+    False() -> $[false]
+
+  pp-mobl-exp :
+    Null() -> $[null]
+
+  pp-mobl-exp :
+    e -> $[someExp]

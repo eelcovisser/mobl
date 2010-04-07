@@ -21,6 +21,7 @@ imports
   analyze
   type
   desugar
+  pp
 
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
 
@@ -80,6 +81,8 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     _ -> None() //(filename-html, result-html)
     where HasErrors
 
+
+
   editor-hover:
     (t@SimpleType(_), position, ast, path, project-path) -> <get-doc> <lookup-type> t2
     where t2 := <lookup-node> (position, ast)
@@ -124,10 +127,10 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
 
   editor-complete:
     (FieldAccess(_, COMPLETION(prefix)), position, ast, path, project-path) -> [prop*, method*]
-    where analyzed-ast := <analyze> ast
-    where position' := <desugar-position(normalize|ast); debug(!"New position: ")> position
-    where FieldAccess(e, _) := <term-at-position(|position'); debug(!"Term at position: ")> analyzed-ast
-       <+ FieldAccess(e, _) := <parent-at-position(|position'); debug(!"Term at parent: ")> analyzed-ast
+    where ast' := <analyze; store-result> ast
+        ; position' := <desugar-position(normalize|ast); debug(!"New position: ")> position
+    where FieldAccess(e, _) := <term-at-position(|position'); debug(!"Term at position: ")> ast
+       <+ FieldAccess(e, _) := <parent-at-position(|position'); debug(!"Term at parent: ")> ast
     where t := <debug(!"e: "); type-of; debug(!"Type: ")> e
         ; prop* := <get-all-properties; map(\ prop@Property(_, x, _, _) -> ([x], <get-doc> prop) \)> t
         ; method* := <get-all-methods; map(\ meth@c#([_, x, args|_]) -> (<concat> [[x, "("], <filter(?FArg(<id>, _)); separate-by(!", ")> args, [")"]], <get-doc> meth) \)> t
@@ -145,6 +148,11 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     (selected, position, ast, path, project-path) -> (filename, <normalize-all; desugar-all> selected)
     with
       filename := <guarantee-extension(|"aterm")> "desugar"
+
+  format-code :
+    (selected, position, ast, path, project-path) -> (filename, <pp-mobl> selected)
+    with
+      filename := <guarantee-extension(|"mobl")> "formatted"
 
 strategies
 

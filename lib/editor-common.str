@@ -92,6 +92,8 @@ strategies
   refresh-workspace-file:
     f -> <prim("SSL_EXT_refreshresource", f)>
 
+  project-path = prim("SSL_EXT_projectpath")
+
 strategies
 
   desugar-position(desugar|ast):

@@ -9,7 +9,7 @@ imports
   desugar
   generation/emit
   generation/ui
-  generation/lift
+  generation/cps-lift
   generation/cps-action
   generation/sql
   generation/data

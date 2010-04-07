@@ -81,6 +81,20 @@ function log(s) {
         callback(valueCopy);
     };
 
+    function Template(renderFn) {
+        this.render = renderFn;
+        this.calledTemplates = [];
+        this.subscriptions = [];
+    }
+
+    Template.prototype.addSubscription = function(subId) {
+        this.subscriptions.push(subId);
+    };
+
+    Template.prototype.addCalledTemplate = function(template) {
+        this.calledTemplates.push(template);
+    };
+
     function LinkedMap (parent, values) {
         this.values = values || {};
         this.parent = parent;
@@ -138,12 +152,33 @@ function log(s) {
 
     Reference.prototype = new persistence.Observable();
 
+    Reference.prototype.oldAddEventListener = Reference.prototype.addEventListener;
+
+
+    window.allSubscriptions = [];
+
+    Reference.prototype.addEventListener = function(eventType, fn) {
+        this.oldAddEventListener(eventType, fn);
+        allSubscriptions.push({eventType: eventType, fn: fn, ref: this});
+        return allSubscriptions.length;
+    };
+
+    Reference.prototype.addSetListener = function(callback) {
+        var that = this;
+        if(this.ref.addEventListener) {
+           this.ref.addEventListener('change', function(_, _, prop, value) {
+             if(prop === that.prop) {
+               callback(that, value);
+             }
+           });
+        }
+    };
+
     Reference.prototype.get = function() {
         if(!this.prop) {
             return this.ref;
         }
         if(this.ref.get) {
-            console.log(this.prop, this.ref.get())
             return this.ref.get()[this.prop];
         }
     };
@@ -157,7 +192,7 @@ function log(s) {
             this.ref.get()[this.prop] = value;
         }
         for(var i = 0; i < this.childRefs.length; i++) {
-            //this.childRefs[i].ref = this;
+            // this.childRefs[i].ref = this;
             var childRef = this.childRefs[i];
             childRef.rebind();
             childRef.triggerEvent('change', childRef, childRef.get());
@@ -169,7 +204,8 @@ function log(s) {
         if(this.prop) {
             if(this.ref.get().addEventListener) {
                 window.newTask2 = this.ref.get();
-                //console.log("Attaching event listener to property: " + this.prop)
+                // console.log("Attaching event listener to property: " +
+                // this.prop)
                 this.ref.get().addEventListener('change', function(_, _, prop, value) {
                     if(prop === that.prop) {
                         that.triggerEvent('change', that, value);
@@ -182,17 +218,6 @@ function log(s) {
         }
         for(var i = 0; i < this.childRefs.length; i++) {
             this.childRefs[i].rebind(value[this.childRefs[i].prop]);
-        }
-    };
-
-    Reference.prototype.addSetListener = function(callback) {
-        var that = this;
-        if(this.ref.addEventListener) {
-            this.ref.addEventListener('change', function(_, _, prop, value) {
-                if(prop === that.prop) {
-                    callback(that, value);
-                }
-            });
         }
     };
 

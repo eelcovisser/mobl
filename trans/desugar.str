@@ -5,6 +5,7 @@ imports
   libstratego-lib
   rename
   type
+  ui-lift
 
 strategies
 

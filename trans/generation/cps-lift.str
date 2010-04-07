@@ -1,4 +1,4 @@
-module generation/lift
+module generation/cps-lift
 
 imports
   include/MoBL
@@ -237,6 +237,10 @@ strategies
 
   is-sync =
     ?FieldAccess(e, x)
+    ; <is-sync> e
+
+  is-sync =
+    ?Brackets(e)
     ; <is-sync> e
 
   is-sync =

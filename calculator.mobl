@@ -12,6 +12,9 @@ screen root() {
   group {
     inputInt(n1)
     inputInt(n2)
-    item { outputInt(n1 * n2) }
+    item { "* " outputInt(n1 * n2) }
+    item { "+ " outputInt(n1 + n2) }
+    item { "- " outputInt(n1 - n2) }
+    item { "/ " outputInt(n1 / n2) }
   }
 }

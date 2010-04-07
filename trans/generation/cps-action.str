@@ -2,7 +2,7 @@ module generation/cps-action
 
 imports
   include/MoBL
-  generation/lift
+  generation/cps-lift
   generation/action
   generation/ui
   declare

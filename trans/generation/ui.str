@@ -12,7 +12,7 @@ imports
   util
   generation/emit
   generation/action
-  generation/lift
+  generation/cps-lift
   generation/cps-action
 
 rules
@@ -70,16 +70,10 @@ rules
     [TemplateCall(e, arg*, elems)|rest*] ->
     $[var [nodes] = $("<span>");
       [root].append([nodes]);
-      [subscriptions]
-      function [renderTemplate](rerender) {
-        [templatecall]
-      }
-      [renderTemplate]();
+      [templatecall]
 ]
     with elem-root := <newname> "root"
-       ; subScope := <newname> "subScope"
        ; nodes := <newname> "nodes"
-       ; renderTemplate := <newname> "renderTemplate"
        ; elems-fun := $[function(namedArgs, elements, callback) {
                           var [elem-root] = $("<span>");
                           [<elems-to-js-callback(|elem-root)> elems]
@@ -90,18 +84,44 @@ rules
            watch-e-expr* := []
          end
        ; watch-expr* := <map(find-watchable-expressions); concat> arg*
-       ; subscriptions := <map(exp-to-watcher-js(|renderTemplate)); concat-strings> [watch-e-expr*, watch-expr*]
        ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun,
            $[function(node) {
                var oldNodes = [nodes];
                [nodes] = node.contents();
                oldNodes.replaceWith([nodes]);
-               if(!rerender) {
-                 [<elems-to-js(|root)> rest*]
-               }
+               [<elems-to-js(|root)> rest*]
              }]
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
+
+  elems-to-js(|root) :
+    [TemplateCall(e, arg*, elems)|rest*] ->
+    $[var [nodes] = $("<span>");
+      [root].append([nodes]);
+      [templatecall]
+]
+    with elem-root := <newname> "root"
+       ; nodes := <newname> "nodes"
+       ; elems-fun := $[function(namedArgs, elements, callback) {
+                          var [elem-root] = $("<span>");
+                          [<elems-to-js-callback(|elem-root)> elems]
+                        }]
+       ; if not(Var(QId(_, _)) := e) then
+           watch-e-expr* := <collect(?Var(_) <+ ?FieldAccess(_, _))> e
+         else
+           watch-e-expr* := []
+         end
+       ; watch-expr* := <map(find-watchable-expressions); concat> arg*
+       ; args  := <ref-arguments-to-js; <concat> [<id>, [elems-fun,
+           $[function(node) {
+               var oldNodes = [nodes];
+               [nodes] = node.contents();
+               oldNodes.replaceWith([nodes]);
+               [<elems-to-js(|root)> rest*]
+             }]
+         ]]; separate-by(!", "); concat-strings> arg*
+       ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
+
 
    find-watchable-expressions =
         not(?Var(_))
@@ -338,8 +358,17 @@ rules
   elems-to-js(|root) :
     [vd@VarDecl(x, t, e)|rest] -> $[
       var [x] = ref([<expression-to-js> e]);
+      [subscriptions]
       [<elems-to-js(|root)> rest]]
     where <is-sync> e
+        ; subscriptions := <find-watchable-expressions; map(exp-to-update-ref-js(|x, e)); concat-strings> e
+
+  exp-to-update-ref-js(|x, exp) :
+    e -> $[[es].addEventListener('change', function() {
+             [x].set([<expression-to-js> exp]);
+           });
+]
+  where es := <ref-expression-to-js> e
 
   elems-to-js(|root) :
     [vd@VarDeclInferred(x, e)|rest] -> <concat; elems-to-js(|root)> [<cps-lift-expressions> [vd], rest]
@@ -348,8 +377,10 @@ rules
   elems-to-js(|root) :
     [vd@VarDeclInferred(x, e)|rest] -> $[
       var [x] = ref([<expression-to-js> e]);
+      [subscriptions]
       [<elems-to-js(|root)> rest]]
     where <is-sync> e
+        ; subscriptions := <find-watchable-expressions; map(exp-to-update-ref-js(|x, e)); concat-strings> e
 
 rules // utils
 

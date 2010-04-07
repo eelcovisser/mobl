@@ -1,0 +1,35 @@
+module ui-lift
+
+imports
+  include/MoBL
+  rename
+
+strategies
+
+  desugar = ui-lift
+
+  ui-lift :
+    TemplateCall(e, arg*, elem*) -> <concat> [inits, [TemplateCall(e, arg2*, elem*)]]
+    where {| Elems
+           : arg2* := <map(ui-lift-expression)> arg*
+           ; inits := <bagof-Elems>
+           |}
+           ; not([] := inits )
+
+  ui-lift-expression :
+    NamedExp(x, e) -> NamedExp(x, <ui-lift-expression> e)
+
+  ui-lift-expression =
+    ?Var(_)
+
+  ui-lift-expression =
+    ?FieldAccess(_, _)
+
+  ui-lift-expression :
+    e -> Var(newvar)
+    where not(?Var(_))
+        ; not(?FieldAccess(_, _))
+        ; not(?NamedExp(_, _))
+        ; newvar := <newname> "tmp"
+        ; rules ( IsRefVar : newvar )
+        ; rules ( Elems :+= VarDeclInferred(newvar, e) )

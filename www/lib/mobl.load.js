@@ -1,6 +1,5 @@
 var mobl = window.mobl || {};
 mobl.screenStack = [];
-mobl.rootScope = new mobl.LinkedMap();
 
 function updateScrollers () {
     //console.log("Updating scrollers");

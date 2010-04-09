@@ -6,7 +6,7 @@ imports
 strategies
 
   pp-mobl-qid :
-    QId(qid, x) -> $[[<pp-mobl> qid]::[x]]
+    QId(qid, x) -> $[[<pp-mobl-qid> qid]::[x]]
 
   pp-mobl-qid :
     s -> s
@@ -14,13 +14,13 @@ strategies
 
   pp-mobl :
     Application(qid, setting*, def*) ->
-    $[application [<pp-mobl-qid> qid]
+    $[application [<pp-mobl-qid> qid]["\n"]
       [<map(pp-mobl-setting); separate-by(|"\n"); concat-strings> setting*]
       [<map(pp-mobl-def); separate-by(|"\n\n"); concat-strings> def*]]
 
   pp-mobl :
     Module(qid, def*) ->
-    $[module [<pp-mobl-qid> qid]
+    $[module [<pp-mobl-qid> qid]["\n"]
       [<map(pp-mobl-def); separate-by(|"\n\n"); concat-strings> def*]]
 
   pp-mobl-setting:
@@ -63,22 +63,38 @@ strategies
   pp-mobl-def :
     EntityNoSuper(doc*, qid, prop*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]entity [<pp-mobl-qid> qid] {
-        [<map(pp-mobl-prop); separate-by(|"\n"); concat-strings> prop*]
+        [<map(pp-mobl-prop(|width)); separate-by(|"\n"); concat-strings> prop*]
       }]
+    where width := <add> (<map(pp-prop-len); foldr(!0, max)> prop*, 1)
+
+  pp-prop-len :
+    Property(_, x, _, _) -> <strlen> x
+
+  pp-prop-len :
+    PropertyNoAnnos(_, x, _) -> <strlen> x
 
   pp-mobl-def :
     Entity(doc*, qid, t, prop*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]entity [<pp-mobl-qid> qid] : [<pp-mobl-type> t] {
-        [<map(pp-mobl-prop); separate-by(|"\n"); concat-strings> prop*]
+        [<map(pp-mobl-prop(|width)); separate-by(|"\n"); concat-strings> prop*]
       }]
+    where width := <add> (<map(pp-prop-len); foldr(!0, max)> prop*, 1)
 
-  pp-mobl-prop :
+  pp-build-string :
+    n -> ""
+    where <lt> (n, 1)
+
+  pp-build-string :
+    n -> <concat-strings> [" ", <pp-build-string> <subt> (n, 1)]
+    where not(0 := n)
+
+  pp-mobl-prop(|width) :
     Property(doc*, x, t, anno*) ->
-    $[[<map(pp-mobl-doc); concat-strings> doc*][x] : [<pp-mobl-type> t] ([<map(pp-mobl-anno); separate-by(|", "); concat-strings> anno*]]
+    $[[<map(pp-mobl-doc); concat-strings> doc*][x][<pp-build-string> <subt> (width, <strlen> x)]: [<pp-mobl-type> t] ([<map(pp-mobl-anno); separate-by(|", "); concat-strings> anno*])]
 
-  pp-mobl-prop :
+  pp-mobl-prop(|width) :
     PropertyNoAnnos(doc*, x, t) ->
-    $[[<map(pp-mobl-doc); concat-strings> doc*][x] : [<pp-mobl-type> t]]
+    $[[<map(pp-mobl-doc); concat-strings> doc*][x][<pp-build-string> <subt> (width, <strlen> x)]: [<pp-mobl-type> t]]
 
   pp-mobl-anno :
     InverseAnno(inv) -> $[inverse: [inv]]
@@ -235,14 +251,14 @@ strategies // statements
       }]
 
   pp-mobl-stat :
-    For(x, t, e, stat*) ->
-    $[for([x] : [<pp-mobl-type> t] in [<pp-mobl-exp> e]) {
+    For(lval, t, e, stat*) ->
+    $[for([<pp-mobl-lvalue> lval] : [<pp-mobl-type> t] in [<pp-mobl-exp> e]) {
         [<map(pp-mobl-stat); separate-by(|"\n"); concat-strings> stat*]
       }]
 
   pp-mobl-stat :
-    ForInferred(x, e, stat*) ->
-    $[for([x] in [<pp-mobl-exp> e]) {
+    ForInferred(lval, e, stat*) ->
+    $[for([<pp-mobl-lvalue> lval] in [<pp-mobl-exp> e]) {
         [<map(pp-mobl-stat); separate-by(|"\n"); concat-strings> stat*]
       }]
 
@@ -352,7 +368,7 @@ strategies // externals
   pp-mobl-def :
     ExternalEntity(doc*, qid, t, prop*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]external entity [<pp-mobl-qid> qid] : [<pp-mobl-type> t] {
-        [<map(pp-mobl-prop); separate-by(|"\n"); concat-strings> prop*]
+        [<map(pp-mobl-prop(|20)); separate-by(|"\n"); concat-strings> prop*]
       }]
 
   pp-mobl-def :
@@ -366,38 +382,40 @@ strategies // externals
   pp-mobl-def :
     ExternalGenericType(doc*, qid, x*, decl*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]external type [<pp-mobl-qid> qid]<[<separate-by(|", "); concat-strings> x*]> {
-        [<map(pp-mobl-ext); separate-by(|"\n"); concat-strings> decl*]
+        [<map(pp-mobl-ext(|20)); separate-by(|"\n"); concat-strings> decl*]
       }]
 
-  pp-mobl-ext :
+  pp-mobl-ext(|width) :
     ExternalMethod(doc*, x, farg*, rt) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]function [x]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) : [<pp-mobl-type> rt]]
 
-  pp-mobl-ext :
+  pp-mobl-ext(|width) :
     ExternalStaticMethod(doc*, x, farg*, rt) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]static function [x]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) : [<pp-mobl-type> rt]]
 
-  pp-mobl-ext :
+  pp-mobl-ext(|width) :
     ExternalSyncMethod(doc*, x, farg*, rt) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]sync function [x]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) : [<pp-mobl-type> rt]]
 
-  pp-mobl-ext :
+  pp-mobl-ext(|width) :
     ExternalStaticSyncMethod(doc*, x, farg*, rt) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]static sync function [x]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*]) : [<pp-mobl-type> rt]]
 
-  pp-mobl-ext = pp-mobl-prop
+  pp-mobl-ext(|width) = pp-mobl-prop(|width)
 
   pp-mobl-def :
     ExternalTypeNoSuper(doc*, qid, decl*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]external type [<pp-mobl-qid> qid] {
-        [<map(pp-mobl-ext); separate-by(|"\n"); concat-strings> decl*]
+        [<map(pp-mobl-ext(|width)); separate-by(|"\n"); concat-strings> decl*]
       }]
+    where width := <add> (<filter(pp-prop-len); foldr(!0, max)> decl*, 1)
 
   pp-mobl-def :
     ExternalType(doc*, qid, t, decl*) ->
     $[[<map(pp-mobl-doc); concat-strings> doc*]external type [<pp-mobl-qid> qid] : [<pp-mobl-type> t] {
-        [<map(pp-mobl-ext); separate-by(|"\n"); concat-strings> decl*]
+        [<map(pp-mobl-ext(|width)); separate-by(|"\n"); concat-strings> decl*]
       }]
+    where width := <add> (<filter(pp-prop-len); foldr(!0, max)> decl*, 1)
 
   pp-mobl-def :
     ExternalScreen(doc*, qid, farg*, rt) ->

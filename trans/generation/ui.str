@@ -72,6 +72,7 @@ rules
     $[var [nodes] = $("<span>");
       [root].append([nodes]);
       [templatecall]
+      [<elems-to-js(|root)> rest*]
 ]
     with elem-root := <newname> "root"
        ; nodes := <newname> "nodes"
@@ -84,7 +85,6 @@ rules
                var oldNodes = [nodes];
                [nodes] = node.contents();
                oldNodes.replaceWith([nodes]);
-               [<elems-to-js(|root)> rest*]
              }]
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
@@ -99,6 +99,7 @@ rules
         [templatecall]
       }
       [renderTemplate]();
+      [<elems-to-js(|root)> rest*]
 ]
     where not(Var(QId(_, _)) := e)
     with elem-root := <newname> "root"
@@ -116,9 +117,6 @@ rules
                var oldNodes = [nodes];
                [nodes] = node.contents();
                oldNodes.replaceWith([nodes]);
-               if(!rerender) {
-                 [<elems-to-js(|root)> rest*]
-               }
              }]
          ]]; separate-by(!", "); concat-strings> arg*
        ; templatecall := <concat-strings> ["(", <expression-to-js> e, ")(", args, ");"]
@@ -277,9 +275,6 @@ rules
     [List(lvalue, t, e, elems)|rest*] -> $[
       var [node] = $("<span>");
       [root].append([node]);
-      var [rest] = function() {
-        [<elems-to-js(|root)> rest*]
-      };
       var [list];
       var [renderList] = function(isRerender) {
         [list] = [<expression-to-js> e];
@@ -292,9 +287,6 @@ rules
               [<concat; elems-to-js(|node)> [elems, [$[
                 if(results.length > 0) {
                   renderOne();
-                } else if(!isRerender) {
-                  mobl.delayedUpdateScrollers();
-                  [rest]();
                 } else {
                   mobl.delayedUpdateScrollers();
                 }
@@ -302,9 +294,6 @@ rules
           }
           if(results.length > 0) {
             renderOne();
-          } else if(!isRerender) {
-            mobl.delayedUpdateScrollers();
-            [rest]();
           } else {
             mobl.delayedUpdateScrollers();
           }
@@ -313,9 +302,9 @@ rules
       [renderList](false);
       [list].addEventListener('change', function() { [renderList](true); });
       [subscriptions]
+      [<elems-to-js(|root)> rest*]
     ]
     with node := <newname> "node"
-       ; rest := <newname> "rest"
        ; i := <newname> "i"
        ; renderList := <newname> "renderList"
        ; list := <newname> "list"
@@ -334,12 +323,10 @@ rules
         if([value]) {
           [<elems-to-js(|node)> elems]
         }
-        if(!isRerender) {
-          [<elems-to-js(|root)> rest*]
-        }
       };
       [renderCond](false);
       [subscriptions]
+      [<elems-to-js(|root)> rest*]
     ]
     with node := <newname> "node"
        ; value := <newname> "value"

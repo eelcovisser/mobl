@@ -95,7 +95,7 @@ rules
     $[var [nodes] = $("<span>");
       [root].append([nodes]);
       [subscriptions]
-      function [renderTemplate](rerender) {
+      function [renderTemplate]() {
         [templatecall]
       }
       [renderTemplate]();
@@ -130,7 +130,7 @@ rules
 
   exp-to-watcher-js(|renderTemplate) :
     e -> $[[<ref-expression-to-js> e].addEventListener('change', function() {
-             [renderTemplate](true);
+             [renderTemplate]();
            });
 ]
 
@@ -276,55 +276,52 @@ rules
       var [node] = $("<span>");
       [root].append([node]);
       var [list];
-      var [renderList] = function(isRerender) {
+      var [renderList] = function() {
         [list] = [<expression-to-js> e];
         [list].list(null, function(results) {
           [node].empty();
-          results = results.reverse();
-          function renderOne() {
+          for(var [i] = 0; [i] < results.length; [i]++) {
+            (function() {
+              var [iternode] = $("<span>");
+              [node].append([iternode]);
               [vardecls]
               [assigns]
-              [<concat; elems-to-js(|node)> [elems, [$[
-                if(results.length > 0) {
-                  renderOne();
-                } else {
-                  mobl.delayedUpdateScrollers();
-                }
+              [<concat; elems-to-js(|iternode)> [elems, [$[
+                 var oldNodes = [iternode];
+                 [iternode] = [iternode].contents();
+                 oldNodes.replaceWith([iternode]);
               ]]]]
+            }());
           }
-          if(results.length > 0) {
-            renderOne();
-          } else {
-            mobl.delayedUpdateScrollers();
-          }
+          mobl.delayedUpdateScrollers();
         });
       };
-      [renderList](false);
+      [renderList]();
       [list].addEventListener('change', function() { [renderList](true); });
       [subscriptions]
       [<elems-to-js(|root)> rest*]
     ]
     with node := <newname> "node"
+       ; iternode := <newname> "iternode"
        ; i := <newname> "i"
        ; renderList := <newname> "renderList"
        ; list := <newname> "list"
-       ; oldScope := <newname> "oldScope"
        ; vardecls := <map(!$[var [<id>]; ]); concat-strings> <lvalue-vars> lvalue
-       ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, MethodCall(Var("results"), "pop", []))
+       ; assigns := <desugar-all; (map(statement-to-js); concat-strings <+ statement-to-js)> Assignment(lvalue, Indexer(Var("results"), Var(i)))
        ; subscriptions := <collect-all(?MethodCall(_, _, <id>) <+ ?Call(_, _)); find-watchable-expressions; map(exp-to-watcher-js(|renderList)); concat-strings> e
 
   elems-to-js(|root) :
     [ConditionalDisplay(e, elems)|rest*] -> $[
       var [node] = $("<span>");
       [root].append([node]);
-      var [renderCond] = function(isRerender) {
+      var [renderCond] = function() {
         var [value] = [<expression-to-js> e];
         [node].empty();
         if([value]) {
           [<elems-to-js(|node)> elems]
         }
       };
-      [renderCond](false);
+      [renderCond]();
       [subscriptions]
       [<elems-to-js(|root)> rest*]
     ]

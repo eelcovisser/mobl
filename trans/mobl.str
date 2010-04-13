@@ -23,6 +23,17 @@ imports
   desugar
   pp
 
+strategies
+
+  resolve-file :
+    filename -> filename
+    where <file-exists> filename
+
+  resolve-file :
+    filename -> path
+    where not(<file-exists> filename)
+        ; [path] := <filter(\ p -> <concat-strings> [p, "/", filename] \; file-exists)> <IncludePaths>
+
 rules // Main editor interface (defined by editor/MoBL-Builders and -References.esv)
 
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
@@ -36,7 +47,8 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     with
       rules ( ProjectPath := project-path
               IsImported  : path
-              OutputPath  := <concat-strings> [project-path, "/www"] )
+              OutputPath  := <concat-strings> [project-path, "/www"]
+              IncludePaths := [project-path, <concat-strings> [project-path, "/stdlib"]])
       ; ast2 := <analyze; store-result> ast
       ; (Module(mod-name, _) := ast2 <+ Application(mod-name, _, _) := ast2)
       ; rules ( CompilingModule := mod-name )
@@ -72,7 +84,8 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     with
       rules ( ProjectPath := project-path
               IsImported  : path
-              OutputPath  := <concat-strings> [project-path, "/www"])
+              OutputPath  := <concat-strings> [project-path, "/www"]
+              IncludePaths := [project-path, <concat-strings> [project-path, "/stdlib"]])
       ; (Module(mod-name, _) := ast <+ Application(mod-name, _, _) := ast)
       ; rules ( CompilingModule := mod-name )
       ; <compile> ast
@@ -145,7 +158,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     x -> ([x], "")
 
   editor-desugar :
-    (selected, position, ast, path, project-path) -> (filename, <normalize-all; desugar-all> selected)
+    (selected, position, ast, path, project-path) -> (filename, <normalize-all; desugar-all; pp-mobl> selected)
     with
       filename := <guarantee-extension(|"aterm")> "desugar"
 

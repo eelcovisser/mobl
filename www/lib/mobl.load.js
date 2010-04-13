@@ -4,6 +4,7 @@ mobl.screenStack = [];
 function updateScrollers () {
     //console.log("Updating scrollers");
     var scrollwrappers = $("div#scrollwrapper");
+    scrollTo(0, 0);
     if (scrollwrappers.length > 0) {
         var height = window.innerHeight;
         height -= $("#header:visible").height();
@@ -52,12 +53,10 @@ mobl.load = function(url) {
     if(url in mobl.loadedFiles) {
         return;
     }
-    if(url.substring(url.length-3) === '.js') {
-        $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
-    } else if(url.substring(url.length-4) === '.css') {
+    if(url.substring(url.length-4) === '.css') {
         $("head").append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + url + "\">");
     } else {
-        console.log("Unkown type to load: " + url);
+        $("head").append("<script type=\"text/javascript\" src=\"" + url + "\">");
     }
     mobl.loadedFiles[url] = true;
 };

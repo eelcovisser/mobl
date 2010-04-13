@@ -82,8 +82,18 @@ screen root() {
     list(account in Account.all().order("username", true)) {
       itemArrow(onclick={ showUpdates(account); }) {
         outputString(account.username)
+        deleteButton("Edit", onclick={ editAccount(account); })
       }
     }
+  }
+}
+
+screen editAccount(account : Account) {
+  header("Add account")
+  topRightButton("Done", onclick={ screen return; })
+  inputs {
+    inputString(account.username, placeholder="Twitter username")
+    inputSecret(account.password, placeholder="Twitter password")
   }
 }
 

@@ -17,7 +17,12 @@ imports
   lib/editor-common
 
 strategies
-  
+
+  ensure-existing-dir :
+    dir -> dir
+    where parts := <string-tokenize(|["/"])> dir
+        ; <file-exists <+ mkdir <+ debug(!"Could not create directory: "); fail> dir
+
   compile =
       (?Module(qid, def*) <+ ?app@Application(qid, _, def*))
       ; where(<debug(!"Now compiling: ")> qid)
@@ -25,29 +30,29 @@ strategies
       ; desugar-all
       ; module-to-js
       ; where(path := <qid-to-path> qid
-              ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path]
+              ; js-filename   := <concat-strings; guarantee-extension(|"js"); debug> [<OutputPath>, "/", path]
+              ; <dirname; ensure-existing-dir> js-filename
               ; index-html-filename   := <concat-strings; guarantee-extension(|"html")> [<OutputPath>, "/", path])
       ; fp := <fopen> (js-filename, "w")
       ; <fputs> ($[mobl.provides('[<qid-to-js> qid]');
 ], fp)
       ; <fputs> (<get-all>, fp)
       ; <fclose> fp
-	    ; if !app then
-	      with(
-	        fp2 := <fopen <+ debug(!"Could not open file: "); fail> (index-html-filename, "w")
-	        ; <fputs> (<generate-index-html <+ debug(!"Could not generate index.html")> app, fp2)
-	        ; <fclose> fp2
-	      )
+      ; if !app then
+        with(
+          fp2 := <fopen <+ debug(!"Could not open file: "); fail> (index-html-filename, "w")
+          ; <fputs> (<generate-index-html <+ debug(!"Could not generate index.html")> app, fp2)
+          ; <fclose> fp2
+        )
         end
       ; <refresh-workspace-file> js-filename
       ; <refresh-workspace-file> index-html-filename
 
 strategies
-  
+
    qid-to-path =
     is-string
-  
+
   qid-to-path :
     QId(qid, x) -> $[[qids]/[x]]
     with qids := <qid-to-path> qid
-    

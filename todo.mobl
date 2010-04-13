@@ -21,6 +21,7 @@ screen addTask() {
     }
     button("Add", onclick={
       add(newTask);
+      mobl::notify::notify("Added task!");
       screen return;
     })
   }

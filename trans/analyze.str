@@ -41,28 +41,35 @@ rules
 
   import-module =
     ?Import(qid)
-    ; where(<open-import(\ path -> <resolve-file> <concat-strings> [path, ".mobl"] \, parse-file, compile-and-externalize-module)> <qid-to-path> qid
-            ; <declare-all> Module(qid, <id>))
-    ; rules ( Imports :+= qid )
+    ; (<ParsedAndImported> qid
+    <+ rules ( ParsedAndImported : qid )
+     //; debug(!"Importing: ")
+     ; where(<open-import(\ path -> <resolve-file> <concat-strings> [path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid
+             ; <declare-all> Module(qid, <id>))
+     ; rules ( Imports :+= qid )
+      )
+
+  compile-import-module =
+    ?Import(qid)
+    ; where(path := <resolve-file> <concat-strings> [<qid-to-path> qid, ".mobl"]
+        ; if not(<Compiled> qid <+ <is-newer> (<concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", <qid-to-path> qid], path)) then
+            <parse-file> path
+            ; compile
+          end
+      )
 
   lookup-import-module =
     ?Import(qid)
-    ; where(<open-import(\ path -> <resolve-file> <concat-strings> [path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid
-            ; <declare-all> Module(qid, <id>))
-
-  compile-and-externalize-module :
-    mod@Module(qid, def*) -> def2*
-    with compile
-       ; def2* := <externalize-module> mod
+    ; (<ParsedAndImported> qid
+    <+ rules ( ParsedAndImported : qid )
+     //; debug(!"Importing: ")
+     ; where(<open-import(\ path -> <resolve-file> <concat-strings> [path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid
+             ; <declare-all> Module(qid, <id>))
+      )
 
   externalize-module :
     Module(qid, def*) -> def2*
     with def2* := <analyze; desugar-all; ?Module(_, <id>); filter(definition-to-external)>
-
-  compile-and-externalize-module :
-    app@Application(qid, _, def*) -> def2*
-    with compile
-       ; def2* := <externalize-module> app
 
   externalize-module :
     Application(qid, _, def*) -> def2*

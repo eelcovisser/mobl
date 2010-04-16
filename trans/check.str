@@ -92,6 +92,7 @@ rules
     where <type-of> e
     where <map(type-of)> arg*
     where not(type-of)
+        ; <type-of; debug(!"Type of e: ")> e
 
   constraint-error :
     Assignment(lhs, e) -> (lhs, $[No such variable '[lhs]' defined])

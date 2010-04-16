@@ -25,12 +25,14 @@ strategies
 
   compile =
       (?Module(qid, def*) <+ ?app@Application(qid, _, def*))
-      ; where(<debug(!"Now compiling: ")> qid)
+      ; where(<debug(!"Now compiling: ")> qid
+              ; rules ( Compiled : qid ))
       ; analyze
+      ; where(alltd(compile-import-module))
       ; desugar-all
       ; module-to-js
       ; where(path := <qid-to-path> qid
-              ; js-filename   := <concat-strings; guarantee-extension(|"js"); debug> [<OutputPath>, "/", path]
+              ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path]
               ; <dirname; ensure-existing-dir> js-filename
               ; index-html-filename   := <concat-strings; guarantee-extension(|"html")> [<OutputPath>, "/", path])
       ; fp := <fopen> (js-filename, "w")
@@ -43,10 +45,10 @@ strategies
           fp2 := <fopen <+ debug(!"Could not open file: "); fail> (index-html-filename, "w")
           ; <fputs> (<generate-index-html <+ debug(!"Could not generate index.html")> app, fp2)
           ; <fclose> fp2
+          ; <refresh-workspace-file> index-html-filename
         )
         end
       ; <refresh-workspace-file> js-filename
-      ; <refresh-workspace-file> index-html-filename
 
 strategies
 

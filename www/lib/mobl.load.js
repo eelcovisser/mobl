@@ -1,13 +1,20 @@
 var mobl = window.mobl || {};
 mobl.screenStack = [];
 
+mobl.innerHeight = false;
+setTimeout(function() {
+    if(mobl.isAndroid) {
+        mobl.innerHeight = window.innerHeight;
+    }
+}, 200);
+
 function updateScrollers () {
     //console.log("Updating scrollers");
     var scrollwrappers = $("div#scrollwrapper");
     scrollTo(0, 0);
     if (scrollwrappers.length > 0) {
-        var height = window.innerHeight;
-        height -= $("#header:visible").height();
+        var height = mobl.innerHeight ? mobl.innerHeight : window.innerHeight;
+        height -= $("div.header:visible").height();
         height -= $("#footer:visible").height();
         height -= $("#tabbar:visible").height();
         scrollwrappers.height(height);
@@ -19,7 +26,7 @@ function updateScrollers () {
         if(scroller) {
             scroller.refresh();
         } else {
-            console.log("what's up here?");
+            //console.log("what's up here?");
         }
     }
 }
@@ -40,7 +47,9 @@ mobl.provides = function (moduleName) {
     current.isLoaded = true;
 }
 
-$(window).resize(updateScrollers);
+if(!mobl.isAndroid) {
+    $(window).resize(updateScrollers);
+}
 
 $(function() {
     // Set flushing at interval

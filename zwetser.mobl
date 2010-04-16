@@ -4,69 +4,12 @@ title "Zwetser"
 database "zwetser"
 
 import mobl
+import zwetser::logic
+import zwetser::data
+import zwetser::account
+import twitter
 
 load "zwitter.css"
-
-entity Account {
-  username : String
-  password : String
-  updates  : Collection<TwitterUpdate> (inverse: account)
-}
-
-entity TwitterUpdate {
-  account    : Account (inverse: updates)
-  updateId   : Int
-  screenName : String
-  iconUrl    : String
-  text       : String
-  mention    : Bool
-  favorite   : Bool
-  date       : DateTime
-}
-
-function updateStream(account : Account) {
-   var updates = twitter::getUpdates(account.username, account.password);
-   for(twupdate : twitter::Update in updates) {
-     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
-       account.updates.add(TwitterUpdate{
-         updateId = twupdate.id,
-         screenName = twupdate.user.screen_name,
-         iconUrl = twupdate.user.profile_image_url,
-         text = twupdate.text,
-         date = twupdate.created_at,
-         favorite = twupdate.favorited,
-         mention = false
-       });
-     }
-   }
-}
-
-function updateMentions(account : Account) {
-   var updates = twitter::getMentions(account.username, account.password);
-   for(twupdate : twitter::Update in updates) {
-     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
-       account.updates.add(TwitterUpdate{
-         updateId = twupdate.id,
-         screenName = twupdate.user.screen_name,
-         iconUrl = twupdate.user.profile_image_url,
-         text = twupdate.text,
-         date = twupdate.created_at,
-         favorite = twupdate.favorited,
-         mention = true
-       });
-     }
-   }
-}
-
-screen addAccount() {
-  header("Add account")
-  var account = Account{}
-  inputs {
-    inputString(account.username, placeholder="Twitter username")
-    inputSecret(account.password, placeholder="Twitter password")
-  }
-  button("Add", onclick={ add(account); screen return; })
-}
 
 screen root() {
   init {
@@ -88,21 +31,12 @@ screen root() {
   }
 }
 
-screen editAccount(account : Account) {
-  header("Add account")
-  topRightButton("Done", onclick={ screen return; })
-  inputs {
-    inputString(account.username, placeholder="Twitter username")
-    inputSecret(account.password, placeholder="Twitter password")
-  }
-}
-
 screen newTweet(account : Account) {
   var text = ""
   topRightButton("Tweet", onclick={
     async {
       twitter::postUpdate(account.username, account.password, text);
-      growl::notify("Tweet posted!");
+      mobl::notify::notify("Tweet posted!");
     }
     screen return;
   })
@@ -119,7 +53,7 @@ screen replyTweet(update : TwitterUpdate) {
   topRightButton("Reply", onclick={
     async {
       twitter::postReply(update.account.username, update.account.password, update.updateId, text);
-      growl::notify("Tweet posted!");
+      mobl::notify::notify("Tweet posted!");
     }
     screen return;
   })
@@ -172,7 +106,7 @@ screen showUpdates(account : Account) {
       inputString(phrase)
     }
     <div id="tweets">
-    list(twupdate in twitter::search(phrase).limit(limit)) {
+    list(twupdate in search(phrase).limit(limit) ) {
       <div class="tweet">
         <span class="icon"><img src=twupdate.profile_image_url width="48" height="48"/></span>
         <span class="text">

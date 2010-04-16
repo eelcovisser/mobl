@@ -40,10 +40,9 @@ function addSwipeListener (el, listener) {
     function onTouchEnd (e) {
         cancelTouch();
         if (Math.abs(dx) > 50) {
-            /*listener( {
-                target: el,
-                direction: dx > 0 ? 'right' : 'left'
-            });*/
+            /*
+             * listener( { target: el, direction: dx > 0 ? 'right' : 'left' });
+             */
             listener(e);
         }
     }
@@ -118,9 +117,9 @@ NoClickDelay.prototype = {
 };
 
 jQuery.fn.tap = function (callback) {
-    //if (true) {//(mobl.isIphone) {
-        new NoClickDelay(this[0], callback);
-    //} else {
-        this.mouseup(callback);
-    //}
+    // if (true) {//(mobl.isIphone) {
+     //new NoClickDelay(this[0], callback);
+    // } else {
+     this.click(callback);
+    // }
 };

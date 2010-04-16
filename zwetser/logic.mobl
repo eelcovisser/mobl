@@ -1,0 +1,39 @@
+module zwetser::logic
+
+import mobl
+import zwetser::data
+import twitter
+
+function updateStream(account : Account) {
+   var updates = twitter::getUpdates(account.username, account.password);
+   for(twupdate : twitter::Update in updates) {
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
+       account.updates.add(TwitterUpdate{
+         updateId = twupdate.id,
+         screenName = twupdate.user.screen_name,
+         iconUrl = twupdate.user.profile_image_url,
+         text = twupdate.text,
+         date = twupdate.created_at,
+         favorite = twupdate.favorited,
+         mention = false
+       });
+     }
+   }
+}
+
+function updateMentions(account : Account) {
+   var updates = twitter::getMentions(account.username, account.password);
+   for(twupdate : twitter::Update in updates) {
+     if(TwitterUpdate.all().filter("updateId", "=", twupdate.id).one() == null) {
+       account.updates.add(TwitterUpdate{
+         updateId = twupdate.id,
+         screenName = twupdate.user.screen_name,
+         iconUrl = twupdate.user.profile_image_url,
+         text = twupdate.text,
+         date = twupdate.created_at,
+         favorite = twupdate.favorited,
+         mention = true
+       });
+     }
+   }
+}

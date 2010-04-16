@@ -82,11 +82,11 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
       try(dr-scope-all-end)
       ; dr-scope-all-start
     with
-      rules ( ProjectPath := project-path
-              IsImported  : path
-              OutputPath  := <concat-strings> [project-path, "/www"]
-              IncludePaths := [project-path, <concat-strings> [project-path, "/stdlib"]])
-      ; (Module(mod-name, _) := ast <+ Application(mod-name, _, _) := ast)
+      rules ( ProjectPath     := project-path
+              CachedParseAst  : path -> ast
+              OutputPath      := <concat-strings> [project-path, "/www"]
+              IncludePaths    := [project-path, <concat-strings> [project-path, "/stdlib"]])
+      ; (Module(mod-name, _)  := ast <+ Application(mod-name, _, _) := ast)
       ; rules ( CompilingModule := mod-name )
       ; <compile> ast
 

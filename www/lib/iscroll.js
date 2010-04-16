@@ -107,6 +107,7 @@ iScroll.prototype = {
     },
 
     onTouchStart: function(e) {
+
         if (e.targetTouches.length != 1) {
             return false;
         }
@@ -187,7 +188,7 @@ iScroll.prototype = {
         //alert(this.moved)
         if (!this.moved) {
             var theEvent = document.createEvent('MouseEvents');
-            theEvent.initEvent('mouseup', true, false);
+            theEvent.initEvent('click', true, false);
             e.changedTouches[0].target.dispatchEvent(theEvent);
             return false;
         }

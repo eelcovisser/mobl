@@ -23,15 +23,54 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-var persistence = window.persistence || {};
+var persistence = (window && window.persistence) ? window.persistence : {};
 
 (function () {
     var conn = null;
     var entityMeta = {};
     var trackedObjects = {};
     var objectsToRemove = {};
+    var globalPropertyListeners = {}; // EntityType__prop -> QueryColleciton obj
+    var queryCollectionCache = {}; // uniqueString -> QueryCollection
 
-    persistence.trackedObjects = trackedObjects;
+    //window.globalPropertyListeners = globalPropertyListeners;
+    //window.queryCollectionCache = queryCollectionCache;
+
+    persistence.getObjectsToRemove = function() { return objectsToRemove; }
+    persistence.getTrackedObjects = function() { return trackedObjects; }
+
+    function subscribeToGlobalPropertyListener(coll, entityName, property) {
+      var key = entityName + '__' + property;
+      if(key in globalPropertyListeners) {
+        var listeners = globalPropertyListeners[key];
+        for(var i = 0; i < listeners.length; i++) {
+          if(listeners[i] === coll) {
+            return;
+          }
+        }
+        globalPropertyListeners[key].push(coll);
+      } else {
+        globalPropertyListeners[key] = [coll];
+      }
+    }
+
+    function propertyChanged(entityName, property, obj, oldValue, newValue) {
+      var key = entityName + '__' + property;
+      if(key in globalPropertyListeners) {
+        var listeners = globalPropertyListeners[key];
+        for(var i = 0; i < listeners.length; i++) {
+          var coll = listeners[i];
+          var dummyObj = obj._data;
+          dummyObj[property] = oldValue;
+          var matchedBefore = coll._filter.match(dummyObj);
+          dummyObj[property] = newValue;
+          var matchedAfter = coll._filter.match(dummyObj);
+          if(matchedBefore != matchedAfter) {
+            coll.triggerEvent('change', coll, obj);
+          }
+        }
+      } 
+    }
 
     /**
      * Retrieves metadata about entity, mostly for internal use
@@ -101,6 +140,13 @@ var persistence = window.persistence || {};
 
     var generatedTables = {}; // set
 
+    function columnTypeToSqliteType(type) {
+      switch(type) {
+      case 'JSON': return 'TEXT';
+      default: return type;
+      }
+    }
+
     /**
      * Synchronize the data model with the database, creates table that had not
      * been defined before
@@ -117,7 +163,7 @@ var persistence = window.persistence || {};
           rowDef = '';
           for (var prop in meta.fields) {
             if (meta.fields.hasOwnProperty(prop)) {
-              rowDef += "`" + prop + "` " + meta.fields[prop] + ", ";
+              rowDef += "`" + prop + "` " + columnTypeToSqliteType(meta.fields[prop]) + ", ";
             }
           }
           for (var rel in meta.hasOne) {
@@ -266,7 +312,7 @@ var persistence = window.persistence || {};
         return;
       }
       var tableArray = [];
-      for (p in generatedTables) {
+      for (var p in generatedTables) {
         if (generatedTables.hasOwnProperty(p)) {
           tableArray.push(p);
         }
@@ -319,8 +365,18 @@ var persistence = window.persistence || {};
      */
     persistence.dbValToEntityVal = function (val, type) {
       switch (type) {
+      case 'DATE':
+        // SQL is in seconds and JS in miliseconds
+        return new Date(parseInt(val, 10) * 1000);
       case 'BOOL':
         return val == 1;
+        break;
+      case 'JSON':
+        if(val) {
+          return JSON.parse(val);
+        } else {
+          return val;
+        }
         break;
       default:
         return val;
@@ -334,10 +390,16 @@ var persistence = window.persistence || {};
     persistence.entityValToDbVal = function (val, type) {
       if (val === undefined || val === null) {
         return null;
+      } else if (type === 'JSON' && val) {
+        return JSON.stringify(val);
       } else if (val.id) {
         return val.id;
       } else if (type === 'BOOL') {
         return val ? 1 : 0;
+      } else if (type == 'DATE') {
+        // In order to make SQLite Date/Time functions work we should store
+        // values in seconds and not as miliseconds as JS Date.getTime()
+        return Math.round(val.getTime() / 1000);
       } else {
         return val;
       }
@@ -377,10 +439,12 @@ var persistence = window.persistence || {};
               if (meta.fields.hasOwnProperty(field)) {
                 var f = field; // Javascript scopes/closures SUCK
                 that.__defineSetter__(f, function (val) {
+                    var oldValue = that._data[f];
                     that._data[f] = val;
                     that._dirtyProperties[f] = true;
                     that.triggerEvent('set', that, f, val);
                     that.triggerEvent('change', that, f, val);
+                    propertyChanged(entityName, f, that, oldValue, val);
                   });
                 that.__defineGetter__(f, function () {
                     return that._data[f];
@@ -395,6 +459,7 @@ var persistence = window.persistence || {};
             (function () {
                 var ref = it;
                 that.__defineSetter__(ref, function (val) {
+                    var oldValue = that._data[ref];
                     if (val == null) {
                       that._data[ref] = null;
                       that._data_obj[ref] = undefined;
@@ -408,6 +473,7 @@ var persistence = window.persistence || {};
                     that._dirtyProperties[ref] = true;
                     that.triggerEvent('set', that, ref, val);
                     that.triggerEvent('change', that, f, val);
+                    propertyChanged(entityName, ref, that, oldValue, val);
                   });
                 that.__defineGetter__(ref, function () {
                     if (that._data[ref] === null || that._data_obj[ref] !== undefined) {
@@ -448,7 +514,7 @@ var persistence = window.persistence || {};
                         queryColl._additionalWhereSqls.push("mtm.`" + meta.name + '_' + coll
                           + "` = '" + that.id + "'");
                         that._data[coll] = queryColl;
-                        return queryColl;
+                        return uniqueQueryCollection(queryColl);
                       }
                     });
                 } else {
@@ -459,19 +525,13 @@ var persistence = window.persistence || {};
                       if (this._data[coll]) {
                         return that._data[coll];
                       } else {
-                        // Return a query collection
-                        // filtering on the
-                        // inverse property, could be
-                        // optimized
-                        var queryColl = new DbQueryCollection(
-                          meta.hasMany[coll].type.meta.name).filter(
-                            meta.hasMany[coll].inverseProperty, '=', that);
-                          that._data[coll] = queryColl;
-                          return queryColl;
-                        }
-                      });
-                  }
-                }());
+                        var queryColl = uniqueQueryCollection(new DbQueryCollection(meta.hasMany[coll].type.meta.name).filter(meta.hasMany[coll].inverseProperty, '=', that));
+                        that._data[coll] = queryColl;
+                        return queryColl;
+                      }
+                    });
+                }
+              }());
             }
           }
 
@@ -517,14 +577,18 @@ var persistence = window.persistence || {};
         }
 
         /**
+         * Currently this is only required when changing JSON properties
+         */
+        Entity.prototype.markDirty = function(prop) {
+          this._dirtyProperties[prop] = true;
+        };
+
+        /**
          * Returns a QueryCollection implementation matching all instances
          * of this entity in the database
          */
         Entity.all = function () {
-          if(!this.allCollection) { // Cache
-            this.allCollection = new AllDbQueryCollection(entityName);
-          }
-          return this.allCollection;
+          return uniqueQueryCollection(new AllDbQueryCollection(entityName));
         }
 
         Entity.load = function(tx, id, callback) {
@@ -611,7 +675,7 @@ var persistence = window.persistence || {};
       persistence.dump = function(tx, entities, callback) {
         if(!entities) { // Default: all entity types
           entities = [];
-          for(e in entityClassCache) {
+          for(var e in entityClassCache) {
             if(entityClassCache.hasOwnProperty(e)) {
               entities.push(entityClassCache[e]);
             }
@@ -675,6 +739,28 @@ var persistence = window.persistence || {};
           }
         }
         persistence.flush(tx, callback);
+      };
+
+      /**
+       * Dumps the entire database to a JSON string 
+       * @param tx transaction to use, use `null` to start a new one
+       * @param entities a list of entity constructor functions to serialize, use `null` for all
+       * @param callback (jsonDump) the callback function called with the results.
+       */
+      persistence.dumpToJson = function(tx, entities, callback) {
+        persistence.dump(tx, entities, function(obj) {
+            callback(JSON.stringify(obj));
+          });
+      };
+
+      /**
+       * Loads data from a JSON string (as dumped by `dumpToJson`)
+       * @param tx transaction to use, use `null` to start a new one
+       * @param entities a list of entity constructor functions to serialize, use `null` for all
+       * @param callback (jsonDump) the callback function called with the results.
+       */
+      persistence.loadFromJson = function(tx, jsonDump, callback) {
+        persistence.load(tx, JSON.parse(json), callback);
       };
 
       /**
@@ -856,20 +942,21 @@ var persistence = window.persistence || {};
        * currently it generates a 1=1 SQL query, which is kind of ugly
        */
       function NullFilter () {
-        this.sql = function (prefix, values) {
-          return "1=1";
-        }
-
-        this.match = function (o) {
-          return true;
-        }
-
-        this.makeFit = function(o) {
-        }
-
-        this.makeNotFit = function(o) {
-        }
       }
+
+      NullFilter.prototype.sql = function (prefix, values) {
+        return "1=1";
+      };
+
+      NullFilter.prototype.match = function (o) {
+        return true;
+      };
+
+      NullFilter.prototype.makeFit = function(o) {
+      };
+
+      NullFilter.prototype.makeNotFit = function(o) {
+      };
 
       /**
        * Filter that makes sure that both its left and right filter match
@@ -877,24 +964,27 @@ var persistence = window.persistence || {};
        * @param right right-hand filter object
        */
       function AndFilter (left, right) {
-        this.sql = function (prefix, values) {
-          return "(" + left.sql(prefix, values) + " AND "
-          + right.sql(prefix, values) + ")";
-        }
+        this.left = left;
+        this.right = right;
+      }
 
-        this.match = function (o) {
-          return left.match(o) && right.match(o);
-        }
+      AndFilter.prototype.sql = function (prefix, values) {
+        return "(" + this.left.sql(prefix, values) + " AND "
+               + this.right.sql(prefix, values) + ")";
+      }
 
-        this.makeFit = function(o) {
-          left.makeFit(o);
-          right.makeFit(o);
-        }
+      AndFilter.prototype.match = function (o) {
+        return this.left.match(o) && this.right.match(o);
+      }
 
-        this.makeNotFit = function(o) {
-          left.makeNotFit(o);
-          right.makeNotFit(o);
-        }
+      AndFilter.prototype.makeFit = function(o) {
+        this.left.makeFit(o);
+        this.right.makeFit(o);
+      }
+
+      AndFilter.prototype.makeNotFit = function(o) {
+        this.left.makeNotFit(o);
+        this.right.makeNotFit(o);
       }
 
       /**
@@ -905,58 +995,74 @@ var persistence = window.persistence || {};
        * @param value the literal value to compare to
        */
       function PropertyFilter (property, operator, value) {
-        this.sql = function (prefix, values) {
-          if (operator === '=' && value === null) {
-            return "`" + prefix + property + "` IS NULL";
-          } else if (operator === '!=' && value === null) {
-            return "`" + prefix + property + "` IS NOT NULL";
-          } else {
-            if(value === true || value === false) {
-              value = value ? 1 : 0;
-            }
-            values.push(persistence.entityValToDbVal(value));
-            return "`" + prefix + property + "` " + operator + " ?";
-          }
-        }
+        this.property = property;
+        this.operator = operator;
+        this.value = value;
+      }
 
-        this.match = function (o) {
-          switch (operator) {
-          case '=':
-            return o[property] === value;
-            break;
-          case '!=':
-            return o[property] !== value;
-            break;
-          case '<':
-            return o[property] < value;
-            break;
-          case '<=':
-            return o[property] <= value;
-            break;
-          case '>':
-            return o[property] > value;
-            break;
-          case '>=':
-            return o[property] >= value;
-            break;
+      PropertyFilter.prototype.sql = function (prefix, values) {
+        if (this.operator === '=' && this.value === null) {
+          return "`" + prefix + this.property + "` IS NULL";
+        } else if (this.operator === '!=' && this.value === null) {
+          return "`" + prefix + this.property + "` IS NOT NULL";
+        } else {
+          var value = this.value;
+          if(value === true || value === false) {
+            value = value ? 1 : 0;
           }
+          values.push(persistence.entityValToDbVal(value));
+          return "`" + prefix + this.property + "` " + this.operator + " ?";
         }
+      }
 
-        this.makeFit = function(o) {
-          if(operator === '=') {
-            o[property] = value;
-          } else {
-            throw "Sorry, can't perform makeFit for other filters than =";
-          }
+      PropertyFilter.prototype.match = function (o) {
+        switch (this.operator) {
+        case '=':
+          return o[this.property] === this.value;
+          break;
+        case '!=':
+          return o[this.property] !== this.value;
+          break;
+        case '<':
+          return o[this.property] < this.value;
+          break;
+        case '<=':
+          return o[this.property] <= this.value;
+          break;
+        case '>':
+          return o[this.property] > this.value;
+          break;
+        case '>=':
+          return o[this.property] >= this.value;
+          break;
         }
+      }
 
-        this.makeNotFit = function(o) {
-          if(operator === '=') {
-            o[property] = null;
-          } else {
-            throw "Sorry, can't perform makeNotFit for other filters than =";
-          }            
+      PropertyFilter.prototype.makeFit = function(o) {
+        if(this.operator === '=') {
+          o[this.property] = this.value;
+        } else {
+          throw "Sorry, can't perform makeFit for other filters than =";
         }
+      }
+
+      PropertyFilter.prototype.makeNotFit = function(o) {
+        if(this.operator === '=') {
+          o[this.property] = null;
+        } else {
+          throw "Sorry, can't perform makeNotFit for other filters than =";
+        }            
+      }
+
+      /**
+       * Ensure global uniqueness of query collection object
+       */
+      function uniqueQueryCollection(coll) {
+        var uniqueString = coll.toUniqueString();
+        if(!queryCollectionCache[uniqueString]) {
+          queryCollectionCache[uniqueString] = coll;
+        }
+        return queryCollectionCache[uniqueString];
       }
 
       /**
@@ -992,11 +1098,44 @@ var persistence = window.persistence || {};
         this.subscribers = {};
       }
 
+      QueryCollection.prototype.toUniqueString = function() {
+        var s = this._constructor.name + ": " + this._entityName;
+        s += '|Filter:';
+        var values = [];
+        s += this._filter.sql('', values);
+        s += '|Values:';
+        for(var i = 0; i < values.length; i++) {
+          s += values + "|^|";
+        }
+        s += '|Order:';
+        for(var i = 0; i < this._orderColumns.length; i++) {
+          var col = this._orderColumns[i];
+          s += col[0] + ", " + col[1];
+        }
+        s += '|Prefetch:';
+        for(var i = 0; i < this._prefetchFields.length; i++) {
+          s += this._prefetchFields[i];
+        }
+        s += '|JoinSQLs:';
+        for(var i = 0; i < this._additionalJoinSqls.length; i++) {
+          s += this._additionalJoinSqls[i];
+        }
+        s += '|WhereSQLs:';
+        for(var i = 0; i < this._additionalWhereSqls.length; i++) {
+          s += this._additionalWhereSqls[i];
+        }
+        s += '|Limit:';
+        s += this._limit;
+        s += '|Skip:';
+        s += this._skip;
+        return s;
+      };
+
       /**
        * Creates a clone of this query collection
        * @return a clone of the collection
        */
-      QueryCollection.prototype.clone = function () {
+      QueryCollection.prototype.clone = function (cloneSubscribers) {
         var c = new (this._constructor)(this._entityName);
         c._filter = this._filter;
         c._prefetchFields = this._prefetchFields.slice(0); // clone
@@ -1005,7 +1144,17 @@ var persistence = window.persistence || {};
         c._additionalWhereSqls = this._additionalWhereSqls.slice(0);
         c._limit = this._limit;
         c._skip = this._skip;
-        c.subscribers = this.subscribers;
+        if(cloneSubscribers) {
+          var subscribers = {};
+          for(var eventType in this.subscribers) {
+            if(this.subscribers.hasOwnProperty(eventType)) {
+              subscribers[eventType] = subs.slice(0);
+            }
+          }
+          c.subscribers = subscribers; //this.subscribers;
+        } else {
+          c.subscribers = this.subscribers;
+        }
         return c;
       };
 
@@ -1017,10 +1166,16 @@ var persistence = window.persistence || {};
        * @return the query collection with the filter added
        */
       QueryCollection.prototype.filter = function (property, operator, value) {
-        var c = this.clone();
+        var c = this.clone(true);
         c._filter = new AndFilter(this._filter, new PropertyFilter(property,
             operator, value));
-        return c;
+        // Add global listener (TODO: memory leak waiting to happen!)
+        c = uniqueQueryCollection(c);
+        subscribeToGlobalPropertyListener(c, this._entityName, property);
+        return uniqueQueryCollection(c);
+      };
+
+      QueryCollection.prototype.subscribeToAllFilters = function() {
       };
 
       /**
@@ -1033,7 +1188,7 @@ var persistence = window.persistence || {};
         ascending = ascending === undefined ? true : ascending;
         var c = this.clone();
         c._orderColumns.push( [ property, ascending ]);
-        return c;
+        return uniqueQueryCollection(c);
       };
 
       /**
@@ -1044,7 +1199,7 @@ var persistence = window.persistence || {};
       QueryCollection.prototype.limit = function(n) {
         var c = this.clone();
         c._limit = n;
-        return c;
+        return uniqueQueryCollection(c);
       };
 
       /**
@@ -1055,7 +1210,7 @@ var persistence = window.persistence || {};
       QueryCollection.prototype.skip = function(n) {
         var c = this.clone();
         c._skip = n;
-        return c;
+        return uniqueQueryCollection(c);
       };
 
       /*
@@ -1067,7 +1222,7 @@ var persistence = window.persistence || {};
       QueryCollection.prototype.prefetch = function (rel) {
         var c = this.clone();
         c._prefetchFields.push(rel);
-        return c;
+        return uniqueQueryCollection(c);
       };
 
       /**
@@ -1391,6 +1546,7 @@ var persistence = window.persistence || {};
         }
       };
 
+      persistence.QueryCollection = QueryCollection;
       persistence.LocalQueryCollection = LocalQueryCollection;
       persistence.Observable           = Observable;
 
@@ -1401,10 +1557,15 @@ var persistence = window.persistence || {};
       persistence.db.conn = null;
       persistence.db.log = true;
 
-      if (window.google && google.gears) {
-          persistence.db.implementation = "gears";
-      } else if (window.openDatabase) {
-          persistence.db.implementation = "html5";
+      // window object does not exist on Qt Declarative UI (http://doc.trolltech.org/4.7-snapshot/declarativeui.html)
+      if (window && window.openDatabase) {
+        persistence.db.implementation = "html5";
+      } else if (window && window.google && google.gears) {
+        persistence.db.implementation = "gears";
+      } else if (openDatabaseSync) {
+          // TODO: find a browser that implements openDatabaseSync and check out if
+          //       it is attached to the window or some other object
+          persistence.db.implementation = "html5-sync";
       }
 
       persistence.db.html5 = {};
@@ -1436,6 +1597,43 @@ var persistence = window.persistence || {};
                       successFn(results);
                   }
               }, errorFn);
+          };
+          return that;
+      };
+	  
+      persistence.db.html5Sync = {};
+	  
+      persistence.db.html5Sync.connect = function (dbname, description, size, version) {
+          var that = {};
+          var conn = openDatabaseSync(dbname, version, description, size);
+
+          that.transaction = function (fn) {
+              return conn.transaction(function (sqlt) {
+                  return fn(persistence.db.html5Sync.transaction(sqlt));
+              });
+          };
+          return that;
+      };
+	  
+      persistence.db.html5Sync.transaction = function (t) {
+          var that = {};
+          that.executeSql = function (query, args, successFn, errorFn) {
+              if (args == null) args = [];
+
+              if(persistence.db.log) {
+                  console.log(query + ' -> ' + args);
+              }
+
+              var result = t.executeSql(query, args);
+              if (result) {
+                  if (successFn) {
+                      var results = [];
+                      for ( var i = 0; i < result.rows.length; i++) {
+                          results.push(result.rows.item(i));
+                      }
+                      successFn(results);
+                  }
+              }
           };
           return that;
       };
@@ -1480,6 +1678,8 @@ var persistence = window.persistence || {};
           version = version || '1.0';
           if (persistence.db.implementation == "html5") {
               return persistence.db.html5.connect(dbname, description, size, version);
+          } else if (persistence.db.implementation == "html5-sync") {
+              return persistence.db.html5Sync.connect(dbname, description, size, version);
           } else if (persistence.db.implementation == "gears") {
               return persistence.db.gears.connect(dbname);
           }
@@ -1532,3 +1732,200 @@ Array.prototype.remove = function(el) {
   }
 }
 
+// JSON2 library, source: http://www.JSON.org/js.html
+// Most modern browsers already support this natively, but mobile
+// browsers often don't, hence this implementation
+// Relevant APIs:
+//    JSON.stringify(value, replacer, space)
+//    JSON.parse(text, reviver)
+
+if (!this.JSON) {
+  this.JSON = {};
+  (function () {
+      function f(n) {
+        return n < 10 ? '0' + n : n;
+      }
+      if (typeof Date.prototype.toJSON !== 'function') {
+
+        Date.prototype.toJSON = function (key) {
+
+          return isFinite(this.valueOf()) ?
+          this.getUTCFullYear()   + '-' +
+            f(this.getUTCMonth() + 1) + '-' +
+            f(this.getUTCDate())      + 'T' +
+            f(this.getUTCHours())     + ':' +
+            f(this.getUTCMinutes())   + ':' +
+            f(this.getUTCSeconds())   + 'Z' : null;
+        };
+
+        String.prototype.toJSON =
+          Number.prototype.toJSON =
+          Boolean.prototype.toJSON = function (key) {
+            return this.valueOf();
+          };
+      }
+
+      var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+      escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+      gap, indent,
+      meta = { 
+        '\b': '\\b',
+        '\t': '\\t',
+        '\n': '\\n',
+        '\f': '\\f',
+        '\r': '\\r',
+        '"' : '\\"',
+        '\\': '\\\\'
+      },
+      rep;
+
+      function quote(string) {
+        escapable.lastIndex = 0;
+        return escapable.test(string) ?
+        '"' + string.replace(escapable, function (a) {
+            var c = meta[a];
+            return typeof c === 'string' ? c :
+            '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+          }) + '"' :
+        '"' + string + '"';
+      }
+
+
+      function str(key, holder) {
+        var i, k, v, length, mind = gap, partial, value = holder[key];
+
+        if (value && typeof value === 'object' &&
+          typeof value.toJSON === 'function') {
+          value = value.toJSON(key);
+        }
+
+        if (typeof rep === 'function') {
+          value = rep.call(holder, key, value);
+        }
+
+        switch (typeof value) {
+        case 'string':
+          return quote(value);
+        case 'number':
+          return isFinite(value) ? String(value) : 'null';
+        case 'boolean':
+        case 'null':
+          return String(value);
+        case 'object':
+          if (!value) {
+            return 'null';
+          }
+
+          gap += indent;
+          partial = [];
+
+          if (Object.prototype.toString.apply(value) === '[object Array]') {
+            length = value.length;
+            for (i = 0; i < length; i += 1) {
+              partial[i] = str(i, value) || 'null';
+            }
+
+            v = partial.length === 0 ? '[]' :
+            gap ? '[\n' + gap +
+              partial.join(',\n' + gap) + '\n' +
+              mind + ']' :
+            '[' + partial.join(',') + ']';
+            gap = mind;
+            return v;
+          }
+
+          if (rep && typeof rep === 'object') {
+            length = rep.length;
+            for (i = 0; i < length; i += 1) {
+              k = rep[i];
+              if (typeof k === 'string') {
+                v = str(k, value);
+                if (v) {
+                  partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                }
+              }
+            }
+          } else {
+            for (k in value) {
+              if (Object.hasOwnProperty.call(value, k)) {
+                v = str(k, value);
+                if (v) {
+                  partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                }
+              }
+            }
+          }
+
+          v = partial.length === 0 ? '{}' :
+          gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
+            mind + '}' : '{' + partial.join(',') + '}';
+          gap = mind;
+          return v;
+        }
+      }
+
+      if (typeof JSON.stringify !== 'function') {
+        JSON.stringify = function (value, replacer, space) {
+          var i;
+          gap = '';
+          indent = '';
+          if (typeof space === 'number') {
+            for (i = 0; i < space; i += 1) {
+              indent += ' ';
+            }
+          } else if (typeof space === 'string') {
+            indent = space;
+          }
+
+          rep = replacer;
+          if (replacer && typeof replacer !== 'function' &&
+            (typeof replacer !== 'object' ||
+              typeof replacer.length !== 'number')) {
+            throw new Error('JSON.stringify');
+          }
+
+          return str('', {'': value});
+        };
+      }
+
+      if (typeof JSON.parse !== 'function') {
+        JSON.parse = function (text, reviver) {
+          var j;
+          function walk(holder, key) {
+            var k, v, value = holder[key];
+            if (value && typeof value === 'object') {
+              for (k in value) {
+                if (Object.hasOwnProperty.call(value, k)) {
+                  v = walk(value, k);
+                  if (v !== undefined) {
+                    value[k] = v;
+                  } else {
+                    delete value[k];
+                  }
+                }
+              }
+            }
+            return reviver.call(holder, key, value);
+          }
+
+          cx.lastIndex = 0;
+          if (cx.test(text)) {
+            text = text.replace(cx, function (a) {
+                return '\\u' +
+                  ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+              });
+          }
+
+          if (/^[\],:{}\s]*$/.
+          test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
+            replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+            replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+            j = eval('(' + text + ')');
+            return typeof reviver === 'function' ?
+            walk({'': j}, '') : j;
+          }
+          throw new SyntaxError('JSON.parse');
+        };
+      }
+    }());
+}

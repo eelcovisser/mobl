@@ -1,0 +1,24 @@
+module zwetser::account
+
+import mobl
+import zwetser::data
+import zwetser::logic
+
+screen addAccount() {
+  header("Add account")
+  var account = Account{}
+  inputs {
+    inputString(account.username, placeholder="Twitter username")
+    inputSecret(account.password, placeholder="Twitter password")
+  }
+  button("Add", onclick={ add(account); screen return; })
+}
+
+screen editAccount(account : Account) {
+  header("Add account")
+  topRightButton("Done", onclick={ screen return; })
+  inputs {
+    inputString(account.username, placeholder="Twitter username")
+    inputSecret(account.password, placeholder="Twitter password")
+  }
+}

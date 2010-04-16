@@ -1,0 +1,18 @@
+application maptest
+
+import mobl::location
+import mobl
+
+screen root() {
+  var position : Coordinates = null
+  init {
+    async {
+      position = getPosition();
+    }
+  }
+  header("A map")
+  cond(position != null) {
+    outputString("Position: " + position.latitude + ", " + position.longitude)
+    mobl::maps::map(position)
+  }
+}

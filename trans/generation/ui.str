@@ -232,7 +232,9 @@ rules
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
       [node].[method]([r].get());
+      var [ignore] = false;
       [r].addEventListener('change', function(_, ref, val) {
+        if([ignore]) return;
         if(ref === [r]) {
           [node].[method]([typeconverter](val));
         } else {
@@ -246,12 +248,15 @@ rules
         ; [] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*
     with es := <ref-expression-to-js> e
        ; r  := <newname> "ref"
+       ; ignore := <newname> "ignore"
        ; typeconverter := <concat-strings> ["mobl.stringTo", <type-of; ?SimpleType(<id>); qid-to-html> e]
        ; if "input" := tag <+ "textarea" := tag then
            method := "val"
            ; subs := $[
-               [node].change(function() {
+               [node].keyup(function() {
+                 [ignore] = true;
                  [es].set([typeconverter]([node].[method]()));
+                 [ignore] = false;
                });
              ]
          else

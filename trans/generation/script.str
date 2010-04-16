@@ -5,6 +5,7 @@ imports
   generation/emit
 
 strategies
-  
+
   definition-to-js :
-    Javascript(part*) -> <emit> <map(?JSString(<id>)); concat-strings> part*
+    //Javascript(part*) -> <emit> <map(?JSString(<id>)); concat-strings> part*
+    Javascript(s) -> <emit> s

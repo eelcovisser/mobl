@@ -21,7 +21,7 @@ exports
 
     LValue "=" Exp ";"                          -> Statement {cons("Assignment")}
     QId                                         -> LValue
-    FieldAccess                                 -> LValue
+    Exp "." ID                                  -> LValue {cons("LFieldAccess")}
     "(" LValue "," {LValue ","}* ")"            -> LValue {cons("LTuple")}
 
     Exp ";"                                     -> Statement {cons("ExpStat")}

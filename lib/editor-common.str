@@ -3,6 +3,7 @@ module lib/editor-common
 imports
   libstratego-lib
   libstratego-sglr
+  mobl
 
 strategies
 
@@ -33,27 +34,27 @@ strategies
    */
   open-import(resolve-path, parse-file, externalize):
     import -> defs
-    where
+    with
       if not(!import => COMPLETION(_)) then
         path       := <resolve-path> import;
         cache-path := <import-cache-path> path;
-        if not(<IsImported> path) then
-          rules(
-            IsImported: path
-          );
-          if <is-newer> (cache-path, path) then
-            file := <ReadFromFile> cache-path
+        if not(<CachedImport> path) then
+          if <CachedParseAst> import then
+            defs := <externalize <+ debug(!"Could not externalize: "); fail> <CachedParseAst> import
           else
-            file := <parse-file; externalize <+ debug(!"Could not parse/compile: "); fail> path;
-            if <file-exists> path then
-              // Only cache if on filesystem (e.g., ignore libstratego-lib)
-              <WriteToBinaryFile> (cache-path, file)
+            if <is-newer> (cache-path, path) then
+              defs := <ReadFromFile> cache-path
+            else
+              defs := <parse-file; externalize <+ debug(!"Could not parse/externalize: "); fail> path;
+              if <file-exists> path then
+                // Only cache if on filesystem (e.g., ignore libstratego-lib)
+                <WriteToBinaryFile> (cache-path, defs)
+              end
             end
-          end;
-          {| CurrentFile:
-            rules(CurrentFile := path);
-            defs := file
-          |}
+          end
+          ; rules (
+              CachedImport : path -> defs
+            )
         end
       end
 

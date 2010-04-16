@@ -36,15 +36,11 @@ exports
 
   context-free syntax %% native javascript
 
-    "<script>" JSPart* "</script>"  -> Definition {cons("Javascript"), prefer}
-
-    JSString -> JSPart{cons("JSString")}
-  %%"~" Exp -> JSPart{cons("JSExp"), prefer}
-  %%"\\~" -> JSPart{cons("JSTilde"), prefer}
+    "<script>" JSString "</script>"  -> Definition {cons("Javascript"), prefer}
 
   lexical syntax
     JSChar*       -> JSString
-    ~[\<]       -> JSChar
+    ~[\<]         -> JSChar
     SmallerThan   -> JSChar
     [\<]          -> SmallerThan
     ""            -> JSString{reject}
@@ -52,7 +48,7 @@ exports
   lexical restrictions
     SmallerThan   -/- [\/]
     JSString -/- [\ \t\n\r]
-    JSString -/- ~[\<\~]
+    JSString -/- ~[\<]
 
   lexical syntax
     "template" -> ID {reject}

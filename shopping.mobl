@@ -1,0 +1,81 @@
+application shopping
+
+import mobl
+
+entity Item {
+  name     : String
+  checked  : Bool
+  favorite : Bool
+  onlist   : Bool
+  order    : Int
+}
+
+screen editItem(it : Item) {
+  header("Edit item")
+  topRightButton("Done", onclick={ screen return; })
+  inputs {
+    inputString(it.name, placeholder="Name")
+    item { checkbox(it.favorite, label="favorite") }
+    inputInt(it.order, placeholder="Shop order (0 = early, 999=late)")
+  }
+}
+
+function clean() {
+  for(it : Item in Item.all().filter("checked", "=", true)) {
+    if(it.favorite) {
+      it.checked = false;
+      it.onlist = false;
+    } else {
+      remove(it);
+    }
+  }
+}
+
+template showItemsHeader() {
+  header("Items")
+  topRightButton("Clean", onclick={ clean(); })
+}
+
+template showItems() {
+  group {
+    list(it in Item.all().filter("onlist", "=", true).order("order", true)) {
+      item(onclick={ it.checked = it.checked ? false: true; }) {
+        checkbox(it.checked, label=it.name)
+        sideButton("Edit", onclick={ editItem(it); })
+      }
+    }
+  }
+  quickAdd()
+}
+
+template showFavoritesHeader() {
+  header("Favorites")
+}
+
+template showFavorites() {
+  group {
+    list(it in Item.all().filter("favorite", "=", true).order("order", true)) {
+      item(onclick={ editItem(it); }) {
+        label(it.name)
+        cond(it.onlist == false) {
+          sideButton("Add", onclick={ it.onlist = true; })
+        }
+      }
+    }
+  }
+}
+
+template quickAdd() {
+  var newItem = Item{ order=999, onlist=true }
+  group {
+    inputString(newItem.name, placeholder="New item")
+  }
+  altButton("Add", onclick={
+    add(newItem);
+    newItem = Item{order=999, onlist=true};
+  })
+}
+
+screen root() {
+  tabsetCustomHeaders([("Items", "lib/toolbar/icon_users.png", showItemsHeader, showItems), ("Favorite", "lib/toolbar/icon_users.png", showFavoritesHeader, showFavorites)])
+}

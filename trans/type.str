@@ -57,6 +57,10 @@ strategies
     where ExternalScreen(_, _, _, rt) := <lookup-screen> qid
 
   eq-type-of :
+    Call(qid, e*) -> rt
+    where rt@SimpleType(QId("mobl", "Callback")) := <type-of> Var(qid)
+
+  eq-type-of :
     EntityCons(t, _) -> t
 
   eq-type-of :

@@ -82,6 +82,7 @@ external type Collection<T> {
   sync function offset(n : Int) : Collection<T>
   sync function add(item : T) : void
   sync function remove(item : T) : void
+  sync function updated() : void
 }
 
 external type Entity<T> {
@@ -107,6 +108,10 @@ template outputString(s : String) {
   <span databind=s></span>
 }
 
+template label(s : String, onclick : Callback = null) {
+  <span databind=s onclick=onclick></span>
+}
+
 template outputInt(n : Int) {
   <span databind=n></span>
 }
@@ -116,7 +121,7 @@ template outputDate(d : DateTime) {
 }
 
 template header(title : String, onclick : Callback = null) {
-  <div id="header" onclick=onclick>
+  <div class="header" onclick=onclick>
     <h1 databind=title></h1>
   </div>
 }
@@ -160,8 +165,19 @@ template inputs() {
   </ul>
 }
 
-template inputCheckbox(b : Bool, onchange : Callback = null, onclick : Callback = null) {
-  <input type="checkbox" databind=b onclick=onclick onchange=onchange />
+template checkbox(b : Bool, label : String = "") {
+  <span onclick={ b = b ? false : true; }>
+    <img src=b ? "lib/img/checkbox-checked.png" : "lib/img/checkbox.png" class="checkbox" />
+    <span databind=label/>
+  </span>
+}
+
+template inputCheckbox(b : Bool, onchange : Callback = null, onclick : Callback = {}) {
+  <input type="checkbox" databind=b onchange=onchange />
+}
+
+template outputCheckbox(b : Bool) {
+  <input type="checkbox" databind=b disabled="disabled" />
 }
 
 template basicView(title : String, toolBar : Template = template{}) {
@@ -202,7 +218,7 @@ template altButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="whiteButton" databind=text onclick=onclick></a>
 }
 
-template deleteButton(text : String, onclick : Callback = null) {
+template sideButton(text : String, onclick : Callback = null) {
   <a href="javascript:void(0)" class="button" databind=text onclick=onclick></a>
 }
 
@@ -235,6 +251,35 @@ template tabset(tabs : List<Tuple3<String, String, Template>>) {
 
   <div id="tabbar">
     list((tabName, tabIcon, tabTemplate) in tabs) {
+      <div onclick={ activeTabName = tabName; updateScrollers(); } class=activeTabName == tabName ? "activeTabButton" : "inActiveTabButton">
+        <img src=tabIcon width="25" height="25"/><br/>
+        outputString(tabName)
+      </div>
+    }
+  </div>
+}
+
+@doc "A tabset, takes a list of tuples as argument, e.g. [(\"Tab 1\", \"icon url\", tab1), (\"Tab 2\", \"icon uri\", tab2)] where tab1 and tab2 are templates with no arguments"
+template tabsetCustomHeaders(tabs : List<Tuple4<String, String, Template, Template>>) {
+  var activeTabName : String = tabs.get(0)._1
+
+  list((tabName, tabIcon, headerTemplate, tabTemplate) in tabs) {
+    <div class=activeTabName == tabName ? "activeTab" : "inActiveTab">
+      headerTemplate()
+    </div>
+  }
+  list((tabName, tabIcon, headerTemplate, tabTemplate) in tabs) {
+    <div class=activeTabName == tabName ? "activeTab" : "inActiveTab">
+      <div id="scrollwrapper">
+        <div id="content">
+          tabTemplate()
+        </div>
+      </div>
+    </div>
+  }
+
+  <div id="tabbar">
+    list((tabName, tabIcon, headerTemplate, tabTemplate) in tabs) {
       <div onclick={ activeTabName = tabName; updateScrollers(); } class=activeTabName == tabName ? "activeTabButton" : "inActiveTabButton">
         <img src=tabIcon width="25" height="25"/><br/>
         outputString(tabName)
@@ -285,6 +330,10 @@ mobl.scrollTop = function() {
     scroller.scrollTo(0, 0);
   }
 }
+
+persistence.QueryCollection.prototype.updates = function() {
+  this.triggerEvent('change', this);
+};
 
 mobl.formatDate = function(timestamp) {
   var date = new Date(timestamp);

@@ -16,10 +16,8 @@ function fromScope(that, prop) {
     }
 }
 
-mobl.isIphone = false;
-if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
-    mobl.isIphone = true;
-}
+mobl.isIphone = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i);
+mobl.isAndroid = navigator.userAgent.match(/Android/i);
 
 mobl.stringTomobl__Int = function (s) {
     return parseInt(s, 10);
@@ -148,19 +146,23 @@ function log(s) {
             ref.childRefs.push(this);
         }
         this.subscribers = {}; // Observable
+        var that = this;
     }
 
     Reference.prototype = new persistence.Observable();
 
-    Reference.prototype.oldAddEventListener = Reference.prototype.addEventListener;
+    Reference.prototype.oldAddListener = Reference.prototype.addEventListener;
 
-
-    window.allSubscriptions = [];
-
-    Reference.prototype.addEventListener = function(eventType, fn) {
-        this.oldAddEventListener(eventType, fn);
-        allSubscriptions.push({eventType: eventType, fn: fn, ref: this});
-        return allSubscriptions.length;
+    Reference.prototype.addEventListener = function(eventType, callback) {
+        if(eventType === 'change' && this.prop && this.ref.get().addEventListener) {
+            var that = this;
+            this.ref.get().addEventListener('change', function(_, _, prop, value) {
+                if(prop === that.prop) {
+                    callback(that, value);
+                }
+            });
+        }
+        this.oldAddListener(eventType, callback);
     };
 
     Reference.prototype.addSetListener = function(callback) {

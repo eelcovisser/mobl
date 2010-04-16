@@ -171,7 +171,11 @@ rules // Statements
 
   stat-to-js :
     Assignment(qid, e) -> $[[<qid-to-js> qid] = [<expression-to-js> e];]
+    where <is-string> qid
     where not(<is-ref> qid)
+
+  stat-to-js :
+    Assignment(LFieldAccess(le, x), e) -> $[[<exp-to-js> le].[x] = [<expression-to-js> e];]
 
 rules // Expressions
   expression-to-js =

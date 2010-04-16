@@ -50,7 +50,7 @@ strategies
           |}
 
   cps-lift-exprs :
-    [Assignment(qid, e)|stats] -> <concat> [stats2, [Assignment(qid, e2)|<cps-lift-expressions> stats]]
+    [Assignment(lvalue, e)|stats] -> <concat> [stats2, [Assignment(lvalue, e2)|<cps-lift-expressions> stats]]
     where not(<is-sync> e)
     with {| Exp
           : stats2 := <cps-lift-expression> e

@@ -426,7 +426,8 @@ strategies // externals
     $[[<map(pp-mobl-doc); concat-strings> doc*]external template [<pp-mobl-qid> qid]([<map(pp-mobl-farg); separate-by(|", "); concat-strings> farg*])]
 
   pp-mobl-def :
-    Javascript(part*) -> <concat-strings> ["<script>\n", <map(?JSString(<id>)); concat-strings> part*, "</script>"]
+    //Javascript(part*) -> <concat-strings> ["<script>\n", <map(?JSString(<id>)); concat-strings> part*, "</script>"]
+    Javascript(s) -> <concat-strings> ["<script>\n", s, "</script>"]
 
   pp-mobl-def =
     debug(!"Could not translate def: "); fail

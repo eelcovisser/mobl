@@ -71,7 +71,12 @@ strategies
   cps-statements :
     [Assignment(qid, e)|stat*] -> <cps-expression(|[$[[<qid-to-js> qid] = result;
 ]|stat*])> e
+    where <is-string> qid
     where not(<is-ref> qid)
+
+  cps-statements :
+    [Assignment(LFieldAccess(le, x), e)|stat*] -> <cps-expression(|[$[[<exp-to-js> le].[x] = result;
+]|stat*])> e
 
   cps-statements :
     [Assignment(qid, e)|stat*] -> <cps-expression(|[$[[<qid-to-js> qid].set(result);

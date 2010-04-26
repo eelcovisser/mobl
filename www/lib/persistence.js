@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (c) 2010 Zef Hemel <zef@zef.me>
  * 
  * Permission is hereby granted, free of charge, to any person

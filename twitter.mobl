@@ -37,4 +37,130 @@ external sync function search(phrase : String) : Collection<SearchResult>
 external function postUpdate(username : String, password : String, text : String) : Bool
 external function postReply(username : String, password : String, replyToId : Int, text : String) : Bool
 
-// The end
+<script>
+
+twitter.getUpdates = function(username, password, optionalArgs) {
+  return {
+    addEventListener: function() {},
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl('http://api.twitter.com/1/statuses/home_timeline.json', username, password),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
+    }
+  };
+};
+
+twitter.getMentions = function(username, password, optionalArgs) {
+  return {
+    addEventListener: function() {},
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl('http://api.twitter.com/1/statuses/mentions.json', username, password),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
+    }
+  };
+};
+
+twitter.search = function(phrase, optionalArgs) {
+  return {
+    _limit: 10,
+    addEventListener: function() {},
+    limit: function(n) {
+      this._limit = n;
+      return this;
+    },
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl('http://search.twitter.com/search.json?q='+escape(phrase) + '&rpp=' + this._limit),
+         datatype: "json",
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            var results = [];
+            var update;
+            //console.log(data);
+            data = data['results'];
+            for(var i = 0; i < data.length; i++) {
+              update = data[i];
+              update.created_at = Date.parse(update.created_at);
+              results.push(update);
+            }
+            callback(results);
+         }
+      });
+    }
+  };
+};
+
+twitter.postUpdate = function(username, password, text, optionalArgs, callback) {
+  $.ajax({
+     url: mobl.proxyUrl('http://api.twitter.com/1/statuses/update.json', username, password),
+     datatype: "json",
+     data: {status: text},
+     type: 'POST',
+     beforeSend: function(xhr) {
+       xhr.setRequestHeader('X-Twitter-Client', 'zwitter');
+     },
+     error: function(_, message, error) {
+       console.log(message);
+       console.log(error);
+       callback(false);
+     },
+     success: function(data) {
+       callback(true);
+     }
+  });
+};
+
+twitter.postReply = function(username, password, replyToId, text, optionalArgs, callback) {
+  $.ajax({
+     url: mobl.proxyUrl('http://api.twitter.com/1/statuses/update.json', username, password),
+     datatype: "json",
+     data: {status: text, in_reply_to_status_id: replyToId},
+     type: 'POST',
+     error: function(_, message, error) {
+       console.log(message);
+       console.log(error);
+       callback(false);
+     },
+     success: function(data) {
+       callback(true);
+     }
+  });
+};
+</script>

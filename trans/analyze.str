@@ -42,6 +42,7 @@ rules
   import-module =
     ?Import(qid)
     ; (<ParsedAndImported> qid
+       ; rules ( Imports :+= qid )
     <+ rules ( ParsedAndImported : qid )
      //; debug(!"Importing: ")
      ; where(<open-import(\ path -> <resolve-file> <concat-strings> [path, ".mobl"] \, parse-file, externalize-module)> <qid-to-path> qid

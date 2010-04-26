@@ -25,7 +25,7 @@ screen root() {
     list(account in Account.all().order("username", true)) {
       itemArrow(onclick={ showUpdates(account); }) {
         outputString(account.username)
-        deleteButton("Edit", onclick={ editAccount(account); })
+        sideButton("Edit", onclick={ editAccount(account); })
       }
     }
   }

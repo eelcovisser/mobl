@@ -21,7 +21,7 @@ exports
 
     "title" STRING                   -> Setting {cons("TitleSetting")}
     "database" STRING                -> Setting {cons("DatabaseSetting")}
-    "database" "version" INT         -> Setting {cons("DatabaseVersionSetting")}
+    "database" "version" NUMBER      -> Setting {cons("DatabaseVersionSetting")}
 
     "import" QId                   -> Definition {cons("Import")}
     "load" STRING                  -> Definition {cons("Load")}

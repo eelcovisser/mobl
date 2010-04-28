@@ -8,13 +8,13 @@ external type void {}
 @doc "A string type"
 external type String : Object { }
 
-external type Int : Object { }
+external type Number : Object { }
 
 external type Float : Object { }
 
 external type Bool : Object { }
 external type List<T> {
-  sync function get(n : Int) : T
+  sync function get(n : Number) : T
   sync function add(item : T) : void
 }
 external type Callback {}
@@ -78,8 +78,8 @@ external type Collection<T> {
   @doc "Order the collection based on a property in ascending (ascending = true) or dedescending (ascending = false) order"
   sync function order(property : String, ascending : Bool) : Collection<T>
 
-  sync function limit(n : Int) : Collection<T>
-  sync function offset(n : Int) : Collection<T>
+  sync function limit(n : Number) : Collection<T>
+  sync function offset(n : Number) : Collection<T>
   sync function add(item : T) : void
   sync function remove(item : T) : void
   sync function updated() : void
@@ -97,8 +97,8 @@ external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
 external function resetDatabase() : void
 external sync function formatDate(d : DateTime) : String
-external sync function range(from : Int, to : Int) : List<Int>
-external sync function random(max : Int) : Int
+external sync function range(from : Number, to : Number) : List<Number>
+external sync function random(max : Number) : Number
 
 @doc "Internal use only"
 external sync function updateScrollers() : void
@@ -112,7 +112,7 @@ template label(s : String, onclick : Callback = null) {
   <span databind=s onclick=onclick></span>
 }
 
-template outputInt(n : Int) {
+template outputNumber(n : Number) {
   <span databind=n></span>
 }
 
@@ -141,6 +141,12 @@ template inputString(s : String, placeholder : String = null, onchange : Callbac
   </li>
 }
 
+template inputSearch(s : String, placeholder : String = null, onsearch : Callback = null) {
+  <li>
+    <input type="text" placeholder=placeholder databind=s onchange=onsearch />
+  </li>
+}
+
 template inputText(s : String, placeholder : String = null, onchange : Callback = null) {
   <li>
     <textarea placeholder=placeholder databind=s onchange=onchange/>
@@ -153,7 +159,7 @@ template inputSecret(s : String, placeholder : String = null, onchange : Callbac
   </li>
 }
 
-template inputInt(i : Int, placeholder : String = null, onchange : Callback = null) {
+template inputNumber(i : Number, placeholder : String = null, onchange : Callback = null) {
   <li>
     <input type="text" placeholder=placeholder databind=i onchange=onchange/>
   </li>

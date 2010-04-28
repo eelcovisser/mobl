@@ -19,8 +19,8 @@ function fromScope(that, prop) {
 mobl.isIphone = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i);
 mobl.isAndroid = navigator.userAgent.match(/Android/i);
 
-mobl.stringTomobl__Int = function (s) {
-    return parseInt(s, 10);
+mobl.stringTomobl__Number = function (s) {
+    return parseFloat(s, 10);
 }
 
 mobl.stringTomobl__String =function (s) {

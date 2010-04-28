@@ -4,9 +4,9 @@ imports
   include/MoBL
   generation/action
   generation/compile
-  
+
 strategies
-  
+
   generate-index-html :
     Application(qid, setting*, _) -> $[
 <!DOCTYPE HTML>

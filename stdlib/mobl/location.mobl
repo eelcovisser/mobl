@@ -5,7 +5,7 @@ import mobl
 external type Coordinates {
   latitude  : Float
   longitude : Float
-  accuracy  : Int
+  accuracy  : Number
 }
 
 external function getPosition() : Coordinates

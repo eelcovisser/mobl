@@ -4,7 +4,7 @@ import mobl
 
 external type Update {
   @doc "The internal twitter ID"
-  id                    : Int
+  id                    : Number
 
   created_at            : DateTime
   text                  : String
@@ -102,6 +102,10 @@ twitter.search = function(phrase, optionalArgs) {
       return this;
     },
     list: function(_, callback) {
+      if(!phrase) {
+        callback([]);
+        return;
+      }
       $.ajax({
          url: mobl.proxyUrl('http://search.twitter.com/search.json?q='+escape(phrase) + '&rpp=' + this._limit),
          datatype: "json",

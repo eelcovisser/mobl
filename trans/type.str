@@ -10,7 +10,7 @@ strategies
   type-of = eq-type-of <+ ?Var(<id>); TypeOf
 
   eq-type-of :
-    Int(_) -> SimpleType(QId("mobl", "Int"))
+    Number(_) -> SimpleType(QId("mobl", "Number"))
 
   eq-type-of :
     String(_) -> SimpleType(QId("mobl", "String"))

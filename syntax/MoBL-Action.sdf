@@ -40,7 +40,7 @@ exports
   context-free syntax %% Expressions
 
     STRING                        -> Exp {cons("String")}
-    INT                           -> Exp {cons("Int")}
+    NUMBER                        -> Exp {cons("Number")}
     "true"                        -> Exp {cons("True")}
     "false"                       -> Exp {cons("False")}
     "null"                        -> Exp {cons("Null")}

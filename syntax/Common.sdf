@@ -8,7 +8,18 @@ exports
   lexical syntax
 
     [a-zA-Z\_][a-zA-Z0-9\_]* -> ID
-    "-"? [0-9]+            -> INT
+    %% "-"? [0-9]+            -> INT
+
+  lexical syntax
+    "-"? FloatDigits
+     ExponentPart? [fFdD]? -> NUMBER
+    [0-9]* "." [0-9]*      -> FloatDigits
+    [0-9]+                 -> FloatDigits
+    [eE] SignedInteger     -> ExponentPart
+    [\+\-]? [0-9]+         -> SignedInteger
+
+    %%"-"? [0-9]+            -> NUM {reject}
+    "."                    -> FloatDigits  {reject}
 
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar

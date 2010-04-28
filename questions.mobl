@@ -5,16 +5,21 @@ database "questions"
 
 import mobl
 
+template toolbar() {
+  "Hello"
+}
+
 screen root() {
-  header("Questions")
-  var message : String = "<message will appear here>"
-  group {
-    item { outputString(message) }
+  basicView("Questions", toolBar=toolbar) {
+    var message : String = "<message will appear here>"
+    group {
+      item { outputString(message) }
+    }
+    button("Ask for name", onclick={
+      message = "Hello, " + promptString("What is your name?");
+    })
+    altButton("Ask for age", onclick={
+      message = "You are " + promptString("How old are you?") + " years old";
+    })
   }
-  button("Ask for name", onclick={
-    message = "Hello, " + promptString("What is your name?");
-  })
-  altButton("Ask for age", onclick={
-    message = "You are " + promptString("How old are you?") + " years old";
-  })
 }

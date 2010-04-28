@@ -101,12 +101,13 @@ screen showUpdates(account : Account) {
   }
   template search() {
     var phrase = "#mobl"
+    var searchPhrase = ""
     var limit = 10
     group {
-      inputString(phrase)
+      inputSearch(phrase, onsearch={ searchPhrase = phrase; })
     }
     <div id="tweets">
-    list(twupdate in search(phrase).limit(limit) ) {
+    list(twupdate in twitter::search(searchPhrase).limit(limit)) {
       <div class="tweet">
         <span class="icon"><img src=twupdate.profile_image_url width="48" height="48"/></span>
         <span class="text">

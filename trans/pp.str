@@ -349,7 +349,7 @@ strategies // expressions
     String(s) -> s
 
   pp-mobl-exp :
-    Int(s) -> s
+    Number(s) -> s
 
   pp-mobl-exp :
     True() -> $[true]

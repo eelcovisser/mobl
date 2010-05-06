@@ -6,8 +6,8 @@ database "zodo"
 import mobl
 
 entity Task {
-  name        : String
-  description : Text
+  name        : String (searchable)
+  description : Text   (searchable)
   done        : Bool
 }
 
@@ -21,7 +21,7 @@ screen addTask() {
     }
     button("Add", onclick={
       add(newTask);
-      mobl::notify::notify("Added task!");
+      //mobl::notify::notify("Added task!");
       screen return;
     })
   }
@@ -52,13 +52,15 @@ screen root() {
     item(onswipe={ editing = false; }) {
       inputCheckbox(t.done, onclick={}) " "
       outputString(t.name)
-      deleteButton("Delete", onclick={ remove(t); })
+      sideButton("Delete", onclick={ remove(t); })
     }
   }
   topRightButton("Add", onclick={ addTask(); })
+  var searchQuery = ""
   basicView("Tasks") {
+    searchbox(searchQuery)
     group {
-      list(t in Task.all().order("done", true).order("name", true).limit(10)) {
+      list(t in Task.searchPrefix(searchQuery)) {
         var editing = false
         (editing ? editView : defaultView)(t, editing)
       }

@@ -56,7 +56,6 @@ exports
     "init" -> ID {reject}
     "screen" -> ID {reject}
     "entity" -> ID {reject}
-    "uri" -> ID {reject}
     "function" -> ID {reject}
     "callback" -> ID {reject}
     "sync" -> ID {reject}

@@ -1,0 +1,133 @@
+application mtv
+
+import mobl
+
+external sync function findArtist(query : String) : Collection<Artist>
+external sync function getVideos(a : Artist) : Collection<Video>
+external sync function getRelatedArtists(a : Artist) : Collection<Video>
+
+entity Artist {
+  url      : String
+  name     : String
+  favorite : Bool
+}
+
+external type Video {
+  name    : String
+  picture : String
+  url     : String
+}
+
+function lookupLocalArtist(a : Artist) : Artist {
+  var found = Artist.all().filter("url", "=", a.url).one();
+  if(found == null) {
+    found = a;
+  }
+  return found;
+}
+
+function toggleFavorite(a : Artist) {
+  add(a);
+  a.favorite = a.favorite ? false : true;
+}
+
+template search() {
+  var artistQuery = "Michael"
+  searchbox(artistQuery)
+  group {
+    list(a : Artist in findArtist(artistQuery)) {
+      artistItem(a)
+    }
+  }
+}
+
+template favorites() {
+  group {
+    list(a in Artist.all().filter("favorite", "=", true)) {
+      artistItem(a)
+    }
+  }
+}
+
+screen root() {
+  tabset([("Search", "lib/toolbar/icon_magnify_glass.png", search), ("Favorites", "lib/toolbar/icon_favorities.png", favorites)])
+}
+
+template artistItem(a : Artist) {
+  itemArrow(onclick={showArtist(a); }) {
+    var localArtist : Artist = lookupLocalArtist(a)
+    label(localArtist.name)
+    cond(localArtist.favorite == true) {
+      sideButton("Unfavorite!", onclick={ toggleFavorite(localArtist); })
+    }
+    cond(localArtist.favorite == false) {
+      sideButton("Make favorite!", onclick={ toggleFavorite(localArtist); })
+    }
+  }
+}
+
+screen showArtist(a : Artist) {
+  backButton("Back", onclick={ screen return; })
+  basicView(a.name) {
+    <h2>"Related"</h2>
+    group {
+      list(relatedArtist : Artist in getRelatedArtists(a)) {
+        artistItem(relatedArtist)
+      }
+    }
+    <h2>"Videos"</h2>
+    group {
+      list(v : Video in getVideos(a)) {
+        item(onclick={ openUrl(v.url); }) { <img width="70" height="53" src=v.picture valign="middle" /> " " label(v.name) }
+      }
+    }
+  }
+}
+
+<script>
+mtv.findArtist = function(query) {
+  return mobl.remoteCollection('http://api.mtvnservices.com/1/artist/search/?term=' + escape(query) + '&max-results=10', 'xml', function(data) {
+    var doc = $(data);
+    var results = [];
+    doc.find("entry").each(function(_, el) {
+      el = $(el);
+      results.push(new mtv.Artist({
+        url: el.find("id").text(),
+        name: el.find("title").text()
+      }));
+    });
+    return results;
+  });
+};
+
+mtv.getVideos = function(artist) {
+  return mobl.remoteCollection(artist.url + 'videos/', 'xml', function(data) {
+    var doc = $(data);
+    var results = [];
+    doc.find("entry").each(function(_, el) {
+      el = $(el);
+      results.push({
+          name: el.find("title").eq(0).text(),
+          picture: el.find("thumbnail").attr("url"),
+          url: el.find("player").attr("url")
+        });
+    });
+    return results;
+  });
+};
+
+mtv.getRelatedArtists = function(artist) {
+  return mobl.remoteCollection(artist.url + 'related/?max-results=5', 'xml', function(data) {
+    var doc = $(data);
+    var results = [];
+    doc.find("entry").each(function(_, el) {
+      el = $(el);
+      results.push(new mtv.Artist({
+        url: el.find("id").text(),
+        name: el.find("title").text()
+      }));
+    });
+    return results.slice(0, 5);
+  });
+};
+</script>

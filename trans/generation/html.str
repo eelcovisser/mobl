@@ -25,6 +25,8 @@ strategies
         </script>
         <script src="lib/persistence.js" type="application/x-javascript" charset="utf-8">
         </script>
+        <script src="lib/persistence.search.js" type="application/x-javascript" charset="utf-8">
+        </script>
         <script type="application/x-javascript" charset="utf-8">
             persistence.connect('[<!<un-double-quote> dbname <+ <qid-to-js> qid>]', 'mobl database', 5 * 1024 * 1024, '[<!db-version <+ !"1">].0');
         </script>

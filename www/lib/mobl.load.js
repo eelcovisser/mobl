@@ -11,7 +11,7 @@ setTimeout(function() {
 function updateScrollers () {
     //console.log("Updating scrollers");
     var scrollwrappers = $("div#scrollwrapper");
-    scrollTo(0, 0);
+    //scrollTo(0, 0);
     if (scrollwrappers.length > 0) {
         var height = mobl.innerHeight ? mobl.innerHeight : window.innerHeight;
         height -= $("div.header:visible").height();
@@ -75,7 +75,7 @@ mobl.call = function (screenName, args, callback) {
         "name": screenName,
         "args": args,
         "callback": callback,
-        "div": screenName.replace('.', '__')
+        "div": screenName.replace('.', '__') + mobl.screenStack.length
     };
     mobl.screenStack.push(screenFrame);
     var callbackFn = function () {

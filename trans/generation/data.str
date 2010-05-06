@@ -10,12 +10,13 @@ imports
 
 strategies
   entities-to-js =
-    {| OneToMany
+    {| OneToMany, SearchableProperties
      : map(entity-to-js)
      ; <map(one-to-many-to-js)> <bagof-OneToMany>
+     ; <map(searchable-to-js)> <bagof-SearchableProperties>
      //; <emit> $[persistence.schemaSync();]
      |}
-     
+
   entity-to-js :
     Entity(_, qid, super, prop*) -> <emit> $[
     [varname] = persistence.define('[<qid-to-html> qid]', {
@@ -32,7 +33,10 @@ strategies
   property-to-js(|ent) :
     Property(_, x, t@SimpleType(_), anno*) -> $['[x]': '[sqlType]']
     where not(<is-entity-type> t)
-    with sqlType := <sql-type <+ debug(!"Could not conver to SQL: "); fail> t
+    with sqlType := <sql-type <+ debug(!"Could not convert to SQL: "); fail> t
+       ; if [_] := <filter(?SimpleAnno("searchable"))> anno* then
+           rules ( SearchableProperties :+= (ent, x) )
+         end
 
   property-to-js(|ent) :
     Property(_, x, GenericType(coll, [t]), anno*) -> <fail>
@@ -41,4 +45,8 @@ strategies
 
   one-to-many-to-js :
     (SimpleType(from), field, SimpleType(to), invField) -> <emit> $[[<qid-to-js> from].hasMany('[field]', [<qid-to-js> to], '[invField]');
+]
+
+  searchable-to-js :
+    (ent, field) -> <emit> $[[<qid-to-js> ent].textIndex('[field]');
 ]

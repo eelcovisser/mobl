@@ -32,6 +32,13 @@ div#scroller {
      vertical-align: top;
 }
 
+h2 {
+  font-size: 1.1em;
+  text-align: center;
+  padding: 0;
+  color: #303030;
+}
+
 .header h1 {
     box-sizing: border-box;
     margin: 0;
@@ -144,6 +151,36 @@ ul {
     padding: 0;
 }
 
+div.searchbox {
+    background-color: #FFFFFF;
+     margin: 0;
+    border: 1px solid #999999;
+    color: #222222;
+    padding: 10px 6px;
+    border-width: 0 30px 0 30px;
+    -webkit-border-image: url(search.png) 0 30 0 30;
+    -moz-border-image: url(search.png) 0 30 0 30;
+    height: 23px;
+}
+div.searchbox input {
+    color: #555;
+    background: #fff url(../.png);
+    border: 0;
+    font: normal 12px Helvetica;
+    padding: 0;
+    display: inline-block;
+    width: 100%;
+}
+
+span.inputLabel {
+  color: #999999;
+  font-size: 12px;
+  display: inline-block;
+  width: 60px;
+  position: relative;
+  top: -2px;
+}
+
 ul li {
     background-color: #FFFFFF;
     border: 1px solid #999999;
@@ -188,6 +225,11 @@ input[type = text] {
     margin-left: 0px;
     width: 100%;
     -webkit-appearance: textarea;
+}
+
+input[type = text].labelled {
+  position: relative;
+  width: 210px;
 }
 
 textarea {

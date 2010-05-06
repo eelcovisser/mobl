@@ -88,6 +88,8 @@ external type Collection<T> {
 external type Entity<T> {
   @doc "A virtual collection containing all instances of this entity"
   static sync function all() : Collection<T>
+  static sync function search(query : String) : Collection<T>
+  static sync function searchPrefix(query : String) : Collection<T>
 }
 
 external function log(s : String) : void
@@ -97,6 +99,7 @@ external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
 external function resetDatabase() : void
 external sync function formatDate(d : DateTime) : String
+external sync function openUrl(url : String) : void
 external sync function range(from : Number, to : Number) : List<Number>
 external sync function random(max : Number) : Number
 
@@ -141,10 +144,10 @@ template inputString(s : String, placeholder : String = null, onchange : Callbac
   </li>
 }
 
-template inputSearch(s : String, placeholder : String = null, onsearch : Callback = null) {
-  <li>
+template searchbox(s : String, placeholder : String = null, onsearch : Callback = null) {
+  <div class="searchbox">
     <input type="text" placeholder=placeholder databind=s onchange=onsearch />
-  </li>
+  </div>
 }
 
 template inputText(s : String, placeholder : String = null, onchange : Callback = null) {
@@ -159,9 +162,12 @@ template inputSecret(s : String, placeholder : String = null, onchange : Callbac
   </li>
 }
 
-template inputNumber(i : Number, placeholder : String = null, onchange : Callback = null) {
+template inputNumber(i : Number, placeholder : String = null, label : String = null, onchange : Callback = null) {
   <li>
-    <input type="text" placeholder=placeholder databind=i onchange=onchange/>
+    cond(label != null) {
+      <span databind=label class="inputLabel" />
+    }
+    <input type="text" placeholder=placeholder databind=i onchange=onchange class=label != null ? "labelled" : ""/>
   </li>
 }
 
@@ -325,6 +331,10 @@ mobl.updateScrollers = function() {
     mobl.delayedUpdateScrollers();
 };
 
+mobl.openUrl = function(url) {
+  location = url;
+};
+
 mobl.random = function(max) {
   return Math.round(Math.random()*max);
 }
@@ -368,4 +378,11 @@ mobl.range = function(from, to) {
   l.values = ar;
   return l;
 };
+
+persistence.entityDecoratorHooks.push(function(Entity) {
+  Entity.searchPrefix = function(query) {
+    return Entity.search(query, true);
+  };
+});
+
 </script>

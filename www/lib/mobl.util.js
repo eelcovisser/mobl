@@ -21,11 +21,15 @@ mobl.isAndroid = navigator.userAgent.match(/Android/i);
 
 mobl.stringTomobl__Number = function (s) {
     return parseFloat(s, 10);
-}
+};
 
-mobl.stringTomobl__String =function (s) {
+mobl.stringTomobl__String = function (s) {
     return s;
-}
+};
+
+mobl.loadingSpan = function() {
+    return $("<span>Loading... <img src=\"lib/img/loading.gif\"/></span>");
+};
 
 mobl.proxyUrl = function(url, user, password) {
     if(user && password) {
@@ -34,6 +38,26 @@ mobl.proxyUrl = function(url, user, password) {
         return '/proxy.php?proxy_url=' + escape(url);
     }
 }
+
+mobl.remoteCollection = function(uri, datatype, processor) {
+  return {
+    addEventListener: function() {},
+    list: function(_, callback) {
+      $.ajax({
+         url: mobl.proxyUrl(uri),
+         datatype: datatype,
+         error: function(_, message, error) {
+           console.log(message);
+           console.log(error);
+           callback([]);
+         },
+         success: function(data) {
+            callback(processor(data));
+         }
+      });
+    }
+  };
+};
 
 function log(s) {
     console.log(s);

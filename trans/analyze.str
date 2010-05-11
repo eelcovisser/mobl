@@ -13,6 +13,7 @@ imports
   mobl
   resolve
   generation/compile
+  sync-analysis
 
 rules
 

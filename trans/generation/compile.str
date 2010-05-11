@@ -15,6 +15,7 @@ imports
   generation/html
   include/MoBL
   lib/editor-common
+  sync-analysis
 
 strategies
 
@@ -30,6 +31,7 @@ strategies
       ; analyze
       ; where(alltd(compile-import-module))
       ; desugar-all
+      ; analyze-sync
       ; module-to-js
       ; where(path := <qid-to-path> qid
               ; js-filename   := <concat-strings; guarantee-extension(|"js")> [<OutputPath>, "/", path]

@@ -20,10 +20,7 @@ external type Video {
 
 function lookupLocalArtist(a : Artist) : Artist {
   var found = Artist.all().filter("url", "=", a.url).one();
-  if(found == null) {
-    found = a;
-  }
-  return found;
+  return found == null ? a : found;
 }
 
 function toggleFavorite(a : Artist) {
@@ -58,10 +55,10 @@ template artistItem(a : Artist) {
     var localArtist : Artist = lookupLocalArtist(a)
     label(localArtist.name)
     cond(localArtist.favorite == true) {
-      sideButton("Unfavorite!", onclick={ toggleFavorite(localArtist); })
+      image("lib/toolbar/icon_favorities_remove.png", onclick={ toggleFavorite(localArtist); })
     }
     cond(localArtist.favorite == false) {
-      sideButton("Make favorite!", onclick={ toggleFavorite(localArtist); })
+      image("lib/toolbar/icon_favorities_add.png", onclick={ toggleFavorite(localArtist); })
     }
   }
 }

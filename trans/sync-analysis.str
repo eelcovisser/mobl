@@ -1,0 +1,33 @@
+module sync-analysis
+
+imports include/MoBL
+        generation/cps-lift
+
+strategies
+
+  analyze-sync =
+    topdown(try(mark-all-sync))
+    //; debug
+    ; repeat(analyze-sync-code)
+
+  mark-all-sync :
+    Function(anno*, qid, arg*, rt, stat*) -> SyncFunction(anno*, qid, arg*, rt, stat*)
+
+  analyze-sync-code =
+    ?t-before
+    ; alltd(analyze-sync-function)
+    ; not(?t-before)
+
+  analyze-sync-function :
+    SyncFunction(anno*, qid, arg*, rt, stat*) -> Function(anno*, qid, arg*, rt, stat*)
+    where not([] := <collect(async-exp)> stat*)
+        ; <debug(!"Function is async: ")> qid
+
+  async-exp :
+    Call(_, _) -> <not(is-sync)>
+
+  async-exp :
+    MethodCall(_, _, _) -> <not(is-sync)>
+
+  async-exp :
+    For(_, _, _, _) -> <id>

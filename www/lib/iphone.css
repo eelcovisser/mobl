@@ -350,3 +350,20 @@ div.screen.hidden {
 div.screen.righthidden {
     left: 100%;
 }
+
+/* iPad pop-over */
+div .iPadSomething {
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-image: url(http://developer.apple.com/iphone/library/iPad/images/popover_border.png) 6 6 6 6 stretch stretch;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.496094) 0px 0px 40px;
+    -webkit-transform: matrix(1, 0, 0, 1, 0, 18);
+    display: block;
+    height: 600px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 320px;
+}

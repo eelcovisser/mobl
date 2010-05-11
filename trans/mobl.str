@@ -22,6 +22,7 @@ imports
   type
   desugar
   pp
+  sync-analysis
 
 strategies
 
@@ -158,9 +159,9 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     x -> ([x], "")
 
   editor-desugar :
-    (selected, position, ast, path, project-path) -> (filename, <normalize-all; desugar-all; pp-mobl> selected)
+    (selected, position, ast, path, project-path) -> (filename, <desugar-all; analyze-sync; pp-mobl> <ResultingAST>)
     with
-      filename := <guarantee-extension(|"aterm")> "desugar"
+      filename := <guarantee-extension(|"mobl")> "desugared"
 
   format-code :
     (selected, position, ast, path, project-path) -> (filename, <pp-mobl> selected)

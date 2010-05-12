@@ -3,6 +3,7 @@ application todo
 title "Zodo"
 database "zodo"
 
+
 import mobl
 
 entity Task {

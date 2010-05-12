@@ -159,7 +159,7 @@ rules // Main editor interface (defined by editor/MoBL-Builders and -References.
     x -> ([x], "")
 
   editor-desugar :
-    (selected, position, ast, path, project-path) -> (filename, <desugar-all; analyze-sync; pp-mobl> <ResultingAST>)
+    (selected, position, ast, path, project-path) -> (filename, <desugar-all; pp-mobl> <ResultingAST>)
     with
       filename := <guarantee-extension(|"mobl")> "desugared"
 

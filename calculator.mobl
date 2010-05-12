@@ -5,16 +5,16 @@ title "Calculator"
 import mobl
 
 screen root() {
-  var n1 : Number = 2
-  var n2 : Number = 2
+  var n1 : Num = 2
+  var n2 : Num = 2
 
   header("Calculator")
   group {
-    inputNumber(n1)
-    inputNumber(n2)
-    item { "* " outputNumber(n1 * n2) }
-    item { "+ " outputNumber(n1 + n2) }
-    item { "- " outputNumber(n1 - n2) }
-    item { "/ " outputNumber(n1 / n2) }
+    inputNum(n1)
+    inputNum(n2)
+    item { "* " outputNum(n1 * n2) }
+    item { "+ " outputNum(n1 + n2) }
+    item { "- " outputNum(n1 - n2) }
+    item { "/ " outputNum(n1 / n2) }
   }
 }

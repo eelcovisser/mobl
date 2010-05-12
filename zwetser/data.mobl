@@ -10,7 +10,7 @@ entity Account {
 
 entity TwitterUpdate {
   account    : Account (inverse: updates)
-  updateId   : Number
+  updateId   : Num
   screenName : String
   iconUrl    : String
   text       : String

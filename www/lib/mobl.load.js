@@ -116,7 +116,7 @@ mobl.call = function (screenName, args, callback) {
     var screenTemplate = current;
     screenTemplate.apply(null, args.concat( [ function (node) {
         node.attr('id', screenFrame.div);
-        //node.addClass('screen');
+        node.addClass('screen');
         node.attr('style', "position: absolute; left: 0; top: 0; width: 100%;");
         var body = $("body");
 

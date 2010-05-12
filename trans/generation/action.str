@@ -188,7 +188,7 @@ rules // Expressions
     String(s) -> s
 
   exp-to-js :
-    Number(n) -> n
+    Num(n) -> n
 
   exp-to-js :
     True() -> $[true]

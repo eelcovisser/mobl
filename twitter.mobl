@@ -4,13 +4,13 @@ import mobl
 
 external type Update {
   @doc "The internal twitter ID"
-  id                    : Number
+  id                    : Num
 
   created_at            : DateTime
   text                  : String
   source                : String
-  in_reply_to_status_id : Number
-  in_reply_to_user_id   : Number
+  in_reply_to_status_id : Num
+  in_reply_to_user_id   : Num
   favorited             : Bool
   user                  : User
 }
@@ -35,7 +35,7 @@ external sync function getUpdates(username : String, password : String) : Collec
 external sync function getMentions(username : String, password : String) : Collection<Update>
 external sync function search(phrase : String) : Collection<SearchResult>
 external function postUpdate(username : String, password : String, text : String) : Bool
-external function postReply(username : String, password : String, replyToId : Number, text : String) : Bool
+external function postReply(username : String, password : String, replyToId : Num, text : String) : Bool
 
 <script>
 

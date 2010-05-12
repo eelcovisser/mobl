@@ -7,7 +7,7 @@ entity Item {
   checked  : Bool
   favorite : Bool
   onlist   : Bool
-  order    : Number
+  order    : Num
 }
 
 screen editItem(it : Item) {
@@ -16,7 +16,7 @@ screen editItem(it : Item) {
   inputs {
     inputString(it.name, placeholder="Name")
     item { checkbox(it.favorite, label="favorite") }
-    inputNumber(it.order, placeholder="Shop order (0 = early, 999=late)")
+    inputNum(it.order, placeholder="Shop order (0 = early, 999=late)")
   }
 }
 

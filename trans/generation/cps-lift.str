@@ -217,7 +217,7 @@ rules
 
 strategies
 
-  is-sync = ?Number(_)
+  is-sync = ?Num(_)
   is-sync = ?True()
   is-sync = ?Null()
   is-sync = ?False()

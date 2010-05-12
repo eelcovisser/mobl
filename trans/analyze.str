@@ -32,6 +32,8 @@ rules
        ; declare-all
        ; rename-all
        ; add-namespace-all
+       ; analyze-sync
+       ; declare-all
        //; declare-all
        //; rename-all
          //; debug

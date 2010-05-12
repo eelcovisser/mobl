@@ -40,7 +40,7 @@ exports
   context-free syntax %% Expressions
 
     STRING                        -> Exp {cons("String")}
-    NUMBER                        -> Exp {cons("Number")}
+    NUMBER                        -> Exp {cons("Num")}
     "true"                        -> Exp {cons("True")}
     "false"                       -> Exp {cons("False")}
     "null"                        -> Exp {cons("Null")}
@@ -103,11 +103,13 @@ exports
 
   context-free priorities
     Exp "." ID -> LimitedExp
+  > Exp "." ID "(" {Exp ","}* ")" -> LimitedExp
   > Exp TermOperatorMethodId Exp -> Exp
   > Exp OperatorMethodId Exp -> Exp
   > Exp CompareMethodId Exp -> Exp
   > Exp BoolMethodId Exp -> Exp
   > Exp "?" Exp ":" Exp -> Exp
+
 
   context-free priorities
   {

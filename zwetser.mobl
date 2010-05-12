@@ -103,9 +103,7 @@ screen showUpdates(account : Account) {
     var phrase = "#mobl"
     var searchPhrase = ""
     var limit = 10
-    group {
-      inputSearch(phrase, onsearch={ searchPhrase = phrase; })
-    }
+    searchbox(phrase, onsearch={ searchPhrase = phrase; })
     <div id="tweets">
     list(twupdate in twitter::search(searchPhrase).limit(limit)) {
       <div class="tweet">

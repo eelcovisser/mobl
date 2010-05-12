@@ -8,13 +8,13 @@ external type void {}
 @doc "A string type"
 external type String : Object { }
 
-external type Number : Object { }
+external type Num : Object { }
 
 external type Float : Object { }
 
 external type Bool : Object { }
 external type List<T> {
-  sync function get(n : Number) : T
+  sync function get(n : Num) : T
   sync function add(item : T) : void
 }
 external type Callback {}
@@ -57,7 +57,21 @@ external type Function4<RT, T1, T2, T3, T4> { }
 external type Function5<RT, T1, T2, T3, T4, T5> { }
 
 external type Text : Object { }
-external type DateTime {}
+
+external type DateTime {
+  sync function getFullYear() : Num
+  sync function getMonth() : Num
+
+  @doc "Day of the month"
+  sync function getDate() : Num
+
+  sync function toString() : String
+  sync function toDateString() : String
+
+  sync function getTime() : Num
+}
+
+external sync function now() : DateTime
 
 external type Object {
   sync function toString() : String
@@ -78,8 +92,8 @@ external type Collection<T> {
   @doc "Order the collection based on a property in ascending (ascending = true) or dedescending (ascending = false) order"
   sync function order(property : String, ascending : Bool) : Collection<T>
 
-  sync function limit(n : Number) : Collection<T>
-  sync function offset(n : Number) : Collection<T>
+  sync function limit(n : Num) : Collection<T>
+  sync function offset(n : Num) : Collection<T>
   sync function add(item : T) : void
   sync function remove(item : T) : void
   sync function updated() : void
@@ -92,16 +106,16 @@ external type Entity<T> {
   static sync function searchPrefix(query : String) : Collection<T>
 }
 
-external function log(s : String) : void
-external function alert(s : String) : void
+external sync function log(s : String) : void
+external sync function alert(s : String) : void
 
 external sync function add(e : Object) : void
 external sync function remove(e : Object) : void
 external function resetDatabase() : void
 external sync function formatDate(d : DateTime) : String
 external sync function openUrl(url : String) : void
-external sync function range(from : Number, to : Number) : List<Number>
-external sync function random(max : Number) : Number
+external sync function range(from : Num, to : Num) : List<Num>
+external sync function random(max : Num) : Num
 
 @doc "Internal use only"
 external sync function updateScrollers() : void
@@ -115,7 +129,7 @@ template label(s : String, onclick : Callback = null) {
   <span databind=s onclick=onclick></span>
 }
 
-template outputNumber(n : Number) {
+template outputNum(n : Num) {
   <span databind=n></span>
 }
 
@@ -162,7 +176,7 @@ template inputSecret(s : String, placeholder : String = null, onchange : Callbac
   </li>
 }
 
-template inputNumber(i : Number, placeholder : String = null, label : String = null, onchange : Callback = null) {
+template inputNum(i : Num, placeholder : String = null, label : String = null, onchange : Callback = null) {
   <li>
     cond(label != null) {
       <span databind=label class="inputLabel" />
@@ -202,6 +216,18 @@ template basicView(title : String, toolBar : Template = template{}) {
   <div id="footer">
   toolBar()
   </div>
+}
+
+template table() {
+  <table>elements()</table>
+}
+
+template row() {
+  <tr>elements()</tr>
+}
+
+template cell(width : String = null) {
+  <td width=width>elements()</td>
 }
 
 template group() {
@@ -316,6 +342,11 @@ mobl.add = function(e, _, callback) {
     allEnt.triggerEvent('change', allEnt, e);
     if(callback) callback();
 };
+
+mobl.now = function() {
+  return new Date();
+};
+
 mobl.remove = function(e, _, callback) {
     persistence.remove(e);
     var allEnt = persistence.define(e._type).all();
@@ -349,6 +380,10 @@ mobl.scrollTop = function() {
 
 persistence.QueryCollection.prototype.updates = function() {
   this.triggerEvent('change', this);
+};
+
+Date.prototype.toDateString = function() {
+  return "" + (this.getMonth()+1) + "/" + this.getDate() + "/" + this.getFullYear();
 };
 
 mobl.formatDate = function(timestamp) {

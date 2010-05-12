@@ -231,18 +231,18 @@ rules
   databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[
       var [r] = [es];
-      [node].[method]([r].get());
+      [node].[method]([r].get().toString());
       var [ignore] = false;
       [r].addEventListener('change', function(_, ref, val) {
         if([ignore]) return;
         if(ref === [r]) {
-          [node].[method]([typeconverter](val));
+          [node].[method](val.toString());
         } else {
           console.log("Garbage!");
         }
       });
       [r].rebind();
-      [subs]
+      [subs][subscriptions]
     ]
     where Html(tag, arg*, _, _) := tg
         ; [] := <filter(?HtmlArg("type", String("\"checkbox\"")))> arg*
@@ -263,6 +263,15 @@ rules
            method := "text"
            ; subs := ""
          end
+         ; watch-expr* := <find-watchable-expressions> e
+         ; subscriptions := <map(exp-to-html-databind-watcher-js(|node, method, <expression-to-js> e)); concat-strings> watch-expr*
+
+
+  exp-to-html-databind-watcher-js(|node, method, es) :
+    e -> $[[<ref-expression-to-js> e].addEventListener('change', function(_, _, val) {
+             [node].[method]([es]);
+           });
+]
 
   databind-tag-arg-to-js(|tg, node) :
     HtmlDatabindArg(e) -> $[

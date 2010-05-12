@@ -1,4 +1,4 @@
-module sql
+module generation/sql
 
 imports
   include/MoBL
@@ -15,10 +15,10 @@ strategies
     SimpleType(QId("mobl", "Uri")) -> "VARCHAR(255)"
 
   sql-type :
-    SimpleType(QId("mobl", "Number")) -> "INT"
+    SimpleType(QId("mobl", "Num")) -> "INT"
 
   sql-type :
     SimpleType(QId("mobl", "Bool")) -> "BOOL"
 
   sql-type :
-    SimpleType(QId("mobl", "DateTime")) -> "INT"
+    SimpleType(QId("mobl", "DateTime")) -> "DATE"

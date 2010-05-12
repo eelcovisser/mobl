@@ -1,0 +1,124 @@
+application dates
+
+import mobl
+import mobl::datepicker
+
+entity Person {
+  name     : String
+  birthday : DateTime
+}
+
+template showDay(n : Num, d : DateTime) {
+  row {
+    cell(width="40%") { label(n) }
+    cell { label(addDays(d, n).toDateString()) }
+  }
+}
+
+template showWeek(n : Num, d : DateTime) {
+  row {
+    cell(width="40%") { label(n) }
+    cell { label(addWeeks(d, n).toDateString()) }
+  }
+}
+
+template showMonth(n : Num, d : DateTime) {
+  row {
+    cell(width="40%") { label(n) }
+    cell { label(addMonths(d, n).toDateString()) }
+  }
+}
+
+screen root() {
+  header("People")
+  topRightButton("Add", onclick={ addPerson(); })
+  group {
+    list(p in Person.all()) {
+      itemArrow(onclick={personDates(p); }) { label(p.name) }
+    }
+  }
+}
+
+screen addPerson() {
+  var p = Person{ birthday = now() }
+  header("Add person")
+  topRightButton("Done", onclick={
+    add(p);
+    screen return;
+  })
+  inputs {
+    inputString(p.name, placeholder="Name")
+  }
+  group {
+    datepicker(p.birthday)
+  }
+}
+
+function countDays(since : DateTime) : Num {
+  var factor = 1000*60*60*24;
+  var sinceEpoch = (now().getTime() - since.getTime()) / factor;
+  return sinceEpoch;
+}
+
+screen personDates(p : Person) {
+  var birthday : DateTime = p.birthday // shortcut
+  init {
+    alert(countDays(birthday));
+  }
+  header("Birthdays")
+  backButton("Back", onclick={ screen return; })
+  group {
+    datepicker(birthday)
+  }
+  table {
+    row {
+      cell{ <b>"Days"</b> }
+      cell { <b>"Date"</b> }
+    }
+    showDay(100, birthday)
+    showDay(1000, birthday)
+    showDay(10000, birthday)
+    showDay(20000, birthday)
+    showDay(25000, birthday)
+  }
+  table {
+    row {
+      cell{ <b>"Weeks"</b> }
+      cell { <b>"Date"</b> }
+    }
+    showWeek(100, birthday)
+    showWeek(1000, birthday)
+    showWeek(10000, birthday)
+    showWeek(20000, birthday)
+  }
+  table {
+    row {
+      cell{ <b>"Months"</b> }
+      cell { <b>"Date"</b> }
+    }
+    showMonth(100, birthday)
+    showMonth(250, birthday)
+    showMonth(500, birthday)
+    showMonth(1000, birthday)
+  }
+}
+
+function addDays(d : DateTime, n : Num) : DateTime {
+  return makeDate(d.getFullYear(), d.getMonth(), d.getDate() + n);
+}
+
+function addWeeks(d : DateTime, n : Num) : DateTime {
+  return makeDate(d.getFullYear(), d.getMonth(), d.getDate() + 7*n);
+}
+
+function addMonths(d : DateTime, n : Num) : DateTime {
+  return makeDate(d.getFullYear(), d.getMonth() + n, d.getDate());
+}
+
+external sync function makeDate(year : Num, month : Num, day : Num) : DateTime
+
+<script>
+dates.makeDate = function(year, month, day) {
+  return new Date(year, month, day);
+}
+</script>

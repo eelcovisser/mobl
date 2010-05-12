@@ -19,12 +19,16 @@ function fromScope(that, prop) {
 mobl.isIphone = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i);
 mobl.isAndroid = navigator.userAgent.match(/Android/i);
 
-mobl.stringTomobl__Number = function (s) {
+mobl.stringTomobl__Num = function (s) {
     return parseFloat(s, 10);
 };
 
 mobl.stringTomobl__String = function (s) {
     return s;
+};
+
+mobl.stringTomobl__DateTime = function(s) {
+    return new Date(s);
 };
 
 mobl.loadingSpan = function() {
